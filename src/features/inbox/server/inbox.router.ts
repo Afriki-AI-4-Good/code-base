@@ -6,7 +6,11 @@ import {
   type UserProfile,
 } from "@/lib/profile";
 import type { InboxEntry } from "@/types/inbox";
-import { userProfileSchema } from "~/features/inbox/schema";
+import { TRPCError } from "@trpc/server";
+import {
+  sendSummaryEmailSchema,
+  userProfileSchema,
+} from "~/features/inbox/schema";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import type {
   FundingPhase,
@@ -15,6 +19,7 @@ import type {
   InboxEntry as PrismaInboxEntry,
   UserProfile as PrismaUserProfile,
 } from "../../../../generated/prisma";
+import { hasGmailConfiguration, sendSummaryToGmail } from "./gmail";
 
 const DEFAULT_PROFILE_ID = "local-user";
 
@@ -51,6 +56,49 @@ export const inboxRouter = createTRPCRouter({
         return toUserProfile(profile);
       }),
   }),
+
+  sendSummaryEmail: publicProcedure
+    .input(sendSummaryEmailSchema)
+    .mutation(async ({ ctx, input }) => {
+      const profile = await ctx.db.userProfile.findUnique({
+        where: { id: DEFAULT_PROFILE_ID },
+      });
+
+      if (!profile?.emailConnected || !profile.emailAddress) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Connect your Gmail address in onboarding first.",
+        });
+      }
+
+      if (profile.emailAddress !== input.recipientEmail) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Recipient email must match the connected Gmail address.",
+        });
+      }
+
+      if (!hasGmailConfiguration()) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Gmail API credentials are missing on the server.",
+        });
+      }
+
+      try {
+        await sendSummaryToGmail({
+          recipientEmail: input.recipientEmail,
+          brief: input.brief,
+        });
+
+        return { success: true };
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send summary email via Gmail API.",
+        });
+      }
+    }),
 });
 
 async function seedInboxIfEmpty(db: PrismaClient) {

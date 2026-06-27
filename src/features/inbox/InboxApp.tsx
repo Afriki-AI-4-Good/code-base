@@ -43,6 +43,10 @@ export function InboxApp() {
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [focusEntryId, setFocusEntryId] = useState<string | null>(null);
+  const [sendSummaryStatus, setSendSummaryStatus] = useState<{
+    type: "success" | "error";
+    message: string;
+  } | null>(null);
 
   const upsertProfile = api.inbox.profile.upsert.useMutation({
     onSuccess: async (nextProfile) => {
@@ -50,6 +54,19 @@ export function InboxApp() {
       setOnboardingOpen(false);
       await utils.inbox.profile.get.invalidate();
     },
+  });
+
+  const sendSummaryEmail = api.inbox.sendSummaryEmail.useMutation({
+    onSuccess: () =>
+      setSendSummaryStatus({
+        type: "success",
+        message: "Summary sent to Gmail successfully.",
+      }),
+    onError: (error) =>
+      setSendSummaryStatus({
+        type: "error",
+        message: error.message,
+      }),
   });
 
   useEffect(() => {
@@ -89,6 +106,30 @@ export function InboxApp() {
   const handleOpenFromBrief = (entryId: string) => {
     const entry = entries.find((item) => item.id === entryId);
     if (entry) handleSelect(entry);
+  };
+
+  const handleSendSummary = () => {
+    if (!profile?.emailConnected || !profile.emailAddress) {
+      setSendSummaryStatus({
+        type: "error",
+        message: "Please connect your Gmail address in onboarding first.",
+      });
+      return;
+    }
+
+    if (!brief) {
+      setSendSummaryStatus({
+        type: "error",
+        message: "No summary is available to send yet.",
+      });
+      return;
+    }
+
+    setSendSummaryStatus(null);
+    sendSummaryEmail.mutate({
+      recipientEmail: profile.emailAddress,
+      brief,
+    });
   };
 
   if (entriesLoading || profileLoading) {
@@ -185,6 +226,9 @@ export function InboxApp() {
         brief={brief}
         onLocate={handleLocate}
         onOpen={handleOpenFromBrief}
+        onSendSummary={handleSendSummary}
+        isSendingSummary={sendSummaryEmail.isPending}
+        sendSummaryStatus={sendSummaryStatus}
       />
       <CardDetailSheet entry={selected} open={open} onOpenChange={setOpen} />
       <OnboardingDialog

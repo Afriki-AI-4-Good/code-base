@@ -23,6 +23,9 @@ npm run db:start            # start local Postgres + Studio (first run pulls Doc
 npm run db:migrate          # create the database tables from prisma/schema.prisma
 ```
 
+To enable Gmail summary delivery from the inbox assistant, set `GMAIL_CLIENT_ID`,
+`GMAIL_CLIENT_SECRET`, and `GMAIL_REFRESH_TOKEN` in `.env`.
+
 ### Every time you want to develop
 
 ```bash

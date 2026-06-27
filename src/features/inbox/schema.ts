@@ -14,6 +14,19 @@ const outputFieldSchema = z.object({
   enabled: z.boolean(),
 });
 
+const briefItemSchema = z.object({
+  entryId: z.string().min(1),
+  title: z.string().min(1),
+  reason: z.string().min(1),
+  priority: z.enum(["urgent", "relevant", "information"]),
+});
+
+const briefSchema = z.object({
+  headline: z.string().min(1),
+  subline: z.string().min(1),
+  items: z.array(briefItemSchema),
+});
+
 export const userProfileSchema = z.object({
   org: z.enum(["bk", "wtg"]),
   department: z.enum(["pm_intl", "fundraising", "pr_comms", "management"]),
@@ -48,6 +61,11 @@ export const userProfileSchema = z.object({
       urgentKeywords: z.array(z.string()),
     })
     .optional(),
+});
+
+export const sendSummaryEmailSchema = z.object({
+  recipientEmail: z.string().email(),
+  brief: briefSchema,
 });
 
 export type UserProfileInput = z.infer<typeof userProfileSchema>;

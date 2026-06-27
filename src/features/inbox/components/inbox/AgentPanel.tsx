@@ -11,11 +11,17 @@ export function AgentPanel({
   brief,
   onLocate,
   onOpen,
+  onSendSummary,
+  isSendingSummary,
+  sendSummaryStatus,
 }: {
   profile: UserProfile | null;
   brief: Brief | null;
   onLocate: (entryId: string) => void;
   onOpen: (entryId: string) => void;
+  onSendSummary: () => void;
+  isSendingSummary: boolean;
+  sendSummaryStatus: { type: "success" | "error"; message: string } | null;
 }) {
   const org = profile ? getOrg(profile.org) : null;
   const dept = profile ? getDepartment(profile.department) : null;
@@ -108,19 +114,21 @@ export function AgentPanel({
       </div>
 
       <div className="border-t border-border p-3">
-        <div className="flex items-end gap-2 rounded-xl border border-border bg-background p-2">
-          <textarea
-            disabled
-            placeholder="Ask the assistant…"
-            rows={2}
-            className="flex-1 resize-none bg-transparent text-sm outline-none placeholder:text-muted-foreground/70 disabled:cursor-not-allowed"
-          />
-          <Button size="icon" disabled className="h-8 w-8 shrink-0">
-            <Send className="h-4 w-4" />
-          </Button>
-        </div>
+        <Button
+          type="button"
+          className="w-full gap-2"
+          onClick={onSendSummary}
+          disabled={!brief || !profile?.emailConnected || isSendingSummary}
+        >
+          <Send className="h-4 w-4" />
+          {isSendingSummary ? "Sending..." : "Send summary to Gmail"}
+        </Button>
         <p className="mt-2 text-[10px] text-muted-foreground text-center">
-          Demo · chat coming soon
+          {sendSummaryStatus
+            ? sendSummaryStatus.message
+            : profile?.emailConnected
+              ? `Connected: ${profile.emailAddress ?? "No email set"}`
+              : "Connect Gmail in onboarding to enable summary delivery."}
         </p>
       </div>
     </aside>
