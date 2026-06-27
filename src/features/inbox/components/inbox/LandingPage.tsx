@@ -2,14 +2,12 @@
 
 import {
   ArrowRight,
-  CheckCircle2,
-  ClipboardList,
   Compass,
   Globe2,
   Landmark,
   MailCheck,
-  Map as MapIcon,
   Newspaper,
+  ShieldCheck,
 } from "lucide-react";
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
@@ -25,15 +23,14 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           className="flex items-center gap-3 text-left"
           aria-label="Open organization login"
         >
-          <div className="grid h-10 w-10 place-items-center rounded-lg bg-[oklch(0.26_0.04_170)] text-white shadow-sm">
-            <MapIcon className="h-5 w-5" />
-          </div>
-          <div>
-            <div className="text-sm font-bold tracking-tight">Signal Desk</div>
-            <div className="text-[11px] text-muted-foreground">
-              NGO operations intelligence
-            </div>
-          </div>
+          <Image
+            src="/brand/afriki-logo.svg"
+            alt="Afriki logo"
+            width={132}
+            height={40}
+            priority
+            className="h-10 w-auto"
+          />
         </button>
         <Button
           type="button"
@@ -50,15 +47,15 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           <div className="max-w-xl">
             <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-[oklch(0.77_0.07_90)] bg-[oklch(0.96_0.025_90)] px-3 py-1 text-xs font-semibold text-[oklch(0.34_0.06_90)]">
               <Compass className="h-3.5 w-3.5" />
-              Built for the hackathon, shaped by real NGO desks
+              Afrika + KI, shaped for NGO operations
             </div>
             <h1 className="text-balance text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-              One calm room for noisy civic work.
+              Intelligence for teams working across borders.
             </h1>
             <p className="mt-5 max-w-lg text-base leading-7 text-muted-foreground">
-              Signal Desk turns funding calls, field updates, news, and partner
-              reports into an organized workspace for teams that need to act
-              before the moment passes.
+              Afriki turns funding calls, field updates, media monitoring, and
+              received project reports into a calm workspace for teams that need
+              to understand context before they act.
             </p>
             <div className="mt-7 flex flex-col gap-3 sm:flex-row">
               <Button
@@ -70,8 +67,8 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
                 <ArrowRight className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <CheckCircle2 className="h-4 w-4 text-[oklch(0.47_0.11_145)]" />
-                Username only, no password wall
+                <ShieldCheck className="h-4 w-4 text-[oklch(0.47_0.11_145)]" />
+                Organization workspaces, simple team access
               </div>
             </div>
           </div>
@@ -87,10 +84,10 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
               <div className="flex items-center justify-between border-b border-border px-3 pb-3">
                 <div>
                   <div className="text-xs font-semibold uppercase text-muted-foreground">
-                    Live workspace preview
+                    Afriki workspace
                   </div>
                   <div className="text-lg font-bold">
-                    Map, inbox, next steps
+                    Sources, urgency, outputs
                   </div>
                 </div>
                 <div className="flex -space-x-2">
@@ -126,7 +123,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
                     <span className="absolute left-[70%] top-[28%] h-3 w-3 rounded-full bg-[oklch(0.54_0.12_145)] ring-4 ring-white/70" />
                     <div className="absolute bottom-3 left-3 right-3 rounded-md bg-white/90 p-3 shadow-sm">
                       <div className="text-xs font-semibold">
-                        Burundi field report
+                        Burundi project email
                       </div>
                       <div className="mt-1 text-[11px] text-muted-foreground">
                         Translated, tagged, and ready for review.
@@ -177,11 +174,21 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
                 Partners
               </div>
               <h2 className="mt-2 text-2xl font-black tracking-tight">
-                Built around organizations already in the room.
+                A focused partner network.
               </h2>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                Afriki brings product, social-impact, and NGO expertise into one
+                operational workspace.
+              </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
-              <PartnerMark label="TUM Social AI Club" tone="club" />
+              <PartnerImage
+                src="/partners/tum-social-ai-club-logo.svg"
+                alt="TUM Social AI Club logo"
+                label="Research and social AI community"
+                width={210}
+                height={64}
+              />
               {ORGS.map((org) => (
                 <PartnerLogo key={org.id} org={org} />
               ))}
@@ -189,23 +196,64 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           </div>
         </section>
 
-        <section className="mx-auto grid max-w-7xl gap-4 px-5 py-10 sm:px-8 md:grid-cols-3">
-          {REFERENCES.map((reference) => (
-            <article
-              key={reference.title}
-              className="rounded-lg border border-[oklch(0.84_0.025_110)] bg-white p-5 shadow-sm"
-            >
+        <section className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
+          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+            <div>
               <div className="text-xs font-semibold uppercase text-muted-foreground">
-                {reference.org}
+                Project references
               </div>
-              <h2 className="mt-3 text-lg font-black tracking-tight">
-                {reference.title}
+              <h2 className="mt-2 text-2xl font-black tracking-tight">
+                Workflows grounded in real NGO needs.
               </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                {reference.body}
-              </p>
-            </article>
-          ))}
+            </div>
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onLogin}
+              className="h-10"
+            >
+              View workspace
+              <ArrowRight className="h-4 w-4" />
+            </Button>
+          </div>
+          <div className="grid gap-4 md:grid-cols-3">
+            {REFERENCES.map((reference) => {
+              const Icon = reference.icon;
+              return (
+                <article
+                  key={reference.title}
+                  className="overflow-hidden rounded-lg border border-[oklch(0.84_0.025_110)] bg-white shadow-sm"
+                >
+                  <div className={reference.bandClass}>
+                    <div className="grid h-10 w-10 place-items-center rounded-md bg-white/90 text-[oklch(0.26_0.04_170)]">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <div className="text-right text-[10px] font-bold uppercase tracking-wide text-white/90">
+                      {reference.org}
+                    </div>
+                  </div>
+                  <div className="p-5">
+                    <h3 className="text-lg font-black tracking-tight">
+                      {reference.title}
+                    </h3>
+                    <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                      {reference.body}
+                    </p>
+                    <div className="mt-4 flex flex-wrap gap-2">
+                      {reference.tags.map((tag) => (
+                        <span
+                          key={tag}
+                          className="rounded-md bg-[oklch(0.96_0.015_120)] px-2 py-1 text-[11px] font-semibold text-[oklch(0.33_0.05_145)]"
+                        >
+                          {tag}
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+                </article>
+              );
+            })}
+          </div>
         </section>
       </main>
     </div>
@@ -231,7 +279,7 @@ const SIGNALS = [
   },
   {
     title: "Partner report translated",
-    owner: "Team",
+    owner: "Inbox",
     body: "Original text, summary, source, tags, and image fields follow each workspace's onboarding setup.",
     icon: MailCheck,
     iconClass:
@@ -243,32 +291,58 @@ const REFERENCES = [
   {
     org: "Burundikids e.V.",
     title: "Funding scout for education programs",
-    body: "A mocked BK desk shows calls for proposals beside translated field context, so funding work starts with the right evidence.",
+    body: "Funding calls are separated from inbox reports and shown with deadline, amount range, eligibility, and BK-specific review status.",
+    tags: ["Funding", "Eligibility", "Deadlines"],
+    icon: Landmark,
+    bandClass:
+      "flex h-24 items-start justify-between bg-[oklch(0.38_0.08_155)] p-4",
   },
   {
     org: "Welttierschutzgesellschaft e.V.",
-    title: "Animal welfare monitoring without inbox sprawl",
-    body: "A mocked WTG desk tracks keywords and categories from onboarding, then places new coverage where communications teams can act.",
+    title: "Animal welfare press mirror",
+    body: "WTG monitoring combines keywords, categories, and urgency so daily Google Alert items can become clear press-mirror entries.",
+    tags: ["Keywords", "Categories", "Urgency"],
+    icon: Newspaper,
+    bandClass:
+      "flex h-24 items-start justify-between bg-[oklch(0.48_0.12_45)] p-4",
   },
   {
-    org: "TUM Social AI Club",
-    title: "Hackathon foundation for responsible automation",
-    body: "The starter keeps the interface, database profile, and server routes in one place for the agent features coming next.",
+    org: "Afriki",
+    title: "Email reports turned into working notes",
+    body: "Incoming project emails are translated, summarized, sorted by urgency, and prepared as a clean output before deeper review.",
+    tags: ["Email intake", "Translation", "Reports"],
+    icon: MailCheck,
+    bandClass:
+      "flex h-24 items-start justify-between bg-[oklch(0.32_0.08_220)] p-4",
   },
 ];
 
 type PartnerOrg = (typeof ORGS)[number];
 
-function PartnerMark({ label, tone }: { label: string; tone: "club" }) {
+function PartnerImage({
+  src,
+  alt,
+  label,
+  width,
+  height,
+}: {
+  src: string;
+  alt: string;
+  label: string;
+  width: number;
+  height: number;
+}) {
   return (
-    <div className="flex min-h-24 items-center justify-center rounded-lg border border-border bg-[oklch(0.97_0.015_230)] p-4 text-center">
-      <div>
-        <div className="mx-auto mb-2 grid h-9 w-9 place-items-center rounded-md bg-[oklch(0.3_0.07_230)] text-white">
-          {tone === "club" ? <ClipboardList className="h-4 w-4" /> : null}
-        </div>
-        <div className="text-sm font-black uppercase tracking-wide">
-          {label}
-        </div>
+    <div className="flex min-h-28 flex-col items-center justify-center rounded-lg border border-border bg-[oklch(0.99_0.003_110)] p-4 text-center shadow-sm">
+      <Image
+        src={src}
+        alt={alt}
+        width={width}
+        height={height}
+        className="max-h-14 w-auto object-contain"
+      />
+      <div className="mt-3 text-[11px] font-semibold text-muted-foreground">
+        {label}
       </div>
     </div>
   );
@@ -276,7 +350,7 @@ function PartnerMark({ label, tone }: { label: string; tone: "club" }) {
 
 function PartnerLogo({ org }: { org: PartnerOrg }) {
   return (
-    <div className="flex min-h-24 items-center justify-center rounded-lg border border-border bg-[oklch(0.99_0.003_110)] p-4">
+    <div className="flex min-h-28 flex-col items-center justify-center rounded-lg border border-border bg-[oklch(0.99_0.003_110)] p-4 text-center shadow-sm">
       <Image
         src={org.logoSrc}
         alt={org.logoAlt}
@@ -284,6 +358,9 @@ function PartnerLogo({ org }: { org: PartnerOrg }) {
         height={org.id === "bk" ? 56 : 74}
         className="max-h-16 w-auto object-contain"
       />
+      <div className="mt-3 text-[11px] font-semibold text-muted-foreground">
+        {org.description}
+      </div>
     </div>
   );
 }
