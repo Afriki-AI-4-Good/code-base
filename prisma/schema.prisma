@@ -68,6 +68,7 @@ model FundingPhase {
 
 model UserProfile {
     id             String   @id
+    username       String   @default("local-user")
     org            String
     department     String
     prompt         String
@@ -78,6 +79,10 @@ model UserProfile {
     fundingSources Json
     fundingCriteria Json
     urgency        Json
+    wtgKeywords    Json?
+    wtgNewsCategories Json?
     createdAt      DateTime @default(now())
     updatedAt      DateTime @updatedAt
+
+    @@unique([org, username])
 }

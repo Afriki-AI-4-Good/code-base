@@ -3,10 +3,11 @@ import {
   Banknote,
   FileText,
   Inbox,
+  LogOut,
   Newspaper,
   Settings,
-  UserCog,
 } from "lucide-react";
+import Image from "next/image";
 import { useState } from "react";
 import {
   Tooltip,
@@ -14,7 +15,7 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from "@/components/ui/tooltip";
-import type { UserProfile } from "@/lib/profile";
+import type { LoginSession, UserProfile } from "@/lib/profile";
 import { getOrg } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
@@ -28,12 +29,16 @@ const items = [
 
 export function Sidebar({
   profile,
+  session,
   onChangeProfile,
+  onLogout,
   active: activeProp,
   onActiveChange,
 }: {
   profile: UserProfile | null;
+  session: LoginSession;
   onChangeProfile: () => void;
+  onLogout: () => void;
   active?: string;
   onActiveChange?: (id: string) => void;
 }) {
@@ -43,7 +48,7 @@ export function Sidebar({
     if (onActiveChange) onActiveChange(id);
     else setInternalActive(id);
   };
-  const org = profile ? getOrg(profile.org) : null;
+  const org = getOrg(profile?.org ?? session.org);
   return (
     <aside className="flex h-screen w-14 shrink-0 flex-col items-center gap-1 border-r border-border bg-card py-3">
       <TooltipProvider delayDuration={100}>
@@ -53,16 +58,22 @@ export function Sidebar({
               type="button"
               onClick={onChangeProfile}
               className={cn(
-                "mb-3 grid h-9 w-9 place-items-center rounded-lg font-bold text-sm transition-colors",
-                org ? org.accent : "bg-primary text-primary-foreground",
+                "mb-3 grid h-9 w-9 place-items-center rounded-lg bg-white p-1 shadow-sm ring-1 ring-border transition-colors hover:bg-accent/40",
+                org.accent,
               )}
               aria-label="Change profile"
             >
-              {org ? org.initials : "BK"}
+              <Image
+                src={org.logoSrc}
+                alt={org.logoAlt}
+                width={org.id === "bk" ? 42 : 30}
+                height={org.id === "bk" ? 14 : 30}
+                className="max-h-7 w-auto object-contain"
+              />
             </button>
           </TooltipTrigger>
           <TooltipContent side="right">
-            {org ? `${org.name} · change profile` : "Choose profile"}
+            {org.name} · {session.username}
           </TooltipContent>
         </Tooltip>
         {items.map((item) => {
@@ -94,16 +105,14 @@ export function Sidebar({
             <TooltipTrigger asChild>
               <button
                 type="button"
-                onClick={onChangeProfile}
+                onClick={onLogout}
                 className="grid h-10 w-10 place-items-center rounded-lg text-muted-foreground hover:bg-accent/50 hover:text-foreground transition-colors"
-                aria-label="Switch role"
+                aria-label="Log out"
               >
-                <UserCog className="h-5 w-5" />
+                <LogOut className="h-5 w-5" />
               </button>
             </TooltipTrigger>
-            <TooltipContent side="right">
-              Switch organization / role
-            </TooltipContent>
+            <TooltipContent side="right">Log out</TooltipContent>
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>

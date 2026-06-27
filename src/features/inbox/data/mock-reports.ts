@@ -37,7 +37,7 @@ export const mockReports: ReportEntry[] = [
     title: "Q2 Field Report: Schools, Shelters & Sustained Outcomes",
     dek: "Three months of measurable progress across 14 communities in Burundi.",
     summary:
-      "Across April–June, Burundi Kids reached 12,480 children with steady programming. Enrolment rose in every region, while a new mentor model lifted retention to 91%. This issue zooms into the data, the stories, and what shifts in Q3.",
+      "Across April-June, Burundikids e.V. reached 12,480 children with steady programming. Enrolment rose in every region, while a new mentor model lifted retention to 91%. This issue zooms into the data, the stories, and what shifts in Q3.",
     author: "Programs Team",
     date: "2026-06-22",
     readMinutes: 9,

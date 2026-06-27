@@ -32,13 +32,11 @@ export function MapView({
   onSelect,
   view,
   onViewChange,
-  focusEntryId,
 }: {
   entries: InboxEntry[];
   onSelect: (e: InboxEntry) => void;
   view: MapViewMode;
   onViewChange: (v: MapViewMode) => void;
-  focusEntryId?: string | null;
 }) {
   const located: Located[] = useMemo(
     () =>
@@ -74,13 +72,6 @@ export function MapView({
     });
   }, [located]);
 
-  // Lookup: entry id → group key
-  const idToKey = useMemo(() => {
-    const m = new Map<string, string>();
-    for (const g of grouped) for (const it of g.items) m.set(it.id, g.key);
-    return m;
-  }, [grouped]);
-
   // Country ISO id → highest priority of news in that country
   const countryPriority = useMemo(() => {
     const m = new Map<string, InboxEntry["priority"]>();
@@ -110,19 +101,6 @@ export function MapView({
       el.scrollIntoView({ behavior: "smooth", block: "start" });
     }
   }, [activeKey]);
-
-  // External focus request (e.g. from the assistant brief)
-  useEffect(() => {
-    if (!focusEntryId) return;
-    const key = idToKey.get(focusEntryId);
-    if (!key) return;
-    const group = grouped.find((g) => g.key === key);
-    if (!group) return;
-    setActiveKey(key);
-    setActiveId(focusEntryId);
-    setMapCenter(group.coords);
-    setMapZoom(2.6);
-  }, [focusEntryId, idToKey, grouped]);
 
   const focusGroup = (key: string, coords: [number, number], id?: string) => {
     setActiveKey(key);

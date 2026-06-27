@@ -2,12 +2,13 @@
 
 import { useEffect, useMemo, useState } from "react";
 
-import { AgentPanel } from "@/components/inbox/AgentPanel";
 import { CardDetailSheet } from "@/components/inbox/CardDetailSheet";
 import { FundingView } from "@/components/inbox/FundingView";
 import type { CategoryFilter, ViewMode } from "@/components/inbox/InboxHeader";
 import { KanbanView } from "@/components/inbox/KanbanView";
+import { LandingPage } from "@/components/inbox/LandingPage";
 import { ListView } from "@/components/inbox/ListView";
+import { LoginScreen } from "@/components/inbox/LoginScreen";
 import {
   FilterPills,
   MapBackdrop,
@@ -23,16 +24,27 @@ import {
   TimePills,
   type TimeRange,
 } from "@/components/inbox/TimeFilter";
-import { buildBrief, type UserProfile } from "@/lib/profile";
+import {
+  clearSession,
+  type LoginSession,
+  loadSession,
+  saveSession,
+  type UserProfile,
+} from "@/lib/profile";
 import type { InboxEntry } from "@/types/inbox";
 import { api } from "~/trpc/react";
 
 export function InboxApp() {
   const utils = api.useUtils();
+  const [sessionLoaded, setSessionLoaded] = useState(false);
+  const [session, setSession] = useState<LoginSession | null>(null);
+  const [authMode, setAuthMode] = useState<AuthMode>("landing");
   const { data: entries = [], isLoading: entriesLoading } =
-    api.inbox.list.useQuery();
+    api.inbox.list.useQuery(undefined, { enabled: sessionLoaded && !!session });
   const { data: savedProfile, isLoading: profileLoading } =
-    api.inbox.profile.get.useQuery();
+    api.inbox.profile.get.useQuery(session ?? FALLBACK_SESSION, {
+      enabled: sessionLoaded && !!session,
+    });
 
   const [section, setSection] = useState<string>("inbox");
   const [view, setView] = useState<ViewMode>("map");
@@ -42,20 +54,33 @@ export function InboxApp() {
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
-  const [focusEntryId, setFocusEntryId] = useState<string | null>(null);
 
   const upsertProfile = api.inbox.profile.upsert.useMutation({
     onSuccess: async (nextProfile) => {
       setProfile(nextProfile);
       setOnboardingOpen(false);
-      await utils.inbox.profile.get.invalidate();
+      await utils.inbox.profile.get.invalidate({
+        org: nextProfile.org,
+        username: nextProfile.username,
+      });
     },
   });
 
   useEffect(() => {
+    setSession(loadSession());
+    setSessionLoaded(true);
+  }, []);
+
+  useEffect(() => {
+    if (!session) {
+      setProfile(null);
+      setOnboardingOpen(false);
+      return;
+    }
+
     setProfile(savedProfile ?? null);
     if (!profileLoading && !savedProfile) setOnboardingOpen(true);
-  }, [profileLoading, savedProfile]);
+  }, [profileLoading, savedProfile, session]);
 
   const filtered = useMemo(() => {
     const byCategory =
@@ -64,11 +89,6 @@ export function InboxApp() {
         : entries.filter((entry) => entry.category === filter);
     return filterByTime(byCategory, timeRange);
   }, [entries, filter, timeRange]);
-
-  const brief = useMemo(
-    () => (profile ? buildBrief(profile, entries) : null),
-    [entries, profile],
-  );
 
   const handleSelect = (entry: InboxEntry) => {
     setSelected(entry);
@@ -79,17 +99,51 @@ export function InboxApp() {
     upsertProfile.mutate(nextProfile);
   };
 
-  const handleLocate = (entryId: string) => {
-    setSection("inbox");
-    setView("map");
-    setFocusEntryId(null);
-    requestAnimationFrame(() => setFocusEntryId(entryId));
+  const handleCancelOnboarding = () => {
+    if (profile) {
+      setOnboardingOpen(false);
+      return;
+    }
+
+    clearSession();
+    setAuthMode("landing");
+    setSession(null);
+    setProfile(null);
+    setOnboardingOpen(false);
   };
 
-  const handleOpenFromBrief = (entryId: string) => {
-    const entry = entries.find((item) => item.id === entryId);
-    if (entry) handleSelect(entry);
+  const handleLogin = (nextSession: LoginSession) => {
+    saveSession(nextSession);
+    setSession(nextSession);
+    setProfile(null);
+    setSection("inbox");
+    setAuthMode("landing");
   };
+
+  const handleLogout = () => {
+    clearSession();
+    setAuthMode("landing");
+    setSession(null);
+    setProfile(null);
+    setOnboardingOpen(false);
+  };
+
+  if (!sessionLoaded) {
+    return <InboxLoading />;
+  }
+
+  if (!session) {
+    if (authMode === "login") {
+      return (
+        <LoginScreen
+          onLogin={handleLogin}
+          onBack={() => setAuthMode("landing")}
+        />
+      );
+    }
+
+    return <LandingPage onLogin={() => setAuthMode("login")} />;
+  }
 
   if (entriesLoading || profileLoading) {
     return <InboxLoading />;
@@ -99,7 +153,9 @@ export function InboxApp() {
     <div className="flex h-screen w-full overflow-hidden bg-background text-foreground">
       <Sidebar
         profile={profile}
+        session={session}
         onChangeProfile={() => setOnboardingOpen(true)}
+        onLogout={handleLogout}
         active={section}
         onActiveChange={setSection}
       />
@@ -130,7 +186,6 @@ export function InboxApp() {
                 onSelect={handleSelect}
                 view={view}
                 onViewChange={setView}
-                focusEntryId={focusEntryId}
               />
               <div className="pointer-events-none absolute left-4 top-16 z-20">
                 <div className="pointer-events-auto">
@@ -180,21 +235,21 @@ export function InboxApp() {
           )}
         </div>
       </main>
-      <AgentPanel
-        profile={profile}
-        brief={brief}
-        onLocate={handleLocate}
-        onOpen={handleOpenFromBrief}
-      />
       <CardDetailSheet entry={selected} open={open} onOpenChange={setOpen} />
       <OnboardingDialog
         open={onboardingOpen}
+        session={session}
         initial={profile}
+        onCancel={handleCancelOnboarding}
         onComplete={handleCompleteOnboarding}
       />
     </div>
   );
 }
+
+type AuthMode = "landing" | "login";
+
+const FALLBACK_SESSION: LoginSession = { org: "bk", username: "pending" };
 
 function InboxLoading() {
   return (

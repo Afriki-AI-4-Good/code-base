@@ -6,7 +6,6 @@ import {
   Bell,
   BookOpen,
   Briefcase,
-  Building2,
   CalendarDays,
   Check,
   ChevronDown,
@@ -18,7 +17,6 @@ import {
   Globe2,
   GripVertical,
   HandHeart,
-  Heart,
   Image as ImageIcon,
   Languages,
   Link as LinkIcon,
@@ -26,12 +24,13 @@ import {
   MapPin,
   Newspaper,
   Plus,
+  Search,
   SlidersHorizontal,
   Tag,
-  Users,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import Image from "next/image";
+import { useEffect, useMemo, useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent } from "@/components/ui/dialog";
 import { Input } from "@/components/ui/input";
@@ -40,17 +39,16 @@ import {
   DEFAULT_EXTRAS,
   DEFAULT_OUTPUT_FIELDS,
   type DepartmentId,
+  getDefaultDepartment,
   getDepartment,
+  getOrg,
+  type LoginSession,
   type OnboardingExtras,
-  ORGS,
   type OrgId,
   type OutputFieldKey,
   type UserProfile,
 } from "@/lib/profile";
 import { cn } from "@/lib/utils";
-
-const DEFAULT_ORG: OrgId = "bk";
-const DEFAULT_DEPT: DepartmentId = "fundraising";
 
 const NEWS_PRESETS = [
   "Reuters Africa",
@@ -88,70 +86,94 @@ const TOPIC_PRESETS = [
   "Climate",
 ];
 
-type StepId = "org" | "news" | "format" | "funding" | "criteria" | "urgency";
+type StepId =
+  | "news"
+  | "keywords"
+  | "format"
+  | "funding"
+  | "criteria"
+  | "urgency"
+  | "categories";
 
-const STEPS: {
-  id: StepId;
-  label: string;
-  sub: string;
-  icon: React.ReactNode;
-}[] = [
+const STEP_META: Record<
+  StepId,
   {
-    id: "org",
-    label: "Organization",
-    sub: "Who you're briefing for",
-    icon: <Users className="h-4 w-4" />,
-  },
-  {
-    id: "news",
+    label: string;
+    sub: string;
+    icon: React.ReactNode;
+  }
+> = {
+  news: {
     label: "News & Email",
     sub: "Your information inputs",
     icon: <Newspaper className="h-4 w-4" />,
   },
-  {
-    id: "format",
+  keywords: {
+    label: "Keywords",
+    sub: "What WTG monitors",
+    icon: <Search className="h-4 w-4" />,
+  },
+  format: {
     label: "Layout",
     sub: "How items are displayed",
     icon: <FileText className="h-4 w-4" />,
   },
-  {
-    id: "funding",
+  funding: {
     label: "Funding sources",
     sub: "Where you scout grants",
     icon: <HandHeart className="h-4 w-4" />,
   },
-  {
-    id: "criteria",
+  criteria: {
     label: "Criteria",
     sub: "What makes a grant a fit",
     icon: <SlidersHorizontal className="h-4 w-4" />,
   },
-  {
-    id: "urgency",
+  urgency: {
     label: "Urgency",
     sub: "Color-code thresholds",
     icon: <AlertTriangle className="h-4 w-4" />,
   },
-];
+  categories: {
+    label: "Categories",
+    sub: "How WTG news is grouped",
+    icon: <Tag className="h-4 w-4" />,
+  },
+};
 
-function getStep(index: number) {
-  const step = STEPS[index];
-  if (!step) throw new Error(`Unknown onboarding step: ${index}`);
-  return step;
+const BK_STEPS: StepId[] = ["news", "format", "funding", "criteria", "urgency"];
+const WTG_STEPS: StepId[] = ["keywords", "format", "categories"];
+
+const WTG_KEYWORD_PRESETS = DEFAULT_EXTRAS.wtgKeywords;
+const WTG_CATEGORY_PRESETS = DEFAULT_EXTRAS.wtgNewsCategories;
+
+function getSteps(org: OrgId) {
+  return org === "wtg" ? WTG_STEPS : BK_STEPS;
+}
+
+function getStep(steps: StepId[], index: number) {
+  const id = steps[index];
+  if (!id) throw new Error(`Unknown onboarding step: ${index}`);
+  return { id, ...STEP_META[id] };
 }
 
 export function OnboardingDialog({
   open,
+  session,
   initial,
+  onCancel,
   onComplete,
 }: {
   open: boolean;
+  session: LoginSession;
   initial?: UserProfile | null;
+  onCancel: () => void;
   onComplete: (p: UserProfile) => void;
 }) {
+  const steps = useMemo(() => getSteps(session.org), [session.org]);
   const [stepIdx, setStepIdx] = useState(0);
-  const [org, setOrg] = useState<OrgId>(initial?.org ?? DEFAULT_ORG);
-  const [dept] = useState<DepartmentId>(initial?.department ?? DEFAULT_DEPT);
+  const [dept] = useState<DepartmentId>(
+    initial?.department ?? getDefaultDepartment(session.org),
+  );
   const [extras, setExtras] = useState<OnboardingExtras>({
     ...DEFAULT_EXTRAS,
     ...(initial ? extractExtras(initial) : {}),
@@ -166,10 +188,21 @@ export function OnboardingDialog({
       ...DEFAULT_EXTRAS.urgency,
       ...(initial?.urgency ?? {}),
     },
+    wtgKeywords: initial?.wtgKeywords?.length
+      ? initial.wtgKeywords
+      : DEFAULT_EXTRAS.wtgKeywords,
+    wtgNewsCategories: initial?.wtgNewsCategories?.length
+      ? initial.wtgNewsCategories
+      : DEFAULT_EXTRAS.wtgNewsCategories,
   });
 
-  const step = getStep(stepIdx);
-  const isLast = stepIdx === STEPS.length - 1;
+  const org = getOrg(session.org);
+  const step = getStep(steps, stepIdx);
+  const isLast = stepIdx === steps.length - 1;
+
+  useEffect(() => {
+    if (open) setStepIdx(0);
+  }, [open]);
 
   const update = <K extends keyof OnboardingExtras>(
     key: K,
@@ -179,18 +212,24 @@ export function OnboardingDialog({
   const handleNext = () => {
     if (isLast) {
       onComplete({
-        org,
+        username: session.username,
+        org: session.org,
         department: dept,
         prompt: getDepartment(dept).defaultPrompt,
         ...extras,
       });
     } else {
-      setStepIdx((i) => i + 1);
+      setStepIdx((i) => Math.min(steps.length - 1, i + 1));
     }
   };
 
   return (
-    <Dialog open={open}>
+    <Dialog
+      open={open}
+      onOpenChange={(nextOpen) => {
+        if (!nextOpen) onCancel();
+      }}
+    >
       <DialogContent
         overlayClassName="fixed inset-0 z-50 bg-transparent backdrop-blur-xl data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0"
         className="max-w-3xl p-0 overflow-hidden border border-white/50 bg-white shadow-2xl ring-1 ring-white/30"
@@ -201,12 +240,19 @@ export function OnboardingDialog({
         <div className="px-7 pt-6 pb-5 border-b border-border/60">
           <div className="flex items-center justify-between mb-4">
             <div className="flex items-center gap-3">
-              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-primary/10 text-primary">
-                {step.icon}
+              <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-border">
+                <Image
+                  src={org.logoSrc}
+                  alt={org.logoAlt}
+                  width={session.org === "bk" ? 84 : 40}
+                  height={session.org === "bk" ? 28 : 40}
+                  className="max-h-9 w-auto object-contain"
+                />
               </div>
               <div>
                 <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-                  Step {stepIdx + 1} of {STEPS.length}
+                  {org.name} · {session.username} · Step {stepIdx + 1} of{" "}
+                  {steps.length}
                 </div>
                 <h2 className="text-lg font-semibold leading-tight">
                   {step.label}
@@ -215,9 +261,9 @@ export function OnboardingDialog({
               </div>
             </div>
             <div className="flex items-center gap-1.5">
-              {STEPS.map((s, i) => (
+              {steps.map((s, i) => (
                 <div
-                  key={s.id}
+                  key={s}
                   className={cn(
                     "h-1.5 rounded-full transition-all",
                     i === stepIdx
@@ -234,7 +280,6 @@ export function OnboardingDialog({
 
         {/* Body */}
         <div className="px-7 py-6 min-h-[360px] max-h-[62vh] overflow-y-auto">
-          {step.id === "org" && <OrgStep org={org} onChange={setOrg} />}
           {step.id === "news" && (
             <NewsStep
               sources={extras.newsSources}
@@ -245,6 +290,12 @@ export function OnboardingDialog({
                 update("emailConnected", connected);
                 update("emailAddress", addr);
               }}
+            />
+          )}
+          {step.id === "keywords" && (
+            <KeywordsStep
+              keywords={extras.wtgKeywords}
+              onChange={(v) => update("wtgKeywords", v)}
             />
           )}
           {step.id === "format" && (
@@ -269,6 +320,12 @@ export function OnboardingDialog({
             <UrgencyStep
               value={extras.urgency}
               onChange={(v) => update("urgency", v)}
+            />
+          )}
+          {step.id === "categories" && (
+            <WtgCategoriesStep
+              categories={extras.wtgNewsCategories}
+              onChange={(v) => update("wtgNewsCategories", v)}
             />
           )}
         </div>
@@ -308,77 +365,11 @@ export function OnboardingDialog({
 }
 
 function extractExtras(p: UserProfile): Partial<OnboardingExtras> {
-  const { org: _o, department: _d, prompt: _p, ...rest } = p;
+  const { username: _u, org: _o, department: _d, prompt: _p, ...rest } = p;
   return rest;
 }
 
 // ---------- Steps ----------
-
-function OrgStep({
-  org,
-  onChange,
-}: {
-  org: OrgId;
-  onChange: (o: OrgId) => void;
-}) {
-  return (
-    <div className="space-y-5">
-      <p className="text-sm text-muted-foreground">
-        Which organization are you briefing for?
-      </p>
-      <div className="grid grid-cols-2 gap-4">
-        {ORGS.map((o) => {
-          const active = org === o.id;
-          return (
-            <button
-              type="button"
-              key={o.id}
-              onClick={() => onChange(o.id)}
-              className={cn(
-                "group relative text-left rounded-2xl border p-5 transition-all",
-                active
-                  ? "border-primary bg-primary/5 ring-2 ring-primary/20 shadow-sm"
-                  : "border-border bg-white hover:border-primary/40 hover:shadow-sm",
-              )}
-            >
-              {active && (
-                <div className="absolute top-3 right-3 flex h-5 w-5 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                  <Check className="h-3 w-3" />
-                </div>
-              )}
-              <div
-                className={cn(
-                  "flex h-12 w-12 items-center justify-center rounded-xl text-base font-bold mb-3",
-                  o.accent,
-                )}
-              >
-                {o.id === "bk" ? (
-                  <Heart className="h-5 w-5" />
-                ) : (
-                  <Building2 className="h-5 w-5" />
-                )}
-              </div>
-              <div className="text-base font-semibold break-words">
-                {o.name}
-              </div>
-              <div className="text-xs text-muted-foreground leading-relaxed mt-1 break-words">
-                {o.description}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-      <div className="rounded-xl border border-dashed border-border bg-muted/30 px-4 py-3">
-        <div className="text-[10px] font-semibold uppercase tracking-wider text-muted-foreground">
-          Department (preset)
-        </div>
-        <div className="text-sm font-medium mt-0.5">
-          {getDepartment(DEFAULT_DEPT).name}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function ChipList({
   items,
@@ -518,6 +509,72 @@ function NewsStep({
           </Button>
         </div>
       </section>
+    </div>
+  );
+}
+
+function KeywordsStep({
+  keywords,
+  onChange,
+}: {
+  keywords: string[];
+  onChange: (keywords: string[]) => void;
+}) {
+  const toggle = (keyword: string) =>
+    onChange(
+      keywords.includes(keyword)
+        ? keywords.filter((item) => item !== keyword)
+        : [...keywords, keyword],
+    );
+
+  return (
+    <div className="space-y-4">
+      <SectionHeader
+        icon={<Search className="h-4 w-4" />}
+        title="Monitoring keywords"
+        hint="WTG news intake starts from these animal welfare themes."
+      />
+      <ChipList
+        items={WTG_KEYWORD_PRESETS}
+        selected={keywords}
+        onToggle={toggle}
+        onAdd={(keyword) =>
+          !keywords.includes(keyword) && onChange([...keywords, keyword])
+        }
+      />
+    </div>
+  );
+}
+
+function WtgCategoriesStep({
+  categories,
+  onChange,
+}: {
+  categories: string[];
+  onChange: (categories: string[]) => void;
+}) {
+  const toggle = (category: string) =>
+    onChange(
+      categories.includes(category)
+        ? categories.filter((item) => item !== category)
+        : [...categories, category],
+    );
+
+  return (
+    <div className="space-y-4">
+      <SectionHeader
+        icon={<Tag className="h-4 w-4" />}
+        title="WTG news categories"
+        hint="These replace urgency labels for WTG monitoring."
+      />
+      <ChipList
+        items={WTG_CATEGORY_PRESETS}
+        selected={categories}
+        onToggle={toggle}
+        onAdd={(category) =>
+          !categories.includes(category) && onChange([...categories, category])
+        }
+      />
     </div>
   );
 }
