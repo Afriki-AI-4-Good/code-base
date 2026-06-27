@@ -1,5 +1,4 @@
 import {
-  Archive,
   Banknote,
   FileText,
   Inbox,
@@ -24,7 +23,6 @@ const items = [
   { id: "funding", label: "Funding", icon: Banknote },
   { id: "news", label: "News", icon: Newspaper },
   { id: "reports", label: "Reports", icon: FileText },
-  { id: "archive", label: "Archive", icon: Archive },
 ];
 
 export function Sidebar({

@@ -105,4 +105,14 @@ export const sourceLocations: Record<
     coords: [29.3599, -3.3614],
     countryId: "108",
   },
+  "22": {
+    name: "Berlin, Germany (WTG monitoring)",
+    coords: [13.405, 52.52],
+    countryId: "276",
+  },
+  "23": {
+    name: "Nairobi, Kenya (WTG monitoring)",
+    coords: [36.8219, -1.2921],
+    countryId: "404",
+  },
 };

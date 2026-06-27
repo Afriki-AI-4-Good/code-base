@@ -141,7 +141,7 @@ const STEP_META: Record<
 };
 
 const BK_STEPS: StepId[] = ["news", "format", "funding", "criteria", "urgency"];
-const WTG_STEPS: StepId[] = ["keywords", "format", "categories"];
+const WTG_STEPS: StepId[] = ["keywords", "format", "categories", "urgency"];
 
 const WTG_KEYWORD_PRESETS = DEFAULT_EXTRAS.wtgKeywords;
 const WTG_CATEGORY_PRESETS = DEFAULT_EXTRAS.wtgNewsCategories;

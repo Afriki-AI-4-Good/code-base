@@ -64,7 +64,7 @@ export function CardDetailSheet({
                 <Badge variant="outline">{categoryLabel[entry.category]}</Badge>
                 {entry.translatedFrom && (
                   <Badge variant="secondary">
-                    Übersetzt aus {entry.translatedFrom}
+                    Translated from {entry.translatedFrom}
                   </Badge>
                 )}
               </div>
@@ -79,7 +79,7 @@ export function CardDetailSheet({
             <div className="mt-6 space-y-6">
               <section>
                 <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground mb-2">
-                  Zusammenfassung
+                  Summary
                 </h4>
                 <p className="text-sm leading-relaxed">{entry.summary}</p>
               </section>
@@ -89,21 +89,21 @@ export function CardDetailSheet({
                   <Separator />
                   <section className="space-y-3">
                     <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Förderdetails
+                      Funding details
                     </h4>
                     <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
-                      <dt className="text-muted-foreground">Frist</dt>
+                      <dt className="text-muted-foreground">Deadline</dt>
                       <dd className="font-medium">
                         {formatDate(entry.deadline)}{" "}
                         <span className="text-muted-foreground">
-                          ({daysUntil(entry.deadline)} Tage)
+                          ({daysUntil(entry.deadline)} days)
                         </span>
                       </dd>
-                      <dt className="text-muted-foreground">Förderbetrag</dt>
+                      <dt className="text-muted-foreground">Amount</dt>
                       <dd>{entry.amountRange}</dd>
-                      <dt className="text-muted-foreground">Fördergeber</dt>
+                      <dt className="text-muted-foreground">Funder</dt>
                       <dd>{entry.funder}</dd>
-                      <dt className="text-muted-foreground">Themen</dt>
+                      <dt className="text-muted-foreground">Topics</dt>
                       <dd className="flex flex-wrap gap-1">
                         {entry.topics.map((t) => (
                           <Badge
@@ -118,27 +118,27 @@ export function CardDetailSheet({
                     </dl>
                     <div>
                       <h5 className="text-xs font-semibold mb-2">
-                        Förderkriterien
+                        Funding criteria
                       </h5>
                       <ul className="text-sm space-y-1 text-muted-foreground">
                         <li>
-                          Eigenanteil erforderlich:{" "}
+                          Own contribution required:{" "}
                           <span className="text-foreground font-medium">
                             {entry.criteria.ownContributionRequired
-                              ? "Ja"
-                              : "Nein"}
+                              ? "Yes"
+                              : "No"}
                           </span>
                         </li>
                         <li>
-                          Sitz in NRW:{" "}
+                          NRW headquarters:{" "}
                           <span className="text-foreground font-medium">
-                            {entry.criteria.nrwHeadquarters ? "Ja" : "Nein"}
+                            {entry.criteria.nrwHeadquarters ? "Yes" : "No"}
                           </span>
                         </li>
                         <li>
-                          Antrag direkt aus Burundi möglich:{" "}
+                          Application from Burundi possible:{" "}
                           <span className="text-foreground font-medium">
-                            {entry.criteria.applyFromBurundi ? "Ja" : "Nein"}
+                            {entry.criteria.applyFromBurundi ? "Yes" : "No"}
                           </span>
                         </li>
                         {entry.criteria.notes && (
@@ -160,20 +160,22 @@ export function CardDetailSheet({
                   <Separator />
                   <section className="space-y-3">
                     <h4 className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                      Übersetzung
+                      Translation
                     </h4>
                     <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
-                      <dt className="text-muted-foreground">Originalsprache</dt>
+                      <dt className="text-muted-foreground">
+                        Original language
+                      </dt>
                       <dd>{entry.originalLanguage}</dd>
-                      <dt className="text-muted-foreground">Absender</dt>
+                      <dt className="text-muted-foreground">Sender</dt>
                       <dd>{entry.sender}</dd>
-                      <dt className="text-muted-foreground">Datum</dt>
+                      <dt className="text-muted-foreground">Date</dt>
                       <dd>{formatDate(entry.date)}</dd>
                     </dl>
                     <Collapsible>
                       <CollapsibleTrigger className="flex items-center gap-1 text-xs font-medium text-muted-foreground hover:text-foreground">
                         <ChevronDown className="h-3 w-3" />
-                        Originaltext anzeigen
+                        Show original text
                       </CollapsibleTrigger>
                       <CollapsibleContent className="mt-2 rounded-md border border-border bg-muted/40 p-3 text-sm italic text-muted-foreground">
                         {entry.originalText}

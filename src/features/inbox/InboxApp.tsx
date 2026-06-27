@@ -177,7 +177,12 @@ export function InboxApp() {
           ) : section === "reports" ? (
             <>
               <MapBackdrop entries={entries} dimmed />
-              <ReportsView />
+              <ReportsView
+                entries={entries}
+                session={session}
+                profile={profile}
+                onSelect={handleSelect}
+              />
             </>
           ) : view === "map" ? (
             <>
