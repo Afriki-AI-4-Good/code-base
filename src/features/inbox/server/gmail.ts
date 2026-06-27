@@ -1,6 +1,6 @@
 import { google } from "googleapis";
-import { env } from "~/env";
 import type { Brief } from "@/lib/profile";
+import { env } from "~/env";
 
 export async function sendSummaryToGmail({
   recipientEmail,
@@ -30,9 +30,7 @@ export async function sendSummaryToGmail({
 
 export function hasGmailConfiguration() {
   return Boolean(
-    env.GMAIL_CLIENT_ID &&
-      env.GMAIL_CLIENT_SECRET &&
-      env.GMAIL_REFRESH_TOKEN,
+    env.GMAIL_CLIENT_ID && env.GMAIL_CLIENT_SECRET && env.GMAIL_REFRESH_TOKEN,
   );
 }
 

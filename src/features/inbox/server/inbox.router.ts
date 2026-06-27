@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { mockInbox } from "@/data/mock-inbox";
 import { sourceLocations } from "@/data/source-locations";
 import {
@@ -6,7 +7,6 @@ import {
   type UserProfile,
 } from "@/lib/profile";
 import type { InboxEntry } from "@/types/inbox";
-import { TRPCError } from "@trpc/server";
 import {
   sendSummaryEmailSchema,
   userProfileSchema,
