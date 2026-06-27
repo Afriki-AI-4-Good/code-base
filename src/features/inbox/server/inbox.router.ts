@@ -3,6 +3,7 @@ import { mockInbox } from "@/data/mock-inbox";
 import { sourceLocations } from "@/data/source-locations";
 import {
   DEFAULT_EXTRAS,
+  EMPTY_ONBOARDING_EXTRAS,
   normalizeUsername,
   type OnboardingExtras,
   ORGS,
@@ -395,64 +396,65 @@ function toProfileCreate(input: UserProfile) {
 }
 
 function toProfileUpdate(input: UserProfile) {
+  const defaults = getProfileDefaults(input.org);
+
   return {
     username: normalizeUsername(input.username),
     org: input.org,
     department: input.department,
     prompt: input.prompt,
-    newsSources: input.newsSources ?? DEFAULT_EXTRAS.newsSources,
-    emailConnected: input.emailConnected ?? DEFAULT_EXTRAS.emailConnected,
-    emailAddress: input.emailAddress ?? DEFAULT_EXTRAS.emailAddress,
-    outputFormat: toJson(input.outputFormat ?? DEFAULT_EXTRAS.outputFormat),
-    fundingSources: input.fundingSources ?? DEFAULT_EXTRAS.fundingSources,
-    fundingCriteria: toJson(
-      input.fundingCriteria ?? DEFAULT_EXTRAS.fundingCriteria,
-    ),
-    urgency: toJson(input.urgency ?? DEFAULT_EXTRAS.urgency),
-    wtgKeywords: toJson(input.wtgKeywords ?? DEFAULT_EXTRAS.wtgKeywords),
+    newsSources: input.newsSources ?? defaults.newsSources,
+    emailConnected: input.emailConnected ?? defaults.emailConnected,
+    emailAddress: input.emailAddress ?? defaults.emailAddress,
+    outputFormat: toJson(input.outputFormat ?? defaults.outputFormat),
+    fundingSources: input.fundingSources ?? defaults.fundingSources,
+    fundingCriteria: toJson(input.fundingCriteria ?? defaults.fundingCriteria),
+    urgency: toJson(input.urgency ?? defaults.urgency),
+    wtgKeywords: toJson(input.wtgKeywords ?? defaults.wtgKeywords),
     wtgNewsCategories: toJson(
-      input.wtgNewsCategories ?? DEFAULT_EXTRAS.wtgNewsCategories,
+      input.wtgNewsCategories ?? defaults.wtgNewsCategories,
     ),
   };
 }
 
 function toUserProfile(profile: PrismaUserProfile): UserProfile {
+  const org = profile.org as UserProfile["org"];
+  const defaults = getProfileDefaults(org);
+
   return {
     username: profile.username,
-    org: profile.org as UserProfile["org"],
+    org,
     department: profile.department as UserProfile["department"],
     prompt: profile.prompt,
-    newsSources: jsonArray<string>(
-      profile.newsSources,
-      DEFAULT_EXTRAS.newsSources,
-    ),
+    newsSources: jsonArray<string>(profile.newsSources, defaults.newsSources),
     emailConnected: profile.emailConnected,
     emailAddress: profile.emailAddress ?? "",
     outputFormat: jsonObject<OnboardingExtras["outputFormat"]>(
       profile.outputFormat,
-      DEFAULT_EXTRAS.outputFormat,
+      defaults.outputFormat,
     ),
     fundingSources: jsonArray<string>(
       profile.fundingSources,
-      DEFAULT_EXTRAS.fundingSources,
+      defaults.fundingSources,
     ),
     fundingCriteria: jsonObject<OnboardingExtras["fundingCriteria"]>(
       profile.fundingCriteria,
-      DEFAULT_EXTRAS.fundingCriteria,
+      defaults.fundingCriteria,
     ),
     urgency: jsonObject<OnboardingExtras["urgency"]>(
       profile.urgency,
-      DEFAULT_EXTRAS.urgency,
+      defaults.urgency,
     ),
-    wtgKeywords: jsonArray<string>(
-      profile.wtgKeywords,
-      DEFAULT_EXTRAS.wtgKeywords,
-    ),
+    wtgKeywords: jsonArray<string>(profile.wtgKeywords, defaults.wtgKeywords),
     wtgNewsCategories: jsonArray<string>(
       profile.wtgNewsCategories,
-      DEFAULT_EXTRAS.wtgNewsCategories,
+      defaults.wtgNewsCategories,
     ),
   };
+}
+
+function getProfileDefaults(org: UserProfile["org"]): OnboardingExtras {
+  return org === "new_cause" ? EMPTY_ONBOARDING_EXTRAS : DEFAULT_EXTRAS;
 }
 
 function profileId(input: Pick<UserProfile, "org" | "username">) {

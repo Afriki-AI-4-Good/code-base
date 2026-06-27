@@ -416,13 +416,17 @@ function buildMockOutput(
   profile: UserProfile | null,
   session: LoginSession,
 ) {
-  return session.org === "wtg"
-    ? buildWtgOutput(report, profile)
-    : buildBkOutput(report, profile);
+  return session.org === "bk"
+    ? buildBkOutput(report, profile)
+    : buildWtgOutput(report, profile, session);
 }
 
-function buildWtgOutput(report: ReportEntry, profile: UserProfile | null) {
-  const category = pickWtgCategory(report, profile);
+function buildWtgOutput(
+  report: ReportEntry,
+  profile: UserProfile | null,
+  session: LoginSession,
+) {
+  const category = pickWtgCategory(report, profile, session.org);
   const url =
     extractUrl(report.originalText) ?? `https://source.example/${report.id}`;
 
@@ -459,18 +463,24 @@ function buildBkOutput(report: ReportEntry, profile: UserProfile | null) {
   };
 }
 
-function pickWtgCategory(report: ReportEntry, profile: UserProfile | null) {
+function pickWtgCategory(
+  report: ReportEntry,
+  profile: UserProfile | null,
+  org: LoginSession["org"],
+) {
   const categories = profile?.wtgNewsCategories?.length
     ? profile.wtgNewsCategories
-    : DEFAULT_EXTRAS.wtgNewsCategories;
+    : org === "new_cause"
+      ? []
+      : DEFAULT_EXTRAS.wtgNewsCategories;
+  const fallbackCategory =
+    org === "new_cause" ? "Uncategorized" : "International animal welfare";
   const text =
     `${report.title} ${report.summary} ${report.originalText}`.toLowerCase();
 
   if (text.includes("instagram") || text.includes("social")) {
     return (
-      findCategory(categories, "social") ??
-      categories[2] ??
-      "Animal suffering on social media"
+      findCategory(categories, "social") ?? categories[2] ?? fallbackCategory
     );
   }
   if (
@@ -479,26 +489,20 @@ function pickWtgCategory(report: ReportEntry, profile: UserProfile | null) {
     text.includes("welpen")
   ) {
     return (
-      findCategory(categories, "germany") ??
-      categories[0] ??
-      "Animal welfare in Germany"
+      findCategory(categories, "germany") ?? categories[0] ?? fallbackCategory
     );
   }
   if (text.includes("ngo")) {
-    return (
-      findCategory(categories, "ngo") ??
-      categories[4] ??
-      "Reports from other NGOs"
-    );
+    return findCategory(categories, "ngo") ?? categories[4] ?? fallbackCategory;
   }
   if (text.includes("farm") || text.includes("agriculture")) {
     return (
       findCategory(categories, "agriculture") ??
       categories[3] ??
-      "Agriculture and consumer topics with animal welfare relevance"
+      fallbackCategory
     );
   }
-  return categories[1] ?? "International animal welfare";
+  return categories[1] ?? fallbackCategory;
 }
 
 function findCategory(categories: string[], needle: string) {

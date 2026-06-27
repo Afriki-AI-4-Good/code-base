@@ -13,6 +13,8 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ORGS } from "@/lib/profile";
 
+const PARTNER_ORGS = ORGS.filter((org) => org.id !== "new_cause");
+
 export function LandingPage({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="min-h-screen bg-[oklch(0.985_0.008_100)] text-foreground">
@@ -189,7 +191,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
                 width={210}
                 height={64}
               />
-              {ORGS.map((org) => (
+              {PARTNER_ORGS.map((org) => (
                 <PartnerLogo key={org.id} org={org} />
               ))}
             </div>

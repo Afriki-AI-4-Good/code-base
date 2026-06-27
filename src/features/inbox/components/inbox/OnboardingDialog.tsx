@@ -37,8 +37,8 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import {
   DEFAULT_EXTRAS,
-  DEFAULT_OUTPUT_FIELDS,
   type DepartmentId,
+  EMPTY_ONBOARDING_EXTRAS,
   getDefaultDepartment,
   getDepartment,
   getOrg,
@@ -110,7 +110,7 @@ const STEP_META: Record<
   },
   keywords: {
     label: "Keywords",
-    sub: "What WTG monitors",
+    sub: "What this workspace monitors",
     icon: <Search className="h-4 w-4" />,
   },
   format: {
@@ -135,7 +135,7 @@ const STEP_META: Record<
   },
   categories: {
     label: "Categories",
-    sub: "How WTG news is grouped",
+    sub: "How news is grouped",
     icon: <Tag className="h-4 w-4" />,
   },
 };
@@ -147,7 +147,7 @@ const WTG_KEYWORD_PRESETS = DEFAULT_EXTRAS.wtgKeywords;
 const WTG_CATEGORY_PRESETS = DEFAULT_EXTRAS.wtgNewsCategories;
 
 function getSteps(org: OrgId) {
-  return org === "wtg" ? WTG_STEPS : BK_STEPS;
+  return org === "bk" ? BK_STEPS : WTG_STEPS;
 }
 
 function getStep(steps: StepId[], index: number) {
@@ -174,27 +174,9 @@ export function OnboardingDialog({
   const [dept] = useState<DepartmentId>(
     initial?.department ?? getDefaultDepartment(session.org),
   );
-  const [extras, setExtras] = useState<OnboardingExtras>({
-    ...DEFAULT_EXTRAS,
-    ...(initial ? extractExtras(initial) : {}),
-    outputFormat: {
-      ...DEFAULT_EXTRAS.outputFormat,
-      ...(initial?.outputFormat ?? {}),
-      fields: initial?.outputFormat?.fields?.length
-        ? initial.outputFormat.fields
-        : DEFAULT_OUTPUT_FIELDS,
-    },
-    urgency: {
-      ...DEFAULT_EXTRAS.urgency,
-      ...(initial?.urgency ?? {}),
-    },
-    wtgKeywords: initial?.wtgKeywords?.length
-      ? initial.wtgKeywords
-      : DEFAULT_EXTRAS.wtgKeywords,
-    wtgNewsCategories: initial?.wtgNewsCategories?.length
-      ? initial.wtgNewsCategories
-      : DEFAULT_EXTRAS.wtgNewsCategories,
-  });
+  const [extras, setExtras] = useState<OnboardingExtras>(() =>
+    createInitialExtras(session.org, initial),
+  );
 
   const org = getOrg(session.org);
   const step = getStep(steps, stepIdx);
@@ -295,6 +277,8 @@ export function OnboardingDialog({
           {step.id === "keywords" && (
             <KeywordsStep
               keywords={extras.wtgKeywords}
+              presets={getKeywordPresets(session.org)}
+              hint={getKeywordHint(session.org)}
               onChange={(v) => update("wtgKeywords", v)}
             />
           )}
@@ -325,6 +309,9 @@ export function OnboardingDialog({
           {step.id === "categories" && (
             <WtgCategoriesStep
               categories={extras.wtgNewsCategories}
+              presets={getCategoryPresets(session.org)}
+              title={getCategoryTitle(session.org)}
+              hint={getCategoryHint(session.org)}
               onChange={(v) => update("wtgNewsCategories", v)}
             />
           )}
@@ -367,6 +354,73 @@ export function OnboardingDialog({
 function extractExtras(p: UserProfile): Partial<OnboardingExtras> {
   const { username: _u, org: _o, department: _d, prompt: _p, ...rest } = p;
   return rest;
+}
+
+function createInitialExtras(
+  org: OrgId,
+  initial?: UserProfile | null,
+): OnboardingExtras {
+  const base = getBaseExtras(org);
+
+  return {
+    ...base,
+    ...(initial ? extractExtras(initial) : {}),
+    outputFormat: {
+      ...base.outputFormat,
+      ...(initial?.outputFormat ?? {}),
+      fields: initial?.outputFormat?.fields?.length
+        ? initial.outputFormat.fields
+        : base.outputFormat.fields,
+    },
+    urgency: {
+      ...base.urgency,
+      ...(initial?.urgency ?? {}),
+    },
+    wtgKeywords: getInitialList(org, initial?.wtgKeywords, base.wtgKeywords),
+    wtgNewsCategories: getInitialList(
+      org,
+      initial?.wtgNewsCategories,
+      base.wtgNewsCategories,
+    ),
+  };
+}
+
+function getBaseExtras(org: OrgId) {
+  return org === "new_cause" ? EMPTY_ONBOARDING_EXTRAS : DEFAULT_EXTRAS;
+}
+
+function getInitialList(
+  org: OrgId,
+  saved: string[] | undefined,
+  fallback: string[],
+) {
+  if (!saved) return fallback;
+  if (saved.length > 0 || org === "new_cause") return saved;
+  return fallback;
+}
+
+function getKeywordPresets(org: OrgId) {
+  return org === "new_cause" ? [] : WTG_KEYWORD_PRESETS;
+}
+
+function getKeywordHint(org: OrgId) {
+  return org === "new_cause"
+    ? "Start from a blank list and add the topics this workspace should monitor."
+    : "WTG news intake starts from these animal welfare themes.";
+}
+
+function getCategoryPresets(org: OrgId) {
+  return org === "new_cause" ? [] : WTG_CATEGORY_PRESETS;
+}
+
+function getCategoryTitle(org: OrgId) {
+  return org === "new_cause" ? "News categories" : "WTG news categories";
+}
+
+function getCategoryHint(org: OrgId) {
+  return org === "new_cause"
+    ? "Start from a blank category set and add the groups this workspace needs."
+    : "Used alongside urgency labels for WTG monitoring.";
 }
 
 // ---------- Steps ----------
@@ -515,9 +569,13 @@ function NewsStep({
 
 function KeywordsStep({
   keywords,
+  presets,
+  hint,
   onChange,
 }: {
   keywords: string[];
+  presets: string[];
+  hint: string;
   onChange: (keywords: string[]) => void;
 }) {
   const toggle = (keyword: string) =>
@@ -532,10 +590,10 @@ function KeywordsStep({
       <SectionHeader
         icon={<Search className="h-4 w-4" />}
         title="Monitoring keywords"
-        hint="WTG news intake starts from these animal welfare themes."
+        hint={hint}
       />
       <ChipList
-        items={WTG_KEYWORD_PRESETS}
+        items={presets}
         selected={keywords}
         onToggle={toggle}
         onAdd={(keyword) =>
@@ -548,9 +606,15 @@ function KeywordsStep({
 
 function WtgCategoriesStep({
   categories,
+  presets,
+  title,
+  hint,
   onChange,
 }: {
   categories: string[];
+  presets: string[];
+  title: string;
+  hint: string;
   onChange: (categories: string[]) => void;
 }) {
   const toggle = (category: string) =>
@@ -564,11 +628,11 @@ function WtgCategoriesStep({
     <div className="space-y-4">
       <SectionHeader
         icon={<Tag className="h-4 w-4" />}
-        title="WTG news categories"
-        hint="These replace urgency labels for WTG monitoring."
+        title={title}
+        hint={hint}
       />
       <ChipList
-        items={WTG_CATEGORY_PRESETS}
+        items={presets}
         selected={categories}
         onToggle={toggle}
         onAdd={(category) =>

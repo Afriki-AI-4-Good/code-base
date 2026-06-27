@@ -1,4 +1,4 @@
-export type OrgId = "bk" | "wtg";
+export type OrgId = "bk" | "wtg" | "new_cause";
 export type DepartmentId =
   | "pm_intl"
   | "fundraising"
@@ -144,6 +144,38 @@ export const DEFAULT_EXTRAS: OnboardingExtras = {
   ],
 };
 
+export const EMPTY_ONBOARDING_EXTRAS: OnboardingExtras = {
+  newsSources: [],
+  emailConnected: false,
+  emailAddress: "",
+  outputFormat: {
+    style: "bullets",
+    length: "medium",
+    translateTo: "en",
+    includeOriginal: false,
+    fields: DEFAULT_OUTPUT_FIELDS.map((field) => ({
+      ...field,
+      enabled: false,
+    })),
+  },
+  fundingSources: [],
+  fundingCriteria: {
+    minAmount: 0,
+    maxAmount: 0,
+    regions: [],
+    topics: [],
+    requireOwnContribution: "any",
+  },
+  urgency: {
+    urgentDefinition: "",
+    relevantDefinition: "",
+    informationDefinition: "",
+    urgentKeywords: [],
+  },
+  wtgKeywords: [],
+  wtgNewsCategories: [],
+};
+
 export const ORGS: Org[] = [
   {
     id: "bk",
@@ -164,6 +196,16 @@ export const ORGS: Org[] = [
     accent: "bg-amber-100 text-amber-800",
     logoSrc: "/orgs/wtg-logo.png",
     logoAlt: "Welttierschutzgesellschaft e.V. logo",
+  },
+  {
+    id: "new_cause",
+    name: "New cause workspace",
+    shortName: "New",
+    initials: "NC",
+    description: "Blank monitoring template for future workspaces",
+    accent: "bg-slate-100 text-slate-800",
+    logoSrc: "/orgs/new-cause-logo.svg",
+    logoAlt: "New cause workspace logo",
   },
 ];
 
@@ -254,7 +296,7 @@ export function getDepartment(id: DepartmentId) {
 }
 
 export function getDefaultDepartment(org: OrgId): DepartmentId {
-  return org === "wtg" ? "pr_comms" : "fundraising";
+  return org === "bk" ? "fundraising" : "pr_comms";
 }
 
 export function normalizeUsername(username: string) {

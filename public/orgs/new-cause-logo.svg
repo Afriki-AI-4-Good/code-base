@@ -1,0 +1,9 @@
+<svg width="160" height="160" viewBox="0 0 160 160" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <title>New cause workspace</title>
+  <rect x="16" y="16" width="128" height="128" rx="28" fill="#F8FAFC"/>
+  <rect x="16" y="16" width="128" height="128" rx="28" stroke="#CBD5E1" stroke-width="4"/>
+  <path d="M80 46V114" stroke="#0F766E" stroke-width="10" stroke-linecap="round"/>
+  <path d="M46 80H114" stroke="#0F766E" stroke-width="10" stroke-linecap="round"/>
+  <path d="M48 48C58 38 71 33 80 33C89 33 102 38 112 48" stroke="#64748B" stroke-width="7" stroke-linecap="round"/>
+  <path d="M48 112C58 122 71 127 80 127C89 127 102 122 112 112" stroke="#64748B" stroke-width="7" stroke-linecap="round"/>
+</svg>

@@ -27,7 +27,7 @@ const briefSchema = z.object({
   items: z.array(briefItemSchema),
 });
 
-const orgSchema = z.enum(["bk", "wtg"]);
+const orgSchema = z.enum(["bk", "wtg", "new_cause"]);
 const usernameSchema = z.string().trim().min(1).max(48);
 
 export const loginSessionSchema = z.object({
@@ -37,7 +37,7 @@ export const loginSessionSchema = z.object({
 
 export const userProfileSchema = z.object({
   username: usernameSchema,
-  org: z.enum(["bk", "wtg"]),
+  org: orgSchema,
   department: z.enum(["pm_intl", "fundraising", "pr_comms", "management"]),
   prompt: z.string().min(1),
   newsSources: z.array(z.string()).optional(),
