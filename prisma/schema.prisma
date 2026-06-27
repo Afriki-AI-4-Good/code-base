@@ -1,0 +1,83 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+    provider = "prisma-client-js"
+    output   = "../generated/prisma"
+}
+
+datasource db {
+    provider = "postgresql"
+    url      = env("DATABASE_URL")
+}
+
+model Task {
+    id        Int      @id @default(autoincrement())
+    title     String
+    done      Boolean  @default(false)
+    createdAt DateTime @default(now())
+    updatedAt DateTime @updatedAt
+
+    @@index([createdAt])
+}
+
+model InboxEntry {
+    id               String         @id
+    priority         String
+    category         String
+    title            String
+    translatedFrom   String?
+    date             DateTime
+    source           String
+    summary          String
+    locationName     String?
+    locationLng      Float?
+    locationLat      Float?
+    locationCountryId String?
+    imageUrl         String?
+    deadline         DateTime?
+    amountRange      String?
+    topics           Json?
+    funder           String?
+    criteria         Json?
+    bkEligible       String?
+    originalLanguage String?
+    sender           String?
+    originalText     String?
+    phases           FundingPhase[]
+    createdAt        DateTime       @default(now())
+    updatedAt        DateTime       @updatedAt
+
+    @@index([category])
+    @@index([priority])
+    @@index([date])
+}
+
+model FundingPhase {
+    id      String     @id @default(cuid())
+    entryId String
+    kind    String
+    label   String
+    date    DateTime
+    order   Int
+    entry   InboxEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+    @@index([entryId])
+    @@index([date])
+}
+
+model UserProfile {
+    id             String   @id
+    org            String
+    department     String
+    prompt         String
+    newsSources    Json
+    emailConnected Boolean  @default(false)
+    emailAddress   String?
+    outputFormat   Json
+    fundingSources Json
+    fundingCriteria Json
+    urgency        Json
+    createdAt      DateTime @default(now())
+    updatedAt      DateTime @updatedAt
+}
