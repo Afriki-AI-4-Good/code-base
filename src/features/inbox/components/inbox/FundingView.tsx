@@ -106,6 +106,11 @@ function sameDay(a: Date, b: Date) {
 // ---------- Component ----------
 type EligibilityFilter = "all" | "yes" | "check" | "no";
 type PriorityFilter = "all" | Priority;
+const priorityRank: Record<Priority, number> = {
+  urgent: 0,
+  relevant: 1,
+  information: 2,
+};
 
 export function FundingView({
   entries,
@@ -118,7 +123,12 @@ export function FundingView({
     () =>
       entries
         .filter((e): e is FundingEntry => e.category === "funding")
-        .sort((a, b) => a.deadline.localeCompare(b.deadline)),
+        .sort(
+          (a, b) =>
+            priorityRank[a.priority] - priorityRank[b.priority] ||
+            a.deadline.localeCompare(b.deadline) ||
+            (b.agentMetadata?.fitScore ?? 0) - (a.agentMetadata?.fitScore ?? 0),
+        ),
     [entries],
   );
   const [eligibility, setEligibility] = useState<EligibilityFilter>("all");
@@ -412,8 +422,7 @@ export function FundingView({
                 Funding Timeline
               </h2>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                Full application lifecycle for each call · click any phase to
-                focus
+                Sorted by urgency, then deadline · click any phase to focus
               </p>
             </div>
           </div>
