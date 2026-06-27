@@ -1,3 +1,4 @@
+import { TRPCError } from "@trpc/server";
 import { mockInbox } from "@/data/mock-inbox";
 import { sourceLocations } from "@/data/source-locations";
 import {
@@ -8,7 +9,11 @@ import {
   type UserProfile,
 } from "@/lib/profile";
 import type { InboxEntry } from "@/types/inbox";
-import { loginSessionSchema, userProfileSchema } from "~/features/inbox/schema";
+import {
+  loginSessionSchema,
+  sendSummaryEmailSchema,
+  userProfileSchema,
+} from "~/features/inbox/schema";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import type {
   FundingPhase,
@@ -17,6 +22,7 @@ import type {
   InboxEntry as PrismaInboxEntry,
   UserProfile as PrismaUserProfile,
 } from "../../../../generated/prisma";
+import { hasGmailConfiguration, sendSummaryToGmail } from "./gmail";
 
 export const inboxRouter = createTRPCRouter({
   organizations: publicProcedure.query(() => ORGS),
@@ -72,6 +78,56 @@ export const inboxRouter = createTRPCRouter({
         return toUserProfile(profile);
       }),
   }),
+
+  sendSummaryEmail: publicProcedure
+    .input(sendSummaryEmailSchema)
+    .mutation(async ({ ctx, input }) => {
+      const session = normalizeSession(input.session);
+
+      const profile = await ctx.db.userProfile.findUnique({
+        where: {
+          org_username: {
+            org: session.org,
+            username: session.username,
+          },
+        },
+      });
+
+      if (!profile?.emailConnected || !profile.emailAddress) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Connect your Gmail address in onboarding first.",
+        });
+      }
+
+      if (profile.emailAddress !== input.recipientEmail) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Recipient email must match the connected Gmail address.",
+        });
+      }
+
+      if (!hasGmailConfiguration()) {
+        throw new TRPCError({
+          code: "PRECONDITION_FAILED",
+          message: "Gmail API credentials are missing on the server.",
+        });
+      }
+
+      try {
+        await sendSummaryToGmail({
+          recipientEmail: input.recipientEmail,
+          brief: input.brief,
+        });
+
+        return { success: true };
+      } catch {
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Failed to send summary email via Gmail API.",
+        });
+      }
+    }),
 });
 
 async function seedMissingInboxEntries(db: PrismaClient) {
