@@ -1,5 +1,3 @@
-import type { InboxEntry } from "@/types/inbox";
-
 export type OrgId = "bk" | "wtg";
 export type DepartmentId =
   | "pm_intl"
@@ -14,6 +12,8 @@ export interface Org {
   initials: string;
   description: string;
   accent: string; // tailwind class
+  logoSrc: string;
+  logoAlt: string;
 }
 
 export interface Department {
@@ -66,12 +66,20 @@ export interface OnboardingExtras {
     informationDefinition: string;
     urgentKeywords: string[];
   };
+  wtgKeywords: string[];
+  wtgNewsCategories: string[];
 }
 
 export interface UserProfile extends Partial<OnboardingExtras> {
+  username: string;
   org: OrgId;
   department: DepartmentId;
   prompt: string;
+}
+
+export interface LoginSession {
+  org: OrgId;
+  username: string;
 }
 
 export const DEFAULT_OUTPUT_FIELDS: OutputField[] = [
@@ -119,24 +127,43 @@ export const DEFAULT_EXTRAS: OnboardingExtras = {
       "Items that provide useful background or general context but do not require immediate action or response.",
     urgentKeywords: ["deadline", "urgent", "closing"],
   },
+  wtgKeywords: [
+    "Worldwide animal welfare: poaching, animal trade, rabies, legislation, tourism",
+    "Animal welfare in Germany: politics, legislation, puppy trade, circuses, zoos, farm animals",
+    "Animal welfare in development cooperation",
+    "Animal welfare on social media",
+    "Reports about animals and countries connected to our projects",
+    "Major animal welfare topics: pet trends, fur, puppy trade, horse markets, donkey-hide trade",
+  ],
+  wtgNewsCategories: [
+    "Animal welfare in Germany",
+    "International animal welfare",
+    "Animal suffering on social media",
+    "Agriculture and consumer topics with animal welfare relevance",
+    "Reports from other NGOs",
+  ],
 };
 
 export const ORGS: Org[] = [
   {
     id: "bk",
-    name: "Burundi Kids",
+    name: "Burundikids e.V.",
     shortName: "BK",
     initials: "BK",
     description: "Education & child protection in Burundi",
     accent: "bg-primary/15 text-primary",
+    logoSrc: "/orgs/burundikids-logo.png",
+    logoAlt: "Burundikids e.V. logo",
   },
   {
     id: "wtg",
-    name: "Welttierschutzgesellschaft",
+    name: "Welttierschutzgesellschaft e.V.",
     shortName: "WTG",
     initials: "WTG",
-    description: "World Animal Protection Society",
+    description: "Animal welfare worldwide",
     accent: "bg-amber-100 text-amber-800",
+    logoSrc: "/orgs/wtg-logo.png",
+    logoAlt: "Welttierschutzgesellschaft e.V. logo",
   },
 ];
 
@@ -157,7 +184,7 @@ export const DEPARTMENTS: Department[] = [
     description: "Donor relations, calls for proposals, grant cycles",
     focus: "Funding calls, deadlines, eligibility, donor news",
     defaultPrompt:
-      "You are my fundraising assistant. Prioritize open calls for proposals, donor announcements, and grant cycles. For each item show deadline, amount range, eligibility (esp. BK), and whether co-funding is required. Highlight calls expiring in the next 30 days.",
+      "You are my fundraising co-pilot. Prioritize open calls for proposals, donor announcements, and grant cycles. For each item show deadline, amount range, eligibility (esp. BK), and whether co-funding is required. Highlight calls expiring in the next 30 days.",
   },
   {
     id: "pr_comms",
@@ -166,7 +193,7 @@ export const DEPARTMENTS: Department[] = [
     description: "Press, storytelling, public-facing narratives",
     focus: "Sector news, success stories, media-ready field updates",
     defaultPrompt:
-      "You are my communications assistant. Surface sector news, success stories, and field updates that can become press releases, social posts, or newsletter items. Suggest angles, quotable numbers, and likely media interest. Avoid internal-only operational details.",
+      "You are my communications co-pilot. Surface sector news, success stories, and field updates that can become press releases, social posts, or newsletter items. Suggest angles, quotable numbers, and likely media interest. Avoid internal-only operational details.",
   },
   {
     id: "management",
@@ -175,33 +202,44 @@ export const DEPARTMENTS: Department[] = [
     description: "Strategic overview across all streams",
     focus: "High-priority items across funding, ops, and external news",
     defaultPrompt:
-      "You are my executive briefing assistant. Give me a concise strategic overview across funding, operations, and external news. Highlight risks, opportunities, and items needing board-level decisions. Keep each item to 1–2 sentences.",
+      "You are my executive briefing co-pilot. Give me a concise strategic overview across funding, operations, and external news. Highlight risks, opportunities, and items needing board-level decisions. Keep each item to 1–2 sentences.",
   },
 ];
 
-const STORAGE_KEY = "inbox.profile.v1";
+const SESSION_KEY = "inbox.session.v1";
 
-export function loadProfile(): UserProfile | null {
+export function loadSession(): LoginSession | null {
   if (typeof window === "undefined") return null;
   try {
-    const raw = window.localStorage.getItem(STORAGE_KEY);
+    const raw = window.localStorage.getItem(SESSION_KEY);
     if (!raw) return null;
-    const p = JSON.parse(raw);
-    if (p?.org && p.department) return p as UserProfile;
+    const session = JSON.parse(raw);
+    if (session?.org && session.username) {
+      return {
+        org: session.org,
+        username: normalizeUsername(session.username),
+      } as LoginSession;
+    }
   } catch {
     /* ignore */
   }
   return null;
 }
 
-export function saveProfile(p: UserProfile) {
+export function saveSession(session: LoginSession) {
   if (typeof window === "undefined") return;
-  window.localStorage.setItem(STORAGE_KEY, JSON.stringify(p));
+  window.localStorage.setItem(
+    SESSION_KEY,
+    JSON.stringify({
+      org: session.org,
+      username: normalizeUsername(session.username),
+    }),
+  );
 }
 
-export function clearProfile() {
+export function clearSession() {
   if (typeof window === "undefined") return;
-  window.localStorage.removeItem(STORAGE_KEY);
+  window.localStorage.removeItem(SESSION_KEY);
 }
 
 export function getOrg(id: OrgId) {
@@ -215,104 +253,10 @@ export function getDepartment(id: DepartmentId) {
   return department;
 }
 
-// ----- Brief generation -----
-
-export interface BriefItem {
-  entryId: string;
-  title: string;
-  reason: string;
-  priority: InboxEntry["priority"];
+export function getDefaultDepartment(org: OrgId): DepartmentId {
+  return org === "wtg" ? "pr_comms" : "fundraising";
 }
 
-export interface Brief {
-  headline: string;
-  subline: string;
-  items: BriefItem[];
-}
-
-const priorityRank = { urgent: 3, relevant: 2, information: 1 } as const;
-
-export function buildBrief(profile: UserProfile, entries: InboxEntry[]): Brief {
-  const org = getOrg(profile.org);
-  const dept = getDepartment(profile.department);
-
-  // Score each entry per department.
-  const scored = entries
-    .map((e) => ({ entry: e, score: scoreFor(dept.id, e) }))
-    .filter((s) => s.score > 0)
-    .sort((a, b) => {
-      if (b.score !== a.score) return b.score - a.score;
-      return priorityRank[b.entry.priority] - priorityRank[a.entry.priority];
-    })
-    .slice(0, 5);
-
-  const items: BriefItem[] = scored.map(({ entry }) => ({
-    entryId: entry.id,
-    title: entry.title,
-    reason: reasonFor(dept.id, entry),
-    priority: entry.priority,
-  }));
-
-  const urgentCount = items.filter((i) => i.priority === "urgent").length;
-  return {
-    headline: `Welcome, ${org.shortName} · ${dept.shortName}`,
-    subline:
-      urgentCount > 0
-        ? `${items.length} items for you — ${urgentCount} marked urgent.`
-        : `${items.length} items selected for your role today.`,
-    items,
-  };
-}
-
-function scoreFor(dept: DepartmentId, e: InboxEntry): number {
-  const p = priorityRank[e.priority];
-  switch (dept) {
-    case "fundraising":
-      if (e.category === "funding") return 10 + p;
-      if (e.category === "news") return 2 + p;
-      return 1;
-    case "pm_intl":
-      if (e.category === "report") return 10 + p;
-      if (e.category === "funding" && e.priority === "urgent") return 6;
-      if (e.category === "news") return 3 + p;
-      return 1;
-    case "pr_comms":
-      if (e.category === "news") return 10 + p;
-      if (e.category === "report" && e.priority !== "urgent") return 4;
-      return 1 + p;
-    case "management":
-      // Executive view: top urgency across the board.
-      return p * 4 + (e.category === "funding" ? 2 : 0);
-  }
-}
-
-function reasonFor(dept: DepartmentId, e: InboxEntry): string {
-  switch (dept) {
-    case "fundraising":
-      if (e.category === "funding")
-        return `Funding call · deadline ${"deadline" in e ? formatShort(e.deadline) : "tbd"}`;
-      return "Context for donor conversations";
-    case "pm_intl":
-      if (e.category === "report") return "Field report — operational impact";
-      if (e.category === "funding")
-        return "Funding window relevant to projects";
-      return "Sector context for the field";
-    case "pr_comms":
-      if (e.category === "news") return "Media-relevant sector story";
-      if (e.category === "report") return "Possible storytelling angle";
-      return "Background for communications";
-    case "management":
-      return `${e.priority === "urgent" ? "Urgent" : "Strategic"} signal across the inbox`;
-  }
-}
-
-function formatShort(iso: string) {
-  try {
-    return new Date(iso).toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-    });
-  } catch {
-    return iso;
-  }
+export function normalizeUsername(username: string) {
+  return username.trim().toLowerCase();
 }

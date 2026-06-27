@@ -3,11 +3,14 @@ import { mockInbox } from "@/data/mock-inbox";
 import { sourceLocations } from "@/data/source-locations";
 import {
   DEFAULT_EXTRAS,
+  normalizeUsername,
   type OnboardingExtras,
+  ORGS,
   type UserProfile,
 } from "@/lib/profile";
 import type { InboxEntry } from "@/types/inbox";
 import {
+  loginSessionSchema,
   sendSummaryEmailSchema,
   userProfileSchema,
 } from "~/features/inbox/schema";
@@ -21,11 +24,11 @@ import type {
 } from "../../../../generated/prisma";
 import { hasGmailConfiguration, sendSummaryToGmail } from "./gmail";
 
-const DEFAULT_PROFILE_ID = "local-user";
-
 export const inboxRouter = createTRPCRouter({
+  organizations: publicProcedure.query(() => ORGS),
+
   list: publicProcedure.query(async ({ ctx }) => {
-    await seedInboxIfEmpty(ctx.db);
+    await seedMissingInboxEntries(ctx.db);
 
     const entries = await ctx.db.inboxEntry.findMany({
       include: { phases: { orderBy: { order: "asc" } } },
@@ -36,21 +39,40 @@ export const inboxRouter = createTRPCRouter({
   }),
 
   profile: createTRPCRouter({
-    get: publicProcedure.query(async ({ ctx }) => {
-      const profile = await ctx.db.userProfile.findUnique({
-        where: { id: DEFAULT_PROFILE_ID },
-      });
+    get: publicProcedure
+      .input(loginSessionSchema)
+      .query(async ({ ctx, input }) => {
+        const session = normalizeSession(input);
 
-      return profile ? toUserProfile(profile) : null;
-    }),
+        const profile = await ctx.db.userProfile.findUnique({
+          where: {
+            org_username: {
+              org: session.org,
+              username: session.username,
+            },
+          },
+        });
+
+        return profile ? toUserProfile(profile) : null;
+      }),
 
     upsert: publicProcedure
       .input(userProfileSchema)
       .mutation(async ({ ctx, input }) => {
+        const normalizedInput = {
+          ...input,
+          username: normalizeUsername(input.username),
+        };
+
         const profile = await ctx.db.userProfile.upsert({
-          where: { id: DEFAULT_PROFILE_ID },
-          create: toProfileCreate(input),
-          update: toProfileUpdate(input),
+          where: {
+            org_username: {
+              org: normalizedInput.org,
+              username: normalizedInput.username,
+            },
+          },
+          create: toProfileCreate(normalizedInput),
+          update: toProfileUpdate(normalizedInput),
         });
 
         return toUserProfile(profile);
@@ -60,8 +82,15 @@ export const inboxRouter = createTRPCRouter({
   sendSummaryEmail: publicProcedure
     .input(sendSummaryEmailSchema)
     .mutation(async ({ ctx, input }) => {
+      const session = normalizeSession(input.session);
+
       const profile = await ctx.db.userProfile.findUnique({
-        where: { id: DEFAULT_PROFILE_ID },
+        where: {
+          org_username: {
+            org: session.org,
+            username: session.username,
+          },
+        },
       });
 
       if (!profile?.emailConnected || !profile.emailAddress) {
@@ -101,17 +130,30 @@ export const inboxRouter = createTRPCRouter({
     }),
 });
 
-async function seedInboxIfEmpty(db: PrismaClient) {
-  const count = await db.inboxEntry.count();
-  if (count > 0) return;
+async function seedMissingInboxEntries(db: PrismaClient) {
+  const existing = await db.inboxEntry.findMany({
+    select: { id: true },
+  });
+  const existingIds = new Set(existing.map((entry) => entry.id));
+  const missingEntries = mockInbox.filter(
+    (entry) => !existingIds.has(entry.id),
+  );
+  if (missingEntries.length === 0) return;
 
   await db.$transaction(
-    mockInbox.map((entry) =>
+    missingEntries.map((entry) =>
       db.inboxEntry.create({
         data: toInboxCreate(entry),
       }),
     ),
   );
+}
+
+function normalizeSession(input: { org: string; username: string }) {
+  return {
+    org: input.org,
+    username: normalizeUsername(input.username),
+  };
 }
 
 function toInboxCreate(entry: InboxEntry) {
@@ -225,13 +267,14 @@ function toInboxEntry(
 
 function toProfileCreate(input: UserProfile) {
   return {
-    id: DEFAULT_PROFILE_ID,
+    id: profileId(input),
     ...toProfileUpdate(input),
   };
 }
 
 function toProfileUpdate(input: UserProfile) {
   return {
+    username: normalizeUsername(input.username),
     org: input.org,
     department: input.department,
     prompt: input.prompt,
@@ -244,11 +287,16 @@ function toProfileUpdate(input: UserProfile) {
       input.fundingCriteria ?? DEFAULT_EXTRAS.fundingCriteria,
     ),
     urgency: toJson(input.urgency ?? DEFAULT_EXTRAS.urgency),
+    wtgKeywords: toJson(input.wtgKeywords ?? DEFAULT_EXTRAS.wtgKeywords),
+    wtgNewsCategories: toJson(
+      input.wtgNewsCategories ?? DEFAULT_EXTRAS.wtgNewsCategories,
+    ),
   };
 }
 
 function toUserProfile(profile: PrismaUserProfile): UserProfile {
   return {
+    username: profile.username,
     org: profile.org as UserProfile["org"],
     department: profile.department as UserProfile["department"],
     prompt: profile.prompt,
@@ -274,7 +322,19 @@ function toUserProfile(profile: PrismaUserProfile): UserProfile {
       profile.urgency,
       DEFAULT_EXTRAS.urgency,
     ),
+    wtgKeywords: jsonArray<string>(
+      profile.wtgKeywords,
+      DEFAULT_EXTRAS.wtgKeywords,
+    ),
+    wtgNewsCategories: jsonArray<string>(
+      profile.wtgNewsCategories,
+      DEFAULT_EXTRAS.wtgNewsCategories,
+    ),
   };
+}
+
+function profileId(input: Pick<UserProfile, "org" | "username">) {
+  return `${input.org}:${normalizeUsername(input.username)}`;
 }
 
 function jsonArray<T>(value: unknown, fallback: T[]): T[] {

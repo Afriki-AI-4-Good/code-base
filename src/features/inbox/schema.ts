@@ -27,7 +27,16 @@ const briefSchema = z.object({
   items: z.array(briefItemSchema),
 });
 
+const orgSchema = z.enum(["bk", "wtg"]);
+const usernameSchema = z.string().trim().min(1).max(48);
+
+export const loginSessionSchema = z.object({
+  org: orgSchema,
+  username: usernameSchema,
+});
+
 export const userProfileSchema = z.object({
+  username: usernameSchema,
   org: z.enum(["bk", "wtg"]),
   department: z.enum(["pm_intl", "fundraising", "pr_comms", "management"]),
   prompt: z.string().min(1),
@@ -61,11 +70,15 @@ export const userProfileSchema = z.object({
       urgentKeywords: z.array(z.string()),
     })
     .optional(),
+  wtgKeywords: z.array(z.string()).optional(),
+  wtgNewsCategories: z.array(z.string()).optional(),
 });
 
 export const sendSummaryEmailSchema = z.object({
+  session: loginSessionSchema,
   recipientEmail: z.string().email(),
   brief: briefSchema,
 });
 
+export type LoginSessionInput = z.infer<typeof loginSessionSchema>;
 export type UserProfileInput = z.infer<typeof userProfileSchema>;

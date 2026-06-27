@@ -375,4 +375,35 @@ export const mockInbox: InboxEntry[] = [
     sender: "M&E Team Bujumbura",
     originalText: "Évaluation pilote des classes numériques à Bujumbura...",
   },
+  {
+    id: "22",
+    priority: "urgent",
+    category: "report",
+    title:
+      "Press mirror: puppy trade investigation gains traction on Instagram",
+    translatedFrom: "German",
+    date: "2026-06-27",
+    source: "Google Alerts: WTG monitoring",
+    summary:
+      "A German investigative outlet and several high-reach Instagram posts report a suspected puppy trafficking network using cross-border online sales. The topic is spreading quickly on social media and may require a same-day communications check. The item connects to puppy trade, animal suffering on social media, and potential public policy follow-up.",
+    originalLanguage: "German",
+    sender: "Google Alerts Daily Digest",
+    originalText:
+      'Google Alert "Welpenhandel": Recherche zu illegalem Welpenhandel erreicht hohe Sichtbarkeit auf Instagram. URL: https://example.org/wtg/puppy-trade-instagram',
+  },
+  {
+    id: "23",
+    priority: "relevant",
+    category: "report",
+    title: "Daily animal welfare digest: donkey-hide trade in East Africa",
+    translatedFrom: "English",
+    date: "2026-06-24",
+    source: "Google Alerts: WTG monitoring",
+    summary:
+      "Several regional outlets report renewed debate about the donkey-hide trade and its impact on working animals and rural livelihoods in East Africa. The coverage is relevant for international animal welfare monitoring and development cooperation, but no immediate response deadline is visible. The item should be kept for the next press mirror and possible project-context review.",
+    originalLanguage: "English",
+    sender: "Google Alerts Daily Digest",
+    originalText:
+      "Daily digest: donkey-hide trade, working animals, East Africa, rural livelihoods. URL: https://example.org/wtg/donkey-hide-east-africa",
+  },
 ];

@@ -17,10 +17,10 @@ const GEO_URL =
 const DEFAULT_CENTER: [number, number] = [20, 5];
 
 const filters: { id: CategoryFilter; label: string }[] = [
-  { id: "all", label: "Alle" },
+  { id: "all", label: "All" },
   { id: "news", label: "News" },
-  { id: "funding", label: "Förderungen" },
-  { id: "report", label: "Berichte" },
+  { id: "funding", label: "Funding" },
+  { id: "report", label: "Reports" },
 ];
 
 export function ViewTabs({
@@ -32,8 +32,8 @@ export function ViewTabs({
 }) {
   const tabs: { id: ViewMode; label: string; icon: typeof LayoutGrid }[] = [
     { id: "kanban", label: "Kanban", icon: LayoutGrid },
-    { id: "list", label: "Liste", icon: List },
-    { id: "map", label: "Karte", icon: MapIcon },
+    { id: "list", label: "List", icon: List },
+    { id: "map", label: "Map", icon: MapIcon },
   ];
   return (
     <div className="inline-flex items-center gap-1 rounded-full border border-white/40 bg-white/40 p-1 shadow-lg backdrop-blur-xl">
