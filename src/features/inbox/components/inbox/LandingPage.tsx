@@ -26,7 +26,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           <Image
             src="/brand/afriki-logo.svg"
             alt="Afriki logo"
-            width={132}
+            width={140}
             height={40}
             priority
             className="h-10 w-auto"
