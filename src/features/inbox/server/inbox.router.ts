@@ -8,7 +8,7 @@ import {
   ORGS,
   type UserProfile,
 } from "@/lib/profile";
-import type { InboxEntry } from "@/types/inbox";
+import type { AgentMetadata, InboxEntry } from "@/types/inbox";
 import {
   loginSessionSchema,
   sendSummaryEmailSchema,
@@ -28,7 +28,7 @@ export const inboxRouter = createTRPCRouter({
   organizations: publicProcedure.query(() => ORGS),
 
   list: publicProcedure.query(async ({ ctx }) => {
-    await seedMissingInboxEntries(ctx.db);
+    await syncMockInboxEntries(ctx.db);
 
     const entries = await ctx.db.inboxEntry.findMany({
       include: { phases: { orderBy: { order: "asc" } } },
@@ -130,23 +130,37 @@ export const inboxRouter = createTRPCRouter({
     }),
 });
 
-async function seedMissingInboxEntries(db: PrismaClient) {
+async function syncMockInboxEntries(db: PrismaClient) {
   const existing = await db.inboxEntry.findMany({
-    select: { id: true },
+    select: { id: true, agentMetadata: true },
   });
-  const existingIds = new Set(existing.map((entry) => entry.id));
-  const missingEntries = mockInbox.filter(
-    (entry) => !existingIds.has(entry.id),
-  );
-  if (missingEntries.length === 0) return;
+  const existingById = new Map(existing.map((entry) => [entry.id, entry]));
+  const operations = mockInbox.flatMap((entry) => {
+    const existingEntry = existingById.get(entry.id);
+    if (!existingEntry) {
+      return [
+        db.inboxEntry.create({
+          data: toInboxCreate(entry),
+        }),
+      ];
+    }
+    if (!existingEntry.agentMetadata) {
+      return [
+        db.inboxEntry.update({
+          where: { id: entry.id },
+          data: {
+            agentMetadata: toJson(
+              entry.agentMetadata ?? mockAgentMetadata(entry),
+            ),
+          },
+        }),
+      ];
+    }
+    return [];
+  });
+  if (operations.length === 0) return;
 
-  await db.$transaction(
-    missingEntries.map((entry) =>
-      db.inboxEntry.create({
-        data: toInboxCreate(entry),
-      }),
-    ),
-  );
+  await db.$transaction(operations);
 }
 
 function normalizeSession(input: { org: string; username: string }) {
@@ -161,6 +175,26 @@ function toInboxCreate(entry: InboxEntry) {
 
   return {
     id: entry.id,
+    ...toInboxUpdateFields(entry, location),
+    phases:
+      "phases" in entry && entry.phases
+        ? {
+            create: entry.phases.map((phase, order) => ({
+              kind: phase.kind,
+              label: phase.label,
+              date: toDate(phase.date),
+              order,
+            })),
+          }
+        : undefined,
+  };
+}
+
+function toInboxUpdateFields(
+  entry: InboxEntry,
+  location: (typeof sourceLocations)[string] | undefined,
+) {
+  return {
     priority: entry.priority,
     category: entry.category,
     title: entry.title,
@@ -183,17 +217,7 @@ function toInboxCreate(entry: InboxEntry) {
       "originalLanguage" in entry ? entry.originalLanguage : undefined,
     sender: "sender" in entry ? entry.sender : undefined,
     originalText: "originalText" in entry ? entry.originalText : undefined,
-    phases:
-      "phases" in entry && entry.phases
-        ? {
-            create: entry.phases.map((phase, order) => ({
-              kind: phase.kind,
-              label: phase.label,
-              date: toDate(phase.date),
-              order,
-            })),
-          }
-        : undefined,
+    agentMetadata: toJson(entry.agentMetadata ?? mockAgentMetadata(entry)),
   };
 }
 
@@ -209,6 +233,7 @@ function toInboxEntry(
     date: formatDate(entry.date),
     source: entry.source,
     summary: entry.summary,
+    agentMetadata: jsonObject<AgentMetadata>(entry.agentMetadata, {}),
     location:
       entry.locationName &&
       entry.locationLng !== null &&
@@ -263,6 +288,103 @@ function toInboxEntry(
     category: "news",
     imageUrl: entry.imageUrl ?? undefined,
   };
+}
+
+function mockAgentMetadata(entry: InboxEntry): AgentMetadata {
+  if (entry.category === "funding") return mockFundingMetadata(entry);
+  if (entry.category === "news") return mockNewsMetadata(entry);
+  return mockReportMetadata(entry);
+}
+
+function mockFundingMetadata(
+  entry: Extract<InboxEntry, { category: "funding" }>,
+) {
+  const days = Math.ceil(
+    (toDate(entry.deadline).getTime() - Date.now()) / (1000 * 60 * 60 * 24),
+  );
+  const fitScore =
+    entry.bkEligible === "yes" ? 88 : entry.bkEligible === "check" ? 64 : 28;
+
+  return {
+    sourceUrl: `https://funding.example/${entry.id}`,
+    confidence: 0.86,
+    detectedAt: entry.date,
+    sourceType: "funding_call",
+    fitScore,
+    applicationLead:
+      entry.bkEligible === "check" ? "Grant manager" : "Fundraising",
+    recommendedAction:
+      days <= 21
+        ? "Review eligibility and start a first decision note this week."
+        : "Keep in pipeline and schedule a criteria review.",
+    decisionReason:
+      entry.bkEligible === "yes"
+        ? "Matches BK regions and thematic priorities from onboarding."
+        : "Needs manual eligibility check before proposal work starts.",
+    requiredDocuments: [
+      "Eligibility note",
+      "Budget estimate",
+      "Partner confirmation",
+      "Draft concept note",
+    ],
+    nextSteps: [
+      "Confirm applicant eligibility",
+      "Check own-contribution requirement",
+      "Assign proposal owner",
+    ],
+    impactAreas: entry.topics,
+    regionTags: entry.location?.name ? [entry.location.name] : ["Burundi"],
+  };
+}
+
+function mockNewsMetadata(entry: Extract<InboxEntry, { category: "news" }>) {
+  return {
+    sourceUrl: `https://news.example/${entry.id}`,
+    confidence: 0.82,
+    detectedAt: entry.date,
+    sourceType: "news_article",
+    monitoringTheme: entry.title.includes("Health")
+      ? "Health and child wellbeing"
+      : entry.title.includes("Education")
+        ? "Education and vocational training"
+        : "Burundi context monitoring",
+    suggestedUse:
+      entry.priority === "relevant"
+        ? "Add to the weekly context brief."
+        : "Keep as background information.",
+    recommendedAction:
+      entry.priority === "urgent"
+        ? "Review today and decide whether to brief leadership."
+        : "Summarize for the next team digest.",
+    keyFacts: splitSummary(entry.summary).slice(0, 3),
+    regionTags: entry.location?.name ? [entry.location.name] : ["Great Lakes"],
+    impactAreas: entry.title.includes("Education")
+      ? ["Education", "Policy"]
+      : ["Context", "Monitoring"],
+  };
+}
+
+function mockReportMetadata(
+  entry: Extract<InboxEntry, { category: "report" }>,
+) {
+  return {
+    confidence: 0.84,
+    detectedAt: entry.date,
+    sourceType: "email_report",
+    recommendedAction:
+      entry.priority === "urgent"
+        ? "Open the original email and assign a response owner."
+        : "Keep in reports queue for the next review.",
+    keyFacts: splitSummary(entry.summary).slice(0, 3),
+    regionTags: entry.location?.name ? [entry.location.name] : [],
+  };
+}
+
+function splitSummary(summary: string) {
+  return summary
+    .split(/(?<=[.!?])\s+/)
+    .map((part) => part.trim())
+    .filter(Boolean);
 }
 
 function toProfileCreate(input: UserProfile) {

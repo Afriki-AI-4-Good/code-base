@@ -1,13 +1,13 @@
 import { google } from "googleapis";
-import type { Brief } from "@/lib/profile";
 import { env } from "~/env";
+import type { SummaryBriefInput } from "~/features/inbox/schema";
 
 export async function sendSummaryToGmail({
   recipientEmail,
   brief,
 }: {
   recipientEmail: string;
-  brief: Brief;
+  brief: SummaryBriefInput;
 }) {
   const senderEmail = env.GMAIL_SENDER_EMAIL ?? recipientEmail;
   const oauthClient = createOAuthClient();
@@ -49,7 +49,7 @@ function createRawMessage({
 }: {
   recipientEmail: string;
   senderEmail: string;
-  brief: Brief;
+  brief: SummaryBriefInput;
 }) {
   const subject = `Inbox Summary: ${brief.headline}`;
   const textBody = toTextBody(brief);
@@ -81,7 +81,7 @@ function createRawMessage({
     .replace(/=+$/, "");
 }
 
-function toTextBody(brief: Brief) {
+function toTextBody(brief: SummaryBriefInput) {
   return [
     brief.headline,
     brief.subline,
@@ -93,7 +93,7 @@ function toTextBody(brief: Brief) {
   ].join("\n");
 }
 
-function toHtmlBody(brief: Brief) {
+function toHtmlBody(brief: SummaryBriefInput) {
   const items = brief.items
     .map(
       (item) =>

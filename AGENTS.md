@@ -33,5 +33,6 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 ## Known Gotchas
 
 - `node_modules/next/dist/docs/` is absent after `npm install`; use official Next docs when local docs are unavailable.
+- `npm install` requires `--legacy-peer-deps` because `react-simple-maps@3` peers React <=18 while the app uses React 19.
 - `src/app/tasks/page.tsx` is DB-backed and must remain dynamic; static prerender causes the tRPC prefetch error to be redacted during `next build`.
 - `supabase/config.toml` references `supabase/seed.sql`, but no seed file is committed; `npm run db:start` warns and continues.

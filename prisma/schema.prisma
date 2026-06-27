@@ -44,6 +44,7 @@ model InboxEntry {
     originalLanguage String?
     sender           String?
     originalText     String?
+    agentMetadata    Json?
     phases           FundingPhase[]
     createdAt        DateTime       @default(now())
     updatedAt        DateTime       @updatedAt

@@ -15,6 +15,25 @@ export interface BaseEntry {
     name: string; // z.B. "Bujumbura, Burundi"
     coords: [number, number]; // [lng, lat]
   };
+  agentMetadata?: AgentMetadata;
+}
+
+export interface AgentMetadata {
+  sourceUrl?: string;
+  confidence?: number;
+  detectedAt?: string;
+  sourceType?: string;
+  recommendedAction?: string;
+  suggestedUse?: string;
+  keyFacts?: string[];
+  nextSteps?: string[];
+  regionTags?: string[];
+  impactAreas?: string[];
+  fitScore?: number;
+  applicationLead?: string;
+  requiredDocuments?: string[];
+  decisionReason?: string;
+  monitoringTheme?: string;
 }
 
 export interface NewsEntry extends BaseEntry {

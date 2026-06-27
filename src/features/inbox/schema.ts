@@ -82,3 +82,4 @@ export const sendSummaryEmailSchema = z.object({
 
 export type LoginSessionInput = z.infer<typeof loginSessionSchema>;
 export type UserProfileInput = z.infer<typeof userProfileSchema>;
+export type SummaryBriefInput = z.infer<typeof briefSchema>;
