@@ -1,4 +1,9 @@
-import type { BkEligibility, Category, Priority } from "@/types/inbox";
+import type {
+  AgentMetadata,
+  BkEligibility,
+  Category,
+  Priority,
+} from "@/types/inbox";
 
 // Soft, dusty palette aligned with the sage-green design system.
 export const priorityMeta: Record<
@@ -60,4 +65,26 @@ export function formatDate(iso: string) {
 export function daysUntil(iso: string) {
   const ms = new Date(iso).getTime() - Date.now();
   return Math.ceil(ms / (1000 * 60 * 60 * 24));
+}
+
+export function hasConcreteFundingDeadline(entry: {
+  agentMetadata?: AgentMetadata;
+}) {
+  return !entry.agentMetadata?.deadlineLabel;
+}
+
+export function fundingDeadlineLabel(entry: {
+  deadline: string;
+  agentMetadata?: AgentMetadata;
+}) {
+  return entry.agentMetadata?.deadlineLabel || formatDate(entry.deadline);
+}
+
+export function fundingDaysUntilLabel(entry: {
+  deadline: string;
+  agentMetadata?: AgentMetadata;
+}) {
+  return hasConcreteFundingDeadline(entry)
+    ? `(${daysUntil(entry.deadline)} days)`
+    : "";
 }

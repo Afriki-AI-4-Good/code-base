@@ -20,8 +20,9 @@ import type { InboxEntry } from "@/types/inbox";
 import {
   bkLabel,
   categoryLabel,
-  daysUntil,
   formatDate,
+  fundingDaysUntilLabel,
+  fundingDeadlineLabel,
   priorityMeta,
 } from "./priority";
 
@@ -94,10 +95,12 @@ export function CardDetailSheet({
                     <dl className="grid grid-cols-[140px_1fr] gap-y-2 text-sm">
                       <dt className="text-muted-foreground">Deadline</dt>
                       <dd className="font-medium">
-                        {formatDate(entry.deadline)}{" "}
-                        <span className="text-muted-foreground">
-                          ({daysUntil(entry.deadline)} days)
-                        </span>
+                        {fundingDeadlineLabel(entry)}{" "}
+                        {fundingDaysUntilLabel(entry) && (
+                          <span className="text-muted-foreground">
+                            {fundingDaysUntilLabel(entry)}
+                          </span>
+                        )}
                       </dd>
                       <dt className="text-muted-foreground">Amount</dt>
                       <dd>{entry.amountRange}</dd>

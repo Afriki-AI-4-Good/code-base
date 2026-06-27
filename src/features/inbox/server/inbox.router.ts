@@ -23,6 +23,18 @@ import type {
   InboxEntry as PrismaInboxEntry,
   UserProfile as PrismaUserProfile,
 } from "../../../../generated/prisma";
+import { runFundingAgent, runNewsAgent } from "./agent-client";
+import {
+  mapAgentFundingResultToInboxEntry,
+  mapAgentNewsResultToInboxEntry,
+} from "./agent-mappers";
+import {
+  buildFundingQuery,
+  buildNewsQuery,
+  buildOrgProfile,
+  resolveFundingSources,
+  resolveNewsSources,
+} from "./agent-sources";
 import { hasGmailConfiguration, sendSummaryToGmail } from "./gmail";
 
 export const inboxRouter = createTRPCRouter({
@@ -79,6 +91,85 @@ export const inboxRouter = createTRPCRouter({
         return toUserProfile(profile);
       }),
   }),
+
+  syncNews: publicProcedure
+    .input(loginSessionSchema)
+    .mutation(async ({ ctx, input }) => {
+      const profile = await getProfileOrThrow(ctx.db, input);
+      const defaults = getProfileDefaults(profile.org as UserProfile["org"]);
+      const urgency = jsonObject<OnboardingExtras["urgency"]>(
+        profile.urgency,
+        defaults.urgency,
+      );
+      const profilePayload = toUserProfile(profile);
+      const response = await runNewsAgent({
+        query: buildNewsQuery(profilePayload),
+        sources: resolveNewsSources(profilePayload.newsSources),
+        model: "qwen3:8b",
+        maxCandidates: 10,
+        urgentDefinition: urgency.urgentDefinition,
+        relevantDefinition: urgency.relevantDefinition,
+        includeGdelt: true,
+        gdeltQuery: buildNewsQuery(profilePayload),
+        gdeltTimespan: "7d",
+      }).catch((error: unknown) => {
+        throw new TRPCError({
+          code: "BAD_GATEWAY",
+          message: error instanceof Error ? error.message : "Agent API failed.",
+        });
+      });
+      const detectedAt = todayIso();
+      const entries = response.results.map((result) =>
+        mapAgentNewsResultToInboxEntry(result, {
+          runId: response.runId,
+          detectedAt,
+        }),
+      );
+
+      await upsertInboxEntries(ctx.db, entries);
+
+      return {
+        runId: response.runId,
+        elapsedSeconds: response.elapsedSeconds,
+        inserted: entries.length,
+        events: response.events,
+      };
+    }),
+
+  syncFunding: publicProcedure
+    .input(loginSessionSchema)
+    .mutation(async ({ ctx, input }) => {
+      const profile = await getProfileOrThrow(ctx.db, input);
+      const profilePayload = toUserProfile(profile);
+      const response = await runFundingAgent({
+        query: buildFundingQuery(profilePayload),
+        orgProfile: buildOrgProfile(profilePayload),
+        sources: resolveFundingSources(profilePayload.fundingSources),
+        model: "qwen3:8b",
+        maxCandidates: 12,
+      }).catch((error: unknown) => {
+        throw new TRPCError({
+          code: "BAD_GATEWAY",
+          message: error instanceof Error ? error.message : "Agent API failed.",
+        });
+      });
+      const detectedAt = todayIso();
+      const entries = response.results.map((result) =>
+        mapAgentFundingResultToInboxEntry(result, {
+          runId: response.runId,
+          detectedAt,
+        }),
+      );
+
+      await upsertInboxEntries(ctx.db, entries);
+
+      return {
+        runId: response.runId,
+        elapsedSeconds: response.elapsedSeconds,
+        inserted: entries.length,
+        events: response.events,
+      };
+    }),
 
   sendSummaryEmail: publicProcedure
     .input(sendSummaryEmailSchema)
@@ -164,6 +255,58 @@ async function syncMockInboxEntries(db: PrismaClient) {
   await db.$transaction(operations);
 }
 
+async function getProfileOrThrow(
+  db: PrismaClient,
+  input: { org: string; username: string },
+) {
+  const session = normalizeSession(input);
+  const profile = await db.userProfile.findUnique({
+    where: {
+      org_username: {
+        org: session.org,
+        username: session.username,
+      },
+    },
+  });
+
+  if (!profile) {
+    throw new TRPCError({
+      code: "PRECONDITION_FAILED",
+      message: "Complete onboarding before running the agent sync.",
+    });
+  }
+
+  return profile;
+}
+
+async function upsertInboxEntries(db: PrismaClient, entries: InboxEntry[]) {
+  if (entries.length === 0) return;
+
+  await db.$transaction(
+    entries.map((entry) =>
+      db.inboxEntry.upsert({
+        where: { id: entry.id },
+        create: toInboxCreate(entry),
+        update: {
+          ...toInboxUpdateFields(entry, locationForEntry(entry)),
+          phases:
+            entry.category === "funding"
+              ? {
+                  deleteMany: {},
+                  create: (entry.phases ?? []).map((phase, order) => ({
+                    kind: phase.kind,
+                    label: phase.label,
+                    date: toDate(phase.date),
+                    order,
+                  })),
+                }
+              : { deleteMany: {} },
+        },
+      }),
+    ),
+  );
+}
+
 function normalizeSession(input: { org: string; username: string }) {
   return {
     org: input.org,
@@ -172,7 +315,7 @@ function normalizeSession(input: { org: string; username: string }) {
 }
 
 function toInboxCreate(entry: InboxEntry) {
-  const location = sourceLocations[entry.id];
+  const location = locationForEntry(entry);
 
   return {
     id: entry.id,
@@ -193,7 +336,7 @@ function toInboxCreate(entry: InboxEntry) {
 
 function toInboxUpdateFields(
   entry: InboxEntry,
-  location: (typeof sourceLocations)[string] | undefined,
+  location: EntryLocation | undefined,
 ) {
   return {
     priority: entry.priority,
@@ -222,6 +365,16 @@ function toInboxUpdateFields(
   };
 }
 
+type EntryLocation = {
+  name: string;
+  coords: [number, number];
+  countryId?: string;
+};
+
+function locationForEntry(entry: InboxEntry): EntryLocation | undefined {
+  return entry.location ?? sourceLocations[entry.id];
+}
+
 function toInboxEntry(
   entry: PrismaInboxEntry & { phases: FundingPhase[] },
 ): InboxEntry {
@@ -242,6 +395,7 @@ function toInboxEntry(
         ? {
             name: entry.locationName,
             coords: [entry.locationLng, entry.locationLat] as [number, number],
+            countryId: entry.locationCountryId ?? undefined,
           }
         : undefined,
   };
@@ -482,4 +636,8 @@ function toDate(iso: string) {
 function formatDate(date: Date | null) {
   if (!date) return "";
   return date.toISOString().slice(0, 10);
+}
+
+function todayIso() {
+  return new Date().toISOString().slice(0, 10);
 }

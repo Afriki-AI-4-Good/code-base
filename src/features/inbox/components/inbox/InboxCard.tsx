@@ -8,8 +8,9 @@ import type { InboxEntry } from "@/types/inbox";
 import {
   bkLabel,
   categoryLabel,
-  daysUntil,
   formatDate,
+  fundingDaysUntilLabel,
+  fundingDeadlineLabel,
   priorityMeta,
 } from "./priority";
 
@@ -87,10 +88,12 @@ export function InboxCard({
           <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-1 border-t border-border/60">
             <span className="inline-flex items-center gap-1 text-xs font-medium text-foreground">
               <Clock className="h-3 w-3" />
-              Deadline: {formatDate(entry.deadline)}
-              <span className="text-muted-foreground">
-                ({daysUntil(entry.deadline)} days)
-              </span>
+              Deadline: {fundingDeadlineLabel(entry)}
+              {fundingDaysUntilLabel(entry) && (
+                <span className="text-muted-foreground">
+                  {fundingDaysUntilLabel(entry)}
+                </span>
+              )}
             </span>
             <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
               <Banknote className="h-3 w-3" />

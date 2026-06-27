@@ -14,6 +14,7 @@ export interface BaseEntry {
   location?: {
     name: string; // z.B. "Bujumbura, Burundi"
     coords: [number, number]; // [lng, lat]
+    countryId?: string;
   };
   agentMetadata?: AgentMetadata;
 }
@@ -34,6 +35,8 @@ export interface AgentMetadata {
   requiredDocuments?: string[];
   decisionReason?: string;
   monitoringTheme?: string;
+  agentRunId?: number;
+  deadlineLabel?: string;
 }
 
 export interface NewsEntry extends BaseEntry {

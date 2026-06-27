@@ -65,6 +65,16 @@ export function InboxApp() {
       });
     },
   });
+  const syncNews = api.inbox.syncNews.useMutation({
+    onSuccess: async () => {
+      await utils.inbox.list.invalidate();
+    },
+  });
+  const syncFunding = api.inbox.syncFunding.useMutation({
+    onSuccess: async () => {
+      await utils.inbox.list.invalidate();
+    },
+  });
 
   useEffect(() => {
     setSession(loadSession());
@@ -164,7 +174,15 @@ export function InboxApp() {
           {section === "funding" ? (
             <>
               <MapBackdrop entries={filtered} dimmed />
-              <FundingView entries={entries} onSelect={handleSelect} />
+              <FundingView
+                entries={entries}
+                onSelect={handleSelect}
+                onSync={() => {
+                  if (session) syncFunding.mutate(session);
+                }}
+                syncPending={syncFunding.isPending}
+                syncError={syncFunding.error?.message}
+              />
             </>
           ) : section === "news" ? (
             <>
@@ -172,7 +190,15 @@ export function InboxApp() {
                 entries={entries.filter((entry) => entry.category === "news")}
                 dimmed
               />
-              <NewsView entries={entries} onSelect={handleSelect} />
+              <NewsView
+                entries={entries}
+                onSelect={handleSelect}
+                onSync={() => {
+                  if (session) syncNews.mutate(session);
+                }}
+                syncPending={syncNews.isPending}
+                syncError={syncNews.error?.message}
+              />
             </>
           ) : section === "reports" ? (
             <>

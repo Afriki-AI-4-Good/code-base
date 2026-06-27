@@ -119,8 +119,8 @@ export function MapBackdrop({
     }[] = [];
     const cp = new Map<string, InboxEntry["priority"]>();
     for (const e of entries) {
-      const loc = sourceLocations[e.id];
-      if (!loc) continue;
+      const loc = e.location ?? sourceLocations[e.id];
+      if (!loc?.countryId) continue;
       pts.push({ name: loc.name, coords: loc.coords, priority: e.priority });
       const cur = cp.get(loc.countryId);
       if (!cur || PRIORITY_RANK[e.priority] > PRIORITY_RANK[cur]) {

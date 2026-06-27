@@ -12,6 +12,7 @@ export const env = createEnv({
     GMAIL_CLIENT_SECRET: z.string().optional(),
     GMAIL_REFRESH_TOKEN: z.string().optional(),
     GMAIL_SENDER_EMAIL: z.string().email().optional(),
+    AGENT_API_URL: z.string().url().default("http://127.0.0.1:8766"),
     NODE_ENV: z
       .enum(["development", "test", "production"])
       .default("development"),
@@ -36,6 +37,7 @@ export const env = createEnv({
     GMAIL_CLIENT_SECRET: process.env.GMAIL_CLIENT_SECRET,
     GMAIL_REFRESH_TOKEN: process.env.GMAIL_REFRESH_TOKEN,
     GMAIL_SENDER_EMAIL: process.env.GMAIL_SENDER_EMAIL,
+    AGENT_API_URL: process.env.AGENT_API_URL,
     NODE_ENV: process.env.NODE_ENV,
     // NEXT_PUBLIC_CLIENTVAR: process.env.NEXT_PUBLIC_CLIENTVAR,
   },

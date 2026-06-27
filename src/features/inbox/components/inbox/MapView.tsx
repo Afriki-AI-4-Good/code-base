@@ -42,8 +42,8 @@ export function MapView({
     () =>
       entries
         .map((e) => {
-          const loc = sourceLocations[e.id];
-          return loc ? ({ ...e, _loc: loc } as Located) : null;
+          const loc = e.location ?? sourceLocations[e.id];
+          return loc?.countryId ? ({ ...e, _loc: loc } as Located) : null;
         })
         .filter((e): e is Located => e !== null),
     [entries],

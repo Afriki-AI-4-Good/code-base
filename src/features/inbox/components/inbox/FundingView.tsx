@@ -10,6 +10,7 @@ import {
   ListFilter,
   MapPin,
   Megaphone,
+  RefreshCw,
   Rocket,
   Search,
   Target,
@@ -25,7 +26,14 @@ import type {
   InboxEntry,
   Priority,
 } from "@/types/inbox";
-import { bkLabel, daysUntil, formatDate, priorityMeta } from "./priority";
+import {
+  bkLabel,
+  daysUntil,
+  formatDate,
+  fundingDeadlineLabel,
+  hasConcreteFundingDeadline,
+  priorityMeta,
+} from "./priority";
 
 // ---------- Phase configuration ----------
 const phaseStyle: Record<
@@ -103,6 +111,12 @@ function sameDay(a: Date, b: Date) {
   );
 }
 
+function calendarFocusDate(funding: FundingEntry) {
+  return hasConcreteFundingDeadline(funding)
+    ? toDate(funding.deadline)
+    : toDate(funding.date);
+}
+
 // ---------- Component ----------
 type EligibilityFilter = "all" | "yes" | "check" | "no";
 type PriorityFilter = "all" | Priority;
@@ -115,9 +129,15 @@ const priorityRank: Record<Priority, number> = {
 export function FundingView({
   entries,
   onSelect,
+  onSync,
+  syncPending = false,
+  syncError,
 }: {
   entries: InboxEntry[];
   onSelect: (e: InboxEntry) => void;
+  onSync?: () => void;
+  syncPending?: boolean;
+  syncError?: string;
 }) {
   const allFundings = useMemo(
     () =>
@@ -131,6 +151,8 @@ export function FundingView({
         ),
     [entries],
   );
+  const nextFundingWithDeadline =
+    allFundings.find(hasConcreteFundingDeadline) ?? null;
   const [eligibility, setEligibility] = useState<EligibilityFilter>("all");
   const [priority, setPriority] = useState<PriorityFilter>("all");
   const [query, setQuery] = useState("");
@@ -154,7 +176,7 @@ export function FundingView({
   const selected = fundings.find((f) => f.id === selectedId) ?? null;
 
   const [month, setMonth] = useState<Date>(() =>
-    selected ? toDate(selected.deadline) : new Date(),
+    selected ? calendarFocusDate(selected) : new Date(),
   );
 
   const listRef = useRef<HTMLDivElement>(null);
@@ -225,7 +247,7 @@ export function FundingView({
 
   const handleTimelineClick = (f: FundingEntry) => {
     setSelectedId(f.id);
-    setMonth(toDate(f.deadline));
+    setMonth(calendarFocusDate(f));
   };
 
   return (
@@ -245,30 +267,52 @@ export function FundingView({
               steps, deadlines, and eligibility checks.
             </p>
           </div>
-          <div className="grid min-w-[520px] flex-1 gap-2 md:grid-cols-4">
-            <FundingStat label="Calls" value={String(allFundings.length)} />
-            <FundingStat
-              label="BK eligible"
-              value={String(
-                allFundings.filter((funding) => funding.bkEligible === "yes")
-                  .length,
-              )}
-            />
-            <FundingStat
-              label="Urgent"
-              value={String(
-                allFundings.filter((funding) => funding.priority === "urgent")
-                  .length,
-              )}
-            />
-            <FundingStat
-              label="Next deadline"
-              value={
-                allFundings[0] ? `${daysUntil(allFundings[0].deadline)}d` : "-"
-              }
-            />
+          <div className="flex min-w-[520px] flex-1 flex-wrap items-end justify-end gap-2">
+            <div className="grid flex-1 gap-2 md:grid-cols-4">
+              <FundingStat label="Calls" value={String(allFundings.length)} />
+              <FundingStat
+                label="BK eligible"
+                value={String(
+                  allFundings.filter((funding) => funding.bkEligible === "yes")
+                    .length,
+                )}
+              />
+              <FundingStat
+                label="Urgent"
+                value={String(
+                  allFundings.filter((funding) => funding.priority === "urgent")
+                    .length,
+                )}
+              />
+              <FundingStat
+                label="Next deadline"
+                value={
+                  nextFundingWithDeadline
+                    ? `${daysUntil(nextFundingWithDeadline.deadline)}d`
+                    : "-"
+                }
+              />
+            </div>
+            {onSync && (
+              <button
+                type="button"
+                onClick={onSync}
+                disabled={syncPending}
+                className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-primary/30 bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
+              >
+                <RefreshCw
+                  className={cn("h-3.5 w-3.5", syncPending && "animate-spin")}
+                />
+                {syncPending ? "Syncing" : "Sync funding"}
+              </button>
+            )}
           </div>
         </div>
+        {syncError && (
+          <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            {syncError}
+          </div>
+        )}
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <div className="relative min-w-64 flex-1">
@@ -329,7 +373,11 @@ export function FundingView({
               mode="single"
               month={month}
               onMonthChange={setMonth}
-              selected={selected ? toDate(selected.deadline) : undefined}
+              selected={
+                selected && hasConcreteFundingDeadline(selected)
+                  ? toDate(selected.deadline)
+                  : undefined
+              }
               onDayClick={handleDayClick}
               showOutsideDays
               modifiers={{
@@ -436,7 +484,9 @@ export function FundingView({
             <div className="flex flex-col gap-5">
               {fundings.map((f) => {
                 const isSelected = selectedId === f.id;
-                const days = daysUntil(f.deadline);
+                const deadlineDays = hasConcreteFundingDeadline(f)
+                  ? daysUntil(f.deadline)
+                  : null;
                 const meta = priorityMeta[f.priority];
                 const phases = getPhases(f);
                 const firstPhase = phases[0];
@@ -497,15 +547,15 @@ export function FundingView({
                             {meta.label}
                           </span>
                           <span>·</span>
-                          <span>Deadline {formatDate(f.deadline)}</span>
-                          {days >= 0 && (
+                          <span>Deadline {fundingDeadlineLabel(f)}</span>
+                          {deadlineDays !== null && deadlineDays >= 0 && (
                             <span
                               className={cn(
                                 "font-medium",
-                                days <= 14 ? "text-rose-600" : "",
+                                deadlineDays <= 14 ? "text-rose-600" : "",
                               )}
                             >
-                              · in {days}d
+                              · in {deadlineDays}d
                             </span>
                           )}
                           <span

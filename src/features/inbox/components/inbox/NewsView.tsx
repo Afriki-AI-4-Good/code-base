@@ -4,6 +4,7 @@ import {
   Globe2,
   Newspaper,
   Radio,
+  RefreshCw,
   Search,
   Sparkles,
   X,
@@ -25,7 +26,7 @@ type CountryKey = string; // countryId or "global"
 type PriorityFilter = "all" | Priority;
 
 function countryKeyOf(e: InboxEntry): CountryKey {
-  const loc = sourceLocations[e.id];
+  const loc = e.location ?? sourceLocations[e.id];
   return loc?.countryId ?? "global";
 }
 
@@ -36,9 +37,15 @@ function countryDisplay(key: CountryKey) {
 export function NewsView({
   entries,
   onSelect,
+  onSync,
+  syncPending = false,
+  syncError,
 }: {
   entries: InboxEntry[];
   onSelect: (e: InboxEntry) => void;
+  onSync?: () => void;
+  syncPending?: boolean;
+  syncError?: string;
 }) {
   const news = useMemo(
     () =>
@@ -119,20 +126,40 @@ export function NewsView({
               and future agent extraction fields.
             </p>
           </div>
-          <div className="grid min-w-[420px] gap-2 sm:grid-cols-3">
-            <NewsStat label="Articles" value={String(news.length)} />
-            <NewsStat
-              label="Sources"
-              value={String(new Set(news.map((item) => item.source)).size)}
-            />
-            <NewsStat
-              label="Relevant"
-              value={String(
-                news.filter((item) => item.priority === "relevant").length,
-              )}
-            />
+          <div className="flex min-w-[420px] flex-wrap items-end justify-end gap-2">
+            <div className="grid flex-1 gap-2 sm:grid-cols-3">
+              <NewsStat label="Articles" value={String(news.length)} />
+              <NewsStat
+                label="Sources"
+                value={String(new Set(news.map((item) => item.source)).size)}
+              />
+              <NewsStat
+                label="Relevant"
+                value={String(
+                  news.filter((item) => item.priority === "relevant").length,
+                )}
+              />
+            </div>
+            {onSync && (
+              <button
+                type="button"
+                onClick={onSync}
+                disabled={syncPending}
+                className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-primary/30 bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
+              >
+                <RefreshCw
+                  className={cn("h-3.5 w-3.5", syncPending && "animate-spin")}
+                />
+                {syncPending ? "Syncing" : "Sync news"}
+              </button>
+            )}
           </div>
         </div>
+        {syncError && (
+          <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+            {syncError}
+          </div>
+        )}
       </div>
 
       {/* Unified filter bar — three rows, identical pill grammar */}
