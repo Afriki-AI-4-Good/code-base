@@ -1,25 +1,16 @@
 import {
   AlertTriangle,
-  AlignLeft,
   ArrowLeft,
   ArrowRight,
   Bell,
-  BookOpen,
   Briefcase,
-  CalendarDays,
   Check,
-  ChevronDown,
-  ChevronUp,
   Coins,
   Euro,
   FileText,
   Flame,
   Globe2,
-  GripVertical,
   HandHeart,
-  Image as ImageIcon,
-  Languages,
-  Link as LinkIcon,
   Mail,
   MapPin,
   Newspaper,
@@ -45,7 +36,6 @@ import {
   type LoginSession,
   type OnboardingExtras,
   type OrgId,
-  type OutputFieldKey,
   type UserProfile,
 } from "@/lib/profile";
 import { cn } from "@/lib/utils";
@@ -86,13 +76,7 @@ const TOPIC_PRESETS = [
   "Climate",
 ];
 
-type StepId =
-  | "focus"
-  | "sources"
-  | "taxonomy"
-  | "fundingFit"
-  | "triage"
-  | "output";
+type StepId = "focus" | "sources" | "taxonomy" | "fundingFit" | "triage";
 
 const STEP_META: Record<
   StepId,
@@ -127,27 +111,10 @@ const STEP_META: Record<
     sub: "Urgency labels and escalation keywords",
     icon: <AlertTriangle className="h-4 w-4" />,
   },
-  output: {
-    label: "Output layout",
-    sub: "Fields, language, and summary style",
-    icon: <FileText className="h-4 w-4" />,
-  },
 };
 
-const BK_STEPS: StepId[] = [
-  "focus",
-  "sources",
-  "fundingFit",
-  "triage",
-  "output",
-];
-const WTG_STEPS: StepId[] = [
-  "focus",
-  "taxonomy",
-  "sources",
-  "triage",
-  "output",
-];
+const BK_STEPS: StepId[] = ["focus", "sources", "fundingFit", "triage"];
+const WTG_STEPS: StepId[] = ["focus", "taxonomy", "sources", "triage"];
 
 const WTG_KEYWORD_PRESETS = DEFAULT_EXTRAS.wtgKeywords;
 const WTG_CATEGORY_PRESETS = DEFAULT_EXTRAS.wtgNewsCategories;
@@ -308,12 +275,6 @@ export function OnboardingDialog({
             <UrgencyStep
               value={extras.urgency}
               onChange={(v) => update("urgency", v)}
-            />
-          )}
-          {step.id === "output" && (
-            <FormatStep
-              value={extras.outputFormat}
-              onChange={(v) => update("outputFormat", v)}
             />
           )}
         </div>
@@ -776,208 +737,6 @@ function WtgCategoriesStep({
           !categories.includes(category) && onChange([...categories, category])
         }
       />
-    </div>
-  );
-}
-
-// ---------- Layout / Output step (reorderable) ----------
-
-const FIELD_META: Record<
-  OutputFieldKey,
-  { label: string; desc: string; icon: React.ReactNode }
-> = {
-  summary: {
-    label: "Summary",
-    desc: "AI summary of the item",
-    icon: <AlignLeft className="h-4 w-4" />,
-  },
-  translation: {
-    label: "Translation",
-    desc: "Translated body",
-    icon: <Languages className="h-4 w-4" />,
-  },
-  original: {
-    label: "Original",
-    desc: "Original-language excerpt",
-    icon: <BookOpen className="h-4 w-4" />,
-  },
-  source: {
-    label: "Source",
-    desc: "Publisher or sender",
-    icon: <Globe2 className="h-4 w-4" />,
-  },
-  date: {
-    label: "Date",
-    desc: "Publication / received date",
-    icon: <CalendarDays className="h-4 w-4" />,
-  },
-  url: {
-    label: "URL",
-    desc: "Link to the original source",
-    icon: <LinkIcon className="h-4 w-4" />,
-  },
-  tags: {
-    label: "Tags",
-    desc: "Topics, regions, categories",
-    icon: <Tag className="h-4 w-4" />,
-  },
-  image: {
-    label: "Image",
-    desc: "Cover image when available",
-    icon: <ImageIcon className="h-4 w-4" />,
-  },
-};
-
-function FormatStep({
-  value,
-  onChange,
-}: {
-  value: OnboardingExtras["outputFormat"];
-  onChange: (v: OnboardingExtras["outputFormat"]) => void;
-}) {
-  const set = <K extends keyof OnboardingExtras["outputFormat"]>(
-    k: K,
-    v: OnboardingExtras["outputFormat"][K],
-  ) => onChange({ ...value, [k]: v });
-
-  const move = (idx: number, dir: -1 | 1) => {
-    const next = [...value.fields];
-    const j = idx + dir;
-    if (j < 0 || j >= next.length) return;
-    const current = next[idx];
-    const target = next[j];
-    if (!current || !target) return;
-    next[idx] = target;
-    next[j] = current;
-    set("fields", next);
-  };
-  const toggleField = (idx: number) => {
-    const next = value.fields.map((f, i) =>
-      i === idx ? { ...f, enabled: !f.enabled } : f,
-    );
-    set("fields", next);
-  };
-
-  return (
-    <div className="space-y-6">
-      <section className="space-y-3">
-        <SectionHeader
-          icon={<FileText className="h-4 w-4" />}
-          title="Information layout"
-          hint="Drag-style reorder & toggle which fields appear per item. Order = display order."
-        />
-        <div className="rounded-xl border border-border bg-white divide-y divide-border overflow-hidden">
-          {value.fields.map((f, idx) => {
-            const meta = FIELD_META[f.key];
-            return (
-              <div
-                key={f.key}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 transition-colors",
-                  f.enabled ? "bg-white" : "bg-muted/40",
-                )}
-              >
-                <div className="flex flex-col">
-                  <button
-                    type="button"
-                    onClick={() => move(idx, -1)}
-                    disabled={idx === 0}
-                    className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  >
-                    <ChevronUp className="h-3.5 w-3.5" />
-                  </button>
-                  <button
-                    type="button"
-                    onClick={() => move(idx, 1)}
-                    disabled={idx === value.fields.length - 1}
-                    className="h-4 w-4 flex items-center justify-center text-muted-foreground hover:text-foreground disabled:opacity-30"
-                  >
-                    <ChevronDown className="h-3.5 w-3.5" />
-                  </button>
-                </div>
-                <GripVertical className="h-4 w-4 text-muted-foreground/50" />
-                <div
-                  className={cn(
-                    "flex h-8 w-8 items-center justify-center rounded-lg",
-                    f.enabled
-                      ? "bg-primary/10 text-primary"
-                      : "bg-muted text-muted-foreground",
-                  )}
-                >
-                  {meta.icon}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div
-                    className={cn(
-                      "text-sm font-medium",
-                      !f.enabled && "text-muted-foreground line-through",
-                    )}
-                  >
-                    {meta.label}
-                  </div>
-                  <div className="text-[11px] text-muted-foreground truncate">
-                    {meta.desc}
-                  </div>
-                </div>
-                <div className="text-[10px] font-mono text-muted-foreground tabular-nums w-5 text-right">
-                  {idx + 1}
-                </div>
-                <button
-                  type="button"
-                  onClick={() => toggleField(idx)}
-                  className={cn(
-                    "relative h-5 w-9 rounded-full transition-colors",
-                    f.enabled ? "bg-primary" : "bg-muted",
-                  )}
-                  aria-label={f.enabled ? "Disable" : "Enable"}
-                >
-                  <span
-                    className={cn(
-                      "absolute top-0.5 h-4 w-4 rounded-full bg-white shadow transition-all",
-                      f.enabled ? "left-[18px]" : "left-0.5",
-                    )}
-                  />
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      </section>
-
-      <section className="grid grid-cols-2 gap-4">
-        <Field label="Style">
-          <SegGroup
-            value={value.style}
-            onChange={(v) => set("style", v as typeof value.style)}
-            options={[
-              { v: "bullets", label: "Bullets" },
-              { v: "narrative", label: "Narrative" },
-              { v: "executive", label: "Exec" },
-            ]}
-          />
-        </Field>
-        <Field label="Length per item">
-          <SegGroup
-            value={value.length}
-            onChange={(v) => set("length", v as typeof value.length)}
-            options={[
-              { v: "short", label: "1 line" },
-              { v: "medium", label: "2–3 lines" },
-              { v: "long", label: "Detailed" },
-            ]}
-          />
-        </Field>
-        <Field label="Translate to">
-          <SegGroup
-            value={value.translateTo}
-            onChange={(v) => set("translateTo", v as typeof value.translateTo)}
-            options={[
-              { v: "en", label: "English" },
-              { v: "de", label: "Deutsch" },
-            ]}
-          />
-        </Field>
-      </section>
     </div>
   );
 }
