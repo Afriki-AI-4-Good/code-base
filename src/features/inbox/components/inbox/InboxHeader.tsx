@@ -1,9 +1,9 @@
-import { LayoutGrid, List, Map as MapIcon } from "lucide-react";
+import { List, Map as MapIcon } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { cn } from "@/lib/utils";
 import type { Category } from "@/types/inbox";
 
-export type ViewMode = "kanban" | "list" | "map";
+export type ViewMode = "list" | "map";
 
 export type CategoryFilter = "all" | Category;
 
@@ -55,9 +55,6 @@ export function InboxHeader({
 
           <Tabs value={view} onValueChange={(v) => onViewChange(v as ViewMode)}>
             <TabsList className="h-8">
-              <TabsTrigger value="kanban" className="text-xs px-2.5 gap-1">
-                <LayoutGrid className="h-3.5 w-3.5" /> Kanban
-              </TabsTrigger>
               <TabsTrigger value="list" className="text-xs px-2.5 gap-1">
                 <List className="h-3.5 w-3.5" /> List
               </TabsTrigger>

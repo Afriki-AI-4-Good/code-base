@@ -3,7 +3,6 @@ import {
   ArrowLeft,
   ArrowRight,
   Bell,
-  Briefcase,
   Check,
   Coins,
   Euro,
@@ -27,8 +26,6 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import {
   DEFAULT_EXTRAS,
-  DEPARTMENTS,
-  type DepartmentId,
   EMPTY_ONBOARDING_EXTRAS,
   getDefaultDepartment,
   getDepartment,
@@ -76,7 +73,7 @@ const TOPIC_PRESETS = [
   "Climate",
 ];
 
-type StepId = "focus" | "sources" | "taxonomy" | "fundingFit" | "triage";
+type StepId = "sources" | "taxonomy" | "fundingFit" | "triage";
 
 const STEP_META: Record<
   StepId,
@@ -86,11 +83,6 @@ const STEP_META: Record<
     icon: React.ReactNode;
   }
 > = {
-  focus: {
-    label: "Workspace focus",
-    sub: "Team role and monitoring goal",
-    icon: <Briefcase className="h-4 w-4" />,
-  },
   sources: {
     label: "Inputs",
     sub: "News sources and email intake",
@@ -113,8 +105,8 @@ const STEP_META: Record<
   },
 };
 
-const BK_STEPS: StepId[] = ["focus", "sources", "fundingFit", "triage"];
-const WTG_STEPS: StepId[] = ["focus", "taxonomy", "sources", "triage"];
+const BK_STEPS: StepId[] = ["sources", "fundingFit", "triage"];
+const WTG_STEPS: StepId[] = ["taxonomy", "sources", "triage"];
 
 const WTG_KEYWORD_PRESETS = DEFAULT_EXTRAS.wtgKeywords;
 const WTG_CATEGORY_PRESETS = DEFAULT_EXTRAS.wtgNewsCategories;
@@ -148,9 +140,6 @@ export function OnboardingDialog({
 }) {
   const steps = useMemo(() => getSteps(session.org), [session.org]);
   const [stepIdx, setStepIdx] = useState(0);
-  const [dept, setDept] = useState<DepartmentId>(
-    initial?.department ?? getDefaultDepartment(session.org),
-  );
   const [extras, setExtras] = useState<OnboardingExtras>(() =>
     createInitialExtras(session.org, initial),
   );
@@ -162,7 +151,6 @@ export function OnboardingDialog({
   useEffect(() => {
     if (!open) return;
     setStepIdx(0);
-    setDept(initial?.department ?? getDefaultDepartment(session.org));
     setExtras(createInitialExtras(session.org, initial));
   }, [open, session.org, initial]);
 
@@ -175,11 +163,13 @@ export function OnboardingDialog({
     if (saving) return;
 
     if (isLast) {
+      const department =
+        initial?.department ?? getDefaultDepartment(session.org);
       onComplete({
         username: session.username,
         org: session.org,
-        department: dept,
-        prompt: getDepartment(dept).defaultPrompt,
+        department,
+        prompt: getDepartment(department).defaultPrompt,
         ...extras,
       });
     } else {
@@ -244,13 +234,6 @@ export function OnboardingDialog({
 
         {/* Body */}
         <div className="px-7 py-6 min-h-[360px] max-h-[62vh] overflow-y-auto">
-          {step.id === "focus" && (
-            <FocusStep
-              orgName={org.name}
-              department={dept}
-              onChange={setDept}
-            />
-          )}
           {step.id === "sources" && (
             <NewsStep
               sources={extras.newsSources}
@@ -405,91 +388,6 @@ function getCategoryHint(org: OrgId) {
 }
 
 // ---------- Steps ----------
-
-function FocusStep({
-  orgName,
-  department,
-  onChange,
-}: {
-  orgName: string;
-  department: DepartmentId;
-  onChange: (department: DepartmentId) => void;
-}) {
-  const selected = getDepartment(department);
-
-  return (
-    <div className="space-y-5">
-      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
-        <div className="flex items-start gap-3">
-          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-primary shadow-sm ring-1 ring-primary/15">
-            <Briefcase className="h-4 w-4" />
-          </div>
-          <div className="min-w-0">
-            <div className="text-sm font-semibold">
-              What should {orgName} optimize this inbox for?
-            </div>
-            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
-              This choice sets the default AI briefing style. It also makes the
-              later categories easier to interpret: funding teams need fit and
-              deadlines, communications teams need story angles, and management
-              needs decision-ready signals.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      <div className="grid gap-3 sm:grid-cols-2">
-        {DEPARTMENTS.map((item) => {
-          const isSelected = item.id === department;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => onChange(item.id)}
-              className={cn(
-                "flex min-h-[132px] flex-col rounded-xl border bg-white p-4 text-left transition-all",
-                isSelected
-                  ? "border-primary shadow-sm ring-2 ring-primary/15"
-                  : "border-border hover:border-primary/40 hover:shadow-sm",
-              )}
-            >
-              <div className="flex items-start justify-between gap-3">
-                <div>
-                  <div className="text-sm font-semibold leading-snug">
-                    {item.shortName}
-                  </div>
-                  <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
-                    {item.description}
-                  </div>
-                </div>
-                <span
-                  className={cn(
-                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
-                    isSelected
-                      ? "border-primary bg-primary text-primary-foreground"
-                      : "border-border bg-muted/40",
-                  )}
-                >
-                  {isSelected && <Check className="h-3 w-3" />}
-                </span>
-              </div>
-              <div className="mt-auto pt-4 text-[11px] font-medium leading-relaxed text-foreground">
-                {item.focus}
-              </div>
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="rounded-xl border border-border bg-muted/30 p-4">
-        <div className="text-xs font-semibold">Current briefing lens</div>
-        <div className="mt-1 text-sm text-muted-foreground">
-          {selected.name}
-        </div>
-      </div>
-    </div>
-  );
-}
 
 function TaxonomyStep({
   org,
@@ -654,7 +552,7 @@ function NewsStep({
         <SectionHeader
           icon={<Mail className="h-4 w-4" />}
           title="Email connection"
-          hint="Include relevant inbox emails in your brief."
+          hint="Include relevant incoming emails and reports in this workspace."
         />
         <div className="flex gap-2">
           <Input
@@ -870,7 +768,7 @@ function CriteriaStep({
 
       <section className="space-y-3">
         <SectionHeader
-          icon={<Briefcase className="h-4 w-4" />}
+          icon={<Tag className="h-4 w-4" />}
           title="Topics of interest"
         />
         <ChipList

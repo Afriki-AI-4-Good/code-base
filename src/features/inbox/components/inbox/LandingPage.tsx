@@ -3,9 +3,7 @@
 import {
   ArrowRight,
   CheckCircle2,
-  Clock3,
   Globe2,
-  Inbox,
   Landmark,
   Languages,
   MailCheck,
@@ -23,21 +21,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
   return (
     <div className="min-h-screen bg-[oklch(0.982_0.006_140)] text-foreground">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
-        <button
-          type="button"
-          onClick={onLogin}
-          className="flex items-center text-left"
-          aria-label="Open organization login"
-        >
-          <Image
-            src="/brand/afriki-logo.svg"
-            alt="Afriki logo"
-            width={128}
-            height={49}
-            priority
-            className="h-10 w-auto"
-          />
-        </button>
+        <div aria-hidden="true" />
         <Button
           type="button"
           onClick={onLogin}
@@ -52,27 +36,17 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
         <section className="relative mx-auto grid min-h-[calc(100svh-72px)] w-full max-w-7xl items-center gap-10 overflow-hidden px-5 pb-16 pt-6 sm:px-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(430px,0.85fr)]">
           <div className="relative z-10 max-w-[680px]">
             <div className="mb-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[oklch(0.44_0.045_150)]">
-              An intelligent inbox for small NGOs
+              Agentic AI intelligence for NGOs
             </div>
-            <h1 className="max-w-4xl text-balance text-[clamp(3.3rem,10vw,8.5rem)] font-black leading-[0.86] tracking-tight text-[oklch(0.22_0.012_260)]">
-              afriki
-              <span className="ml-2 inline-block h-[0.14em] w-[0.14em] rounded-full bg-[oklch(0.68_0.045_145)] align-baseline" />
-            </h1>
+            <AfrikiWordmark />
             <p className="mt-7 max-w-3xl text-balance text-2xl font-medium leading-snug text-[oklch(0.34_0.012_260)] sm:text-3xl">
-              Turning the daily flood of African news and funding calls into a{" "}
+              Afriki monitors scattered sources, retrieves what matters,
+              translates foreign-language content, and turns it into a{" "}
               <span className="font-black text-[oklch(0.25_0.05_145)]">
                 triaged inbox
               </span>{" "}
-              for small NGOs.
+              for NGOs.
             </p>
-            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium text-muted-foreground">
-              <PriorityDot color="bg-[oklch(0.72_0.085_28)]" label="Urgent" />
-              <PriorityDot color="bg-[oklch(0.79_0.085_78)]" label="Relevant" />
-              <PriorityDot
-                color="bg-[oklch(0.68_0.045_145)]"
-                label="Information"
-              />
-            </div>
 
             <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button
@@ -85,13 +59,17 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
               </Button>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
                 <ShieldCheck className="h-4 w-4 text-[oklch(0.48_0.065_145)]" />
-                Built around real BK and WTG workflows
+                Built for transparent monitoring across many sources
               </div>
             </div>
           </div>
 
           <div className="relative z-0 hidden min-w-0 lg:block">
-            <ProductMockup />
+            <FeatureScreenshot
+              src="/landing/inbox-map.png"
+              alt="Afriki inbox map view screenshot"
+              priority
+            />
           </div>
 
           <div className="absolute bottom-0 left-5 right-5 h-px bg-[oklch(0.84_0.018_120)] sm:left-8 sm:right-8" />
@@ -107,8 +85,9 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
                 Real partners, real operating pressure.
               </h2>
               <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
-                Afriki brings social AI, field experience, and two NGO use cases
-                into one calm workspace.
+                Afriki brings agentic AI, field experience, and two NGO use
+                cases into one workspace for monitoring, translation, and
+                decision-ready review.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
@@ -130,10 +109,11 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
-                What Afriki does
+                The problem
               </div>
               <h2 className="mt-2 max-w-2xl text-3xl font-black tracking-tight">
-                From scattered raw sources to a clean, role-aware inbox.
+                NGO teams should not spend hours searching, copying, and
+                translating updates by hand.
               </h2>
             </div>
             <Button
@@ -179,18 +159,25 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[0.9fr_1.1fr]">
             <div>
               <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/55">
-                The moat
+                Agentic funding intelligence
               </div>
               <h2 className="mt-3 max-w-xl text-4xl font-black tracking-tight">
-                Funding intelligence: never miss a grant again.
+                Never miss a relevant grant because someone had to check one
+                more portal manually.
               </h2>
               <p className="mt-4 max-w-lg text-sm leading-7 text-white/70">
-                Every funding call is separated from reports, translated,
-                checked against the NGO profile, and shown with deadline,
-                amount, funder, and eligibility before the first review.
+                Afriki keeps funding separate from reports, translates calls,
+                checks fit against the NGO profile, and surfaces deadline,
+                amount, funder, eligibility, and next steps before the first
+                review.
               </p>
             </div>
-            <FundingCard />
+            <FeatureScreenshot
+              src="/landing/funding-view.png"
+              alt="Afriki funding page screenshot"
+              priority
+              variant="dark"
+            />
           </div>
         </section>
 
@@ -247,25 +234,46 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
   );
 }
 
+function AfrikiWordmark() {
+  const content = (
+    <>
+      <span>afriki</span>
+      <span
+        className="inline-block h-[0.14em] w-[0.14em] translate-y-[0.015em] rounded-full bg-[oklch(0.68_0.045_145)]"
+        aria-hidden="true"
+      />
+    </>
+  );
+
+  return (
+    <h1
+      aria-label="afriki"
+      className="inline-flex max-w-4xl items-baseline gap-[0.045em] text-[clamp(3.3rem,10vw,8.5rem)] font-black leading-[0.86] tracking-[-0.045em] text-[oklch(0.22_0.012_260)]"
+    >
+      {content}
+    </h1>
+  );
+}
+
 const PIPELINE = [
   {
-    title: "Aggregate",
-    body: "RSS, newsletters, funding databases, Google Alerts, and mailbox reports pulled into one place.",
+    title: "Monitor",
+    body: "Agentic source monitoring watches RSS feeds, newsletters, alerts, databases, and mailboxes across many domains.",
     icon: Globe2,
   },
   {
-    title: "Classify",
-    body: "Priority and organization-specific categories tagged on every item.",
+    title: "Retrieve",
+    body: "Keyword searches and source hits become traceable items, so teams can see what was found and where it came from.",
     icon: CheckCircle2,
   },
   {
     title: "Translate",
-    body: "Summary in the team's language, with the original preserved for review.",
+    body: "Foreign-language content is translated into the team's working language, with the original preserved for review.",
     icon: Languages,
   },
   {
-    title: "Flag funding",
-    body: "Deadlines, amounts, funders, and eligibility surfaced up front.",
+    title: "Triage",
+    body: "Urgency, category, deadline, amount, funder, and eligibility are surfaced before anyone opens the source.",
     icon: Landmark,
   },
 ];
@@ -302,183 +310,37 @@ const REFERENCES = [
 
 type PartnerOrg = (typeof ORGS)[number];
 
-function ProductMockup() {
-  return (
-    <div className="rounded-2xl border border-[oklch(0.86_0.018_120)] bg-white p-4 shadow-2xl">
-      <div className="grid min-h-[460px] gap-4 lg:grid-cols-[0.78fr_1.2fr_0.86fr]">
-        <div className="rounded-lg border border-[oklch(0.88_0.014_120)] bg-[oklch(0.98_0.006_140)] p-4">
-          <div className="mb-5 flex items-center gap-2 text-sm font-black">
-            <Inbox className="h-4 w-4 text-[oklch(0.42_0.055_145)]" />
-            Inbox
-          </div>
-          {["All", "Today", "Funding"].map((item, index) => (
-            <div
-              key={item}
-              className={cn(
-                "mb-2 rounded-lg px-3 py-2 text-xs font-semibold",
-                index === 0
-                  ? "bg-[oklch(0.28_0.035_150)] text-white"
-                  : "bg-white text-muted-foreground",
-              )}
-            >
-              {item}
-            </div>
-          ))}
-        </div>
-
-        <div className="space-y-3">
-          <MockItem
-            priority="Urgent"
-            category="Funding"
-            title="BMZ Call: Education Projects in Sub-Saharan Africa 2026"
-            meta="Jul 15 · 17d · EUR 200k-1.5M"
-            tone="urgent"
-          />
-          <MockItem
-            priority="Urgent"
-            category="Report"
-            title="Quarterly Report Q2 2026 - Bujumbura School"
-            meta="French · translated summary ready"
-            tone="urgent"
-          />
-          <MockItem
-            priority="Relevant"
-            category="News"
-            title="Burundi unveils new education strategy"
-            meta="Source clustered with policy updates"
-            tone="relevant"
-          />
-        </div>
-
-        <div className="rounded-lg border border-[oklch(0.88_0.014_120)] bg-[oklch(0.985_0.006_140)] p-4">
-          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
-            Your brief
-          </div>
-          <div className="mt-2 text-lg font-black leading-tight">
-            5 items for you, 2 urgent.
-          </div>
-          <div className="mt-5 space-y-3 text-xs leading-5 text-muted-foreground">
-            <BriefLine text="BMZ education call - deadline 15 Jul" />
-            <BriefLine text="Bujumbura School Q2 report" />
-            <BriefLine text="New national education strategy" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-function FundingCard() {
-  return (
-    <article className="rounded-xl border border-white/10 bg-white p-5 text-foreground shadow-2xl">
-      <div className="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em]">
-        <span className="rounded bg-[oklch(0.95_0.035_28)] px-2 py-1 text-[oklch(0.45_0.1_28)]">
-          Urgent
-        </span>
-        <span className="rounded bg-[oklch(0.96_0.02_145)] px-2 py-1 text-[oklch(0.35_0.055_145)]">
-          Funding
-        </span>
-        <span className="text-muted-foreground">Translated from German</span>
-      </div>
-      <h3 className="mt-4 text-2xl font-black tracking-tight">
-        BMZ Call for Proposals: Education Projects in Sub-Saharan Africa 2026
-      </h3>
-      <div className="mt-5 grid gap-3 sm:grid-cols-3">
-        <FundingFact label="Amount" value="EUR 200k - 1.5M" />
-        <FundingFact label="Funder" value="BMZ" />
-        <FundingFact label="BK eligibility" value="Yes" />
-      </div>
-      <div className="mt-5 rounded-lg border border-[oklch(0.86_0.018_120)] bg-[oklch(0.982_0.006_140)] p-4">
-        <div className="flex items-center justify-between gap-4">
-          {["Open", "Info", "Deadline", "Decision"].map((step, index) => (
-            <div key={step} className="flex flex-1 items-center gap-2">
-              <span
-                className={cn(
-                  "h-2.5 w-2.5 shrink-0 rounded-full",
-                  index < 3
-                    ? "bg-[oklch(0.68_0.045_145)]"
-                    : "bg-[oklch(0.86_0.018_120)]",
-                )}
-              />
-              <span className="truncate text-xs font-semibold text-muted-foreground">
-                {step}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="mt-4 flex items-center gap-3">
-          <Clock3 className="h-5 w-5 text-[oklch(0.72_0.085_28)]" />
-          <div>
-            <div className="text-xl font-black">17 days</div>
-            <div className="text-xs text-muted-foreground">
-              to the submission deadline · 15 Jul 2026
-            </div>
-          </div>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function PriorityDot({ color, label }: { color: string; label: string }) {
-  return (
-    <span className="inline-flex items-center gap-2">
-      <span className={cn("h-2.5 w-2.5 rounded-full", color)} />
-      {label}
-    </span>
-  );
-}
-
-function MockItem({
-  priority,
-  category,
-  title,
-  meta,
-  tone,
+function FeatureScreenshot({
+  src,
+  alt,
+  priority = false,
+  variant = "light",
 }: {
-  priority: string;
-  category: string;
-  title: string;
-  meta: string;
-  tone: "urgent" | "relevant";
+  src: string;
+  alt: string;
+  priority?: boolean;
+  variant?: "light" | "dark";
 }) {
   return (
-    <article className="rounded-lg border border-[oklch(0.88_0.014_120)] bg-white p-4 shadow-sm">
-      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em]">
-        <span
-          className={cn(
-            "h-2 w-2 rounded-full",
-            tone === "urgent"
-              ? "bg-[oklch(0.72_0.085_28)]"
-              : "bg-[oklch(0.79_0.085_78)]",
-          )}
+    <figure
+      className={cn(
+        "overflow-hidden rounded-lg border shadow-2xl",
+        variant === "dark"
+          ? "border-white/15 bg-white/8"
+          : "border-[oklch(0.86_0.018_120)] bg-white",
+      )}
+    >
+      <div className="relative aspect-[16/10] w-full">
+        <Image
+          src={src}
+          alt={alt}
+          fill
+          sizes="(min-width: 1024px) 48vw, 100vw"
+          priority={priority}
+          className="object-cover object-top"
         />
-        <span>{priority}</span>
-        <span className="text-muted-foreground">{category}</span>
       </div>
-      <h3 className="mt-3 text-sm font-black leading-snug">{title}</h3>
-      <div className="mt-2 text-xs text-muted-foreground">{meta}</div>
-    </article>
-  );
-}
-
-function BriefLine({ text }: { text: string }) {
-  return (
-    <div className="flex items-start gap-2">
-      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[oklch(0.5_0.07_145)]" />
-      <span>{text}</span>
-    </div>
-  );
-}
-
-function FundingFact({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="rounded-lg border border-[oklch(0.88_0.014_120)] bg-[oklch(0.99_0.003_140)] p-3">
-      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
-        {label}
-      </div>
-      <div className="mt-1 text-sm font-black">{value}</div>
-    </div>
+    </figure>
   );
 }
 

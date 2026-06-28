@@ -1,4 +1,4 @@
-import { ArrowUpRight, LayoutGrid, List, Map as MapIcon } from "lucide-react";
+import { ArrowUpRight, List, Map as MapIcon } from "lucide-react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ComposableMap,
@@ -13,7 +13,7 @@ import { cn } from "@/lib/utils";
 import type { InboxEntry } from "@/types/inbox";
 import { categoryLabel, formatDate, priorityMeta } from "./priority";
 
-export type MapViewMode = "kanban" | "list" | "map";
+export type MapViewMode = "list" | "map";
 
 // Africa-centered world map. We zoom + center on Africa so European sources
 // (Germany, Switzerland) still appear at the top edge.
@@ -112,9 +112,8 @@ export function MapView({
   const viewTabs: {
     id: MapViewMode;
     label: string;
-    icon: typeof LayoutGrid;
+    icon: typeof List;
   }[] = [
-    { id: "kanban", label: "Kanban", icon: LayoutGrid },
     { id: "list", label: "List", icon: List },
     { id: "map", label: "Map", icon: MapIcon },
   ];

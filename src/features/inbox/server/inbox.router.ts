@@ -13,7 +13,6 @@ import type { AgentMetadata, InboxEntry } from "@/types/inbox";
 import {
   agentSettingsSchema,
   loginSessionSchema,
-  sendSummaryEmailSchema,
   userProfileSchema,
 } from "~/features/inbox/schema";
 import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
@@ -38,7 +37,6 @@ import {
   resolveFundingSources,
   resolveNewsSources,
 } from "./agent-sources";
-import { hasGmailConfiguration, sendSummaryToGmail } from "./gmail";
 
 export const inboxRouter = createTRPCRouter({
   organizations: publicProcedure.query(() => ORGS),
@@ -316,56 +314,6 @@ export const inboxRouter = createTRPCRouter({
         inserted: entries.length,
         events: response.events,
       };
-    }),
-
-  sendSummaryEmail: publicProcedure
-    .input(sendSummaryEmailSchema)
-    .mutation(async ({ ctx, input }) => {
-      const session = normalizeSession(input.session);
-
-      const profile = await ctx.db.userProfile.findUnique({
-        where: {
-          org_username: {
-            org: session.org,
-            username: session.username,
-          },
-        },
-      });
-
-      if (!profile?.emailConnected || !profile.emailAddress) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "Connect your Gmail address in onboarding first.",
-        });
-      }
-
-      if (profile.emailAddress !== input.recipientEmail) {
-        throw new TRPCError({
-          code: "BAD_REQUEST",
-          message: "Recipient email must match the connected Gmail address.",
-        });
-      }
-
-      if (!hasGmailConfiguration()) {
-        throw new TRPCError({
-          code: "PRECONDITION_FAILED",
-          message: "Gmail API credentials are missing on the server.",
-        });
-      }
-
-      try {
-        await sendSummaryToGmail({
-          recipientEmail: input.recipientEmail,
-          brief: input.brief,
-        });
-
-        return { success: true };
-      } catch {
-        throw new TRPCError({
-          code: "INTERNAL_SERVER_ERROR",
-          message: "Failed to send summary email via Gmail API.",
-        });
-      }
     }),
 });
 
@@ -1153,11 +1101,11 @@ function mockNewsMetadata(entry: Extract<InboxEntry, { category: "news" }>) {
         : "Burundi context monitoring",
     suggestedUse:
       entry.priority === "relevant"
-        ? "Add to the weekly context brief."
+        ? "Add to the weekly context update."
         : "Keep as background information.",
     recommendedAction:
       entry.priority === "urgent"
-        ? "Review today and decide whether to brief leadership."
+        ? "Review today and decide whether to escalate internally."
         : "Summarize for the next team digest.",
     keyFacts: splitSummary(entry.summary).slice(0, 3),
     regionTags: entry.location?.name ? [entry.location.name] : ["Great Lakes"],

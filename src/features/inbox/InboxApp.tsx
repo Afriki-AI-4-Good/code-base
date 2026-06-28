@@ -6,7 +6,6 @@ import { AgentView } from "@/components/inbox/AgentView";
 import { CardDetailSheet } from "@/components/inbox/CardDetailSheet";
 import { FundingView } from "@/components/inbox/FundingView";
 import type { CategoryFilter, ViewMode } from "@/components/inbox/InboxHeader";
-import { KanbanView } from "@/components/inbox/KanbanView";
 import { LandingPage } from "@/components/inbox/LandingPage";
 import { ListView } from "@/components/inbox/ListView";
 import { LoginScreen } from "@/components/inbox/LoginScreen";
@@ -253,12 +252,7 @@ export function InboxApp() {
                   </div>
                 </div>
                 <div className="flex-1 overflow-y-auto p-6">
-                  {view === "kanban" && (
-                    <KanbanView entries={filtered} onSelect={handleSelect} />
-                  )}
-                  {view === "list" && (
-                    <ListView entries={filtered} onSelect={handleSelect} />
-                  )}
+                  <ListView entries={filtered} onSelect={handleSelect} />
                 </div>
               </div>
             </>

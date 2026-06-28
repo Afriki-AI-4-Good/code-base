@@ -45,7 +45,7 @@ export interface OnboardingExtras {
   emailConnected: boolean;
   emailAddress?: string;
   outputFormat: {
-    style: "bullets" | "narrative" | "executive";
+    style: "bullets" | "narrative";
     length: "short" | "medium" | "long";
     translateTo: "en" | "de";
     includeOriginal: boolean;
@@ -239,12 +239,12 @@ export const DEPARTMENTS: Department[] = [
   },
   {
     id: "management",
-    name: "Management / Executive Board",
-    shortName: "Executive Board",
+    name: "Management",
+    shortName: "Management",
     description: "Strategic overview across all streams",
     focus: "High-priority items across funding, ops, and external news",
     defaultPrompt:
-      "You are my executive briefing co-pilot. Give me a concise strategic overview across funding, operations, and external news. Highlight risks, opportunities, and items needing board-level decisions. Keep each item to 1–2 sentences.",
+      "You are my management co-pilot. Surface high-priority funding, operations, and external news signals. Highlight risks, opportunities, and items needing a decision this week.",
   },
 ];
 

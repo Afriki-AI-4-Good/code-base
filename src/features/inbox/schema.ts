@@ -14,19 +14,6 @@ const outputFieldSchema = z.object({
   enabled: z.boolean(),
 });
 
-const briefItemSchema = z.object({
-  entryId: z.string().min(1),
-  title: z.string().min(1),
-  reason: z.string().min(1),
-  priority: z.enum(["urgent", "relevant", "information"]),
-});
-
-const briefSchema = z.object({
-  headline: z.string().min(1),
-  subline: z.string().min(1),
-  items: z.array(briefItemSchema),
-});
-
 const orgSchema = z.enum(["bk", "wtg", "new_cause"]);
 const usernameSchema = z.string().trim().min(1).max(128);
 const agentFocusAreaSchema = z.enum(["news", "funding", "reports"]);
@@ -59,7 +46,7 @@ export const userProfileSchema = z.object({
   emailAddress: z.string().optional(),
   outputFormat: z
     .object({
-      style: z.enum(["bullets", "narrative", "executive"]),
+      style: z.enum(["bullets", "narrative"]),
       length: z.enum(["short", "medium", "long"]),
       translateTo: z.enum(["en", "de"]),
       includeOriginal: z.boolean(),
@@ -88,13 +75,6 @@ export const userProfileSchema = z.object({
   wtgNewsCategories: z.array(z.string()).optional(),
 });
 
-export const sendSummaryEmailSchema = z.object({
-  session: loginSessionSchema,
-  recipientEmail: z.string().email(),
-  brief: briefSchema,
-});
-
 export type LoginSessionInput = z.infer<typeof loginSessionSchema>;
 export type UserProfileInput = z.infer<typeof userProfileSchema>;
-export type SummaryBriefInput = z.infer<typeof briefSchema>;
 export type AgentSettingsInput = z.infer<typeof agentSettingsSchema>;

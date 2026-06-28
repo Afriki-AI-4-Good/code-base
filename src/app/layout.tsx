@@ -16,7 +16,7 @@ import { TRPCReactProvider } from "~/trpc/react";
 export const metadata: Metadata = {
   title: "Afriki",
   description:
-    "An intelligent inbox for African news, funding calls, reports, and small NGO workflows.",
+    "An agentic AI solution for NGO monitoring, retrieval, translation, funding calls, reports, and workflows.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 

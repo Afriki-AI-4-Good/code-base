@@ -1,6 +1,6 @@
-<svg width="168" height="72" viewBox="0 0 168 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+<svg width="190" height="72" viewBox="0 0 190 72" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
   <title id="title">Afriki</title>
   <desc id="desc">Lowercase Afriki wordmark with a muted green dot.</desc>
-  <text x="2" y="55" fill="#1D2028" font-family="Inter, Arial, Helvetica, sans-serif" font-size="66" font-weight="900" letter-spacing="-5.6">afriki</text>
-  <circle cx="151" cy="48" r="8.5" fill="#91AA95"/>
+  <text x="2" y="55" fill="#1D2028" font-family="Inter, Arial, Helvetica, sans-serif" font-size="66" font-weight="900" letter-spacing="-3">afriki</text>
+  <circle cx="172" cy="48" r="8.5" fill="#91AA95"/>
 </svg>

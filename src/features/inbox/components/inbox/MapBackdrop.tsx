@@ -1,4 +1,4 @@
-import { LayoutGrid, List, Map as MapIcon } from "lucide-react";
+import { List, Map as MapIcon } from "lucide-react";
 import { useMemo } from "react";
 import {
   ComposableMap,
@@ -30,8 +30,7 @@ export function ViewTabs({
   view: ViewMode;
   onViewChange: (v: ViewMode) => void;
 }) {
-  const tabs: { id: ViewMode; label: string; icon: typeof LayoutGrid }[] = [
-    { id: "kanban", label: "Kanban", icon: LayoutGrid },
+  const tabs: { id: ViewMode; label: string; icon: typeof List }[] = [
     { id: "list", label: "List", icon: List },
     { id: "map", label: "Map", icon: MapIcon },
   ];
