@@ -6,6 +6,18 @@ const imageEcwBurundi =
   "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80";
 const imageClimateEducation =
   "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1200&q=80";
+const imageWaterAccess =
+  "https://images.unsplash.com/photo-1541844053589-346841d0b34c?auto=format&fit=crop&w=1200&q=80";
+const imageAgricultureResilience =
+  "https://images.unsplash.com/photo-1542601906990-b4d3fb778b09?auto=format&fit=crop&w=1200&q=80";
+const imageFloodResponse =
+  "https://images.unsplash.com/photo-1527482797697-8795b05a13fe?auto=format&fit=crop&w=1200&q=80";
+const imageEconomyMarkets =
+  "https://images.unsplash.com/photo-1526304640581-d334cdbbf45e?auto=format&fit=crop&w=1200&q=80";
+const imageHealthResponse =
+  "https://images.unsplash.com/photo-1584515933487-779824d29309?auto=format&fit=crop&w=1200&q=80";
+const imageDisplacementSupport =
+  "https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1200&q=80";
 const imagePuppyTrade =
   "https://www.tierschutzbund.de/fileadmin/_processed_/7/c/csm_Golden_Retriever_Welpen_Transportbox_Tierheim_Welpenhandel_c_Armin_Lerch_dcb050605f.jpg";
 const imageAnimalProtection =
@@ -413,6 +425,729 @@ export const mockInbox: InboxEntry[] = [
         "UNICEF estimate cited by AP: 242 million affected children in 85 countries.",
         "Climate hazards include heatwaves, cyclones, and flooding.",
       ],
+    },
+  },
+  {
+    id: "13",
+    priority: "relevant",
+    category: "news",
+    title: 'UNICEF Burundi: World Water Day 2024 "Water for Peace"',
+    date: "2024-03-22",
+    source: "UNICEF Burundi",
+    summary:
+      "UNICEF Burundi marked World Water Day 2024 under the theme 'Water for Peace', emphasizing that water is a human right and calling for increased budget allocations to drinking water, hygiene, and sanitation as part of Burundi's Vision 2040/2060.",
+    imageUrl: imageWaterAccess,
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.unicef.org/burundi/press-releases/world-water-day-2024-under-theme-water-peace",
+      confidence: 0.95,
+      monitoringTheme: "WASH financing, peacebuilding, and child health",
+      suggestedUse:
+        "Use as a WASH-sector signal for education, school sanitation, and community resilience planning.",
+      keyFacts: [
+        "Theme: Water for Peace.",
+        "UNICEF Burundi links WASH budget allocations to access, hygiene, sanitation, and peace between communities.",
+      ],
+    },
+  },
+  {
+    id: "14",
+    priority: "relevant",
+    category: "funding",
+    title:
+      "AfDB: Additional US$8.6M grant for rural water and climate resilience",
+    date: "2025-10-22",
+    source: "African Development Bank",
+    summary:
+      "The African Development Fund approved an additional US$8.6 million grant through its Climate Action Window to support the first phase of Burundi's Water Sector and Climate Resilience Building Support Programme (PASEREC). The grant supplements earlier Bank financing for the programme.",
+    deadline: "2025-10-22",
+    amountRange: "US$8.6 million additional grant",
+    topics: ["Water Supply", "Climate Resilience", "Rural Communities"],
+    funder: "African Development Fund / African Development Bank",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Public-sector programme financing; relevant for local implementation, WASH partnerships, and climate-resilience monitoring.",
+    },
+    bkEligible: "check",
+    phases: [
+      { kind: "open", label: "Additional grant approved", date: "2025-10-22" },
+      {
+        kind: "kickoff",
+        label: "PASEREC Phase 1 extension",
+        date: "2026-01-01",
+      },
+      {
+        kind: "decision",
+        label: "Implementation monitoring",
+        date: "2026-12-31",
+      },
+    ],
+    location: {
+      name: "Rural Burundi",
+      coords: [29.9189, -3.3731],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.afdb.org/en/news-and-events/press-releases/african-development-fund-approves-additional-86-million-grant-clean-water-supply-and-climate-change-resilience-rural-burundi-88031",
+      deadlineLabel: "Grant approval",
+      confidence: 0.94,
+      fitScore: 72,
+      impactAreas: ["WASH", "climate resilience", "rural services"],
+      recommendedAction:
+        "Monitor procurement and local implementation windows connected to PASEREC activities.",
+    },
+  },
+  {
+    id: "15",
+    priority: "information",
+    category: "report",
+    title: "World Bank Macro Poverty Outlook: Burundi April 2026",
+    translatedFrom: "English",
+    date: "2026-04-01",
+    source: "World Bank Macro Poverty Outlook",
+    summary:
+      "The April 2026 Macro Poverty Outlook reports that Burundi's real GDP grew by 4.0% in 2025, while inflation nearly doubled amid supply constraints and fuel shortages. The poverty rate remains high at 74%, reflecting inflation pressure and limited job creation.",
+    originalLanguage: "English",
+    sender: "World Bank Macro Poverty Outlook",
+    originalText:
+      "Real GDP grew by 4.0 percent in 2025, driven by agriculture, services, and public spending. The poverty rate remains high at 74 percent due to inflation and limited job creation.",
+    location: {
+      name: "Washington DC, USA (World Bank)",
+      coords: [-77.0369, 38.9072],
+      countryId: "840",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://thedocs.worldbank.org/en/doc/bae48ff2fefc5a869546775b3f010735-0500062021/related/mpo-bdi.pdf",
+      confidence: 0.93,
+      monitoringTheme:
+        "Macroeconomic risk, poverty, inflation, and livelihoods",
+      suggestedUse:
+        "Use as context for board briefings and for explaining household vulnerability in proposals.",
+      keyFacts: [
+        "Real GDP growth: 4.0% in 2025.",
+        "Poverty rate remains high at 74%.",
+      ],
+    },
+  },
+  {
+    id: "16",
+    priority: "relevant",
+    category: "news",
+    title:
+      "GCA partners with AfDB on US$148M agricultural resilience investment",
+    date: "2024-10-04",
+    source: "Global Center on Adaptation",
+    summary:
+      "The Global Center on Adaptation announced support to the African Development Bank's Burundi-Rwanda Integrated Development Program, a US$148 million initiative focused on strengthening agricultural resilience in Burundi and Rwanda through climate-smart practices and technical assistance.",
+    imageUrl: imageAgricultureResilience,
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://gca.org/news/gca-partners-with-afdb-for-148-million-investment-to-boost-agricultural-resilience-in-burundi/",
+      confidence: 0.91,
+      monitoringTheme: "Climate-smart agriculture and resilience investment",
+      suggestedUse:
+        "Track for livelihood, food-security, and school-feeding context in Burundi-related proposals.",
+      keyFacts: [
+        "Investment scale: US$148 million.",
+        "Focus: agricultural resilience and climate-smart practices.",
+      ],
+    },
+  },
+  {
+    id: "17",
+    priority: "information",
+    category: "report",
+    title: "UNEP GRID: Burundi water country fiche",
+    translatedFrom: "English",
+    date: "2026-01-01",
+    source: "UNEP GRID-Geneva",
+    summary:
+      "UNEP GRID's Burundi water fiche describes Lake Tanganyika as one of the world's largest freshwater reserves, with around 20,000 km3 of water. It notes that approximately 8% of the lake lies within Burundi and that the lake is central to fisheries and water-resource monitoring.",
+    originalLanguage: "English",
+    sender: "UNEP GRID-Geneva",
+    originalText:
+      "Lake Tanganyika is one of the largest lakes and freshwater reserves in the world, containing around 20,000 km3 of water. Approximately 8% of Lake Tanganyika is within Burundi's national boundaries.",
+    location: {
+      name: "Lake Tanganyika, Burundi",
+      coords: [29.25, -3.75],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://dicf.unepgrid.ch/burundi/water",
+      confidence: 0.88,
+      monitoringTheme: "Water resources, fisheries, and Lake Tanganyika",
+      suggestedUse:
+        "Useful background for WASH, fisheries, climate resilience, and lakeshore community risk analysis.",
+      keyFacts: [
+        "Lake Tanganyika contains around 20,000 km3 of water.",
+        "About 8% of Lake Tanganyika is within Burundi's national boundaries.",
+      ],
+    },
+  },
+  {
+    id: "18",
+    priority: "urgent",
+    category: "report",
+    title: "UNICEF Burundi Flash Update: Burundian returnees from Rwanda",
+    translatedFrom: "English",
+    date: "2026-05-31",
+    source: "UNICEF Humanitarian Action for Children",
+    summary:
+      "UNICEF's 2026 situation-report stream includes flash updates on Burundian returnees from Rwanda. The updates are relevant for education, child protection, WASH, and family reunification monitoring when returnee movements put pressure on local services.",
+    originalLanguage: "English",
+    sender: "UNICEF Burundi Humanitarian Action for Children",
+    originalText:
+      "Flash updates on Burundian returnees from Rwanda are listed in UNICEF's Burundi situation-report archive for 2026.",
+    location: {
+      name: "Kirundo, Burundi",
+      coords: [30.096, -2.584],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://www.unicef.org/appeals/burundi/situation-reports",
+      confidence: 0.9,
+      monitoringTheme: "Returnees, child protection, education continuity",
+      recommendedAction:
+        "Keep in urgent queue for returnee-response tracking and school-capacity monitoring in northern provinces.",
+      keyFacts: [
+        "UNICEF's 2026 archive lists flash updates on Burundian returnees from Rwanda.",
+        "Likely programme relevance: education, child protection, WASH, and family support.",
+      ],
+    },
+  },
+  {
+    id: "19",
+    priority: "relevant",
+    category: "news",
+    title:
+      "UNICEF Burundi: 2026 situation reports continue flood response watch",
+    date: "2026-04-30",
+    source: "UNICEF Humanitarian Action for Children",
+    summary:
+      "UNICEF's 2026 Burundi situation-report archive continues regular monitoring of humanitarian response needs, including children affected by floods, displacement, health risks, and education disruption.",
+    imageUrl: imageFloodResponse,
+    location: {
+      name: "Gatumba, Burundi",
+      coords: [29.26, -3.31],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://www.unicef.org/appeals/burundi/situation-reports",
+      confidence: 0.9,
+      monitoringTheme:
+        "Flood response and child-focused humanitarian monitoring",
+      suggestedUse:
+        "Use as a live-monitoring card for the 2026 humanitarian response stream.",
+      keyFacts: [
+        "UNICEF maintains a 2026 Burundi situation-report archive.",
+        "Relevant to floods, displacement, health risks, and education continuity.",
+      ],
+    },
+  },
+  {
+    id: "20",
+    priority: "relevant",
+    category: "report",
+    title: "World Bank Macro Poverty Outlook: Burundi 2026 update",
+    translatedFrom: "English",
+    date: "2026-04-01",
+    source: "World Bank Macro Poverty Outlook",
+    summary:
+      "The April 2026 World Bank Macro Poverty Outlook reports continued macroeconomic pressure in Burundi, including high poverty, inflation pressure, and external-sector constraints. It is useful background for funding proposals that need to explain household vulnerability.",
+    originalLanguage: "English",
+    sender: "World Bank",
+    originalText:
+      "The April 2026 Macro Poverty Outlook for Burundi discusses growth, inflation, fiscal and external pressures, and poverty trends.",
+    location: {
+      name: "Washington DC, USA (World Bank)",
+      coords: [-77.0369, 38.9072],
+      countryId: "840",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://thedocs.worldbank.org/en/doc/bae48ff2fefc5a869546775b3f010735-0500062021/related/mpo-bdi.pdf",
+      confidence: 0.92,
+      monitoringTheme:
+        "Macroeconomic pressure, poverty, and household vulnerability",
+      suggestedUse:
+        "Use for board briefings and proposal context on poverty, inflation, and service affordability.",
+      keyFacts: [
+        "Source is the World Bank Macro Poverty Outlook April 2026 edition.",
+        "Focus: growth, inflation, poverty, fiscal and external-sector constraints.",
+      ],
+    },
+  },
+  {
+    id: "21",
+    priority: "information",
+    category: "news",
+    title: "World Bank: Burundi economic outlook tracks poverty and inflation",
+    date: "2026-04-01",
+    source: "World Bank",
+    summary:
+      "The 2026 World Bank Macro Poverty Outlook for Burundi is a useful monitoring signal for NGOs because inflation, poverty, and limited job creation affect household capacity to keep children in school and pay for basic services.",
+    imageUrl: imageEconomyMarkets,
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://thedocs.worldbank.org/en/doc/bae48ff2fefc5a869546775b3f010735-0500062021/related/mpo-bdi.pdf",
+      confidence: 0.88,
+      monitoringTheme: "Poverty and education affordability",
+      suggestedUse:
+        "Use as socioeconomic context for education access and child-protection fundraising narratives.",
+      keyFacts: [
+        "Macro Poverty Outlook is a World Bank country-monitoring product.",
+        "Relevant for education proposals because household poverty affects retention and attendance.",
+      ],
+    },
+  },
+  {
+    id: "22",
+    priority: "urgent",
+    category: "report",
+    title: "WHO AFRO: cholera and acute watery diarrhoea regional watch",
+    translatedFrom: "English",
+    date: "2026-03-31",
+    source: "WHO Regional Office for Africa",
+    summary:
+      "WHO AFRO's regional emergency reporting continues to monitor cholera and acute watery diarrhoea risks across affected African countries. For Burundi-linked work, this is relevant to school WASH, lakeshore communities, and cross-border health-risk monitoring.",
+    originalLanguage: "English",
+    sender: "WHO Regional Office for Africa",
+    originalText:
+      "Regional emergency updates monitor cholera and acute watery diarrhoea risks, response measures, and affected countries in the African region.",
+    location: {
+      name: "Brazzaville, WHO Africa",
+      coords: [15.2832, -4.2634],
+      countryId: "178",
+    },
+    agentMetadata: {
+      sourceUrl: "https://www.afro.who.int/health-topics/cholera",
+      confidence: 0.86,
+      monitoringTheme: "Cholera risk, WASH, health response",
+      recommendedAction:
+        "Flag for school WASH and water-quality coordination when lakeshore or displacement stories appear.",
+      keyFacts: [
+        "WHO AFRO maintains regional cholera information and response updates.",
+        "Relevance: WASH, schools, cross-border health-risk monitoring.",
+      ],
+    },
+  },
+  {
+    id: "23",
+    priority: "information",
+    category: "news",
+    title: "WHO Africa cholera monitoring remains relevant for school WASH",
+    date: "2026-03-31",
+    source: "WHO Africa",
+    summary:
+      "WHO Africa's cholera monitoring provides regional context for waterborne-disease risk. For Burundi-focused education and child-health work, the signal is most useful when paired with school sanitation and flood-displacement reports.",
+    imageUrl: imageHealthResponse,
+    location: {
+      name: "Lake Tanganyika region",
+      coords: [29.25, -3.75],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://www.afro.who.int/health-topics/cholera",
+      confidence: 0.84,
+      monitoringTheme: "Waterborne disease and school sanitation",
+      suggestedUse:
+        "Keep as background context for emergency education and WASH proposal sections.",
+      keyFacts: [
+        "Cholera risk is closely linked with water, sanitation, and hygiene conditions.",
+        "School WASH can be framed as both education-continuity and health protection.",
+      ],
+    },
+  },
+  {
+    id: "24",
+    priority: "relevant",
+    category: "funding",
+    title:
+      "World Bank Burundi human capital programme: 2026 implementation watch",
+    date: "2026-01-15",
+    source: "World Bank",
+    summary:
+      "The World Bank-financed human-capital programme announced in 2024 remains relevant in 2026 as implementation continues across education, health, and nutrition services. NGOs should watch implementation and procurement signals connected to basic education and vulnerable learners.",
+    deadline: "2026-12-31",
+    amountRange: "US$227.6 million programme envelope",
+    topics: ["Basic Education", "Nutrition", "Health", "Vulnerable Learners"],
+    funder: "World Bank IDA / GPE trust fund",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Implementation-watch item, not a direct open call. Useful for procurement and partner-mapping monitoring.",
+    },
+    bkEligible: "check",
+    phases: [
+      { kind: "open", label: "Implementation monitoring", date: "2026-01-15" },
+      { kind: "info", label: "Partner/procurement watch", date: "2026-06-30" },
+      {
+        kind: "deadline",
+        label: "Annual review checkpoint",
+        date: "2026-12-31",
+      },
+    ],
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.worldbank.org/en/news/press-release/2024/07/30/a-three-in-one-project-to-foster-human-capital-development-in-burundi-afe",
+      deadlineLabel: "2026 implementation watch",
+      confidence: 0.9,
+      fitScore: 70,
+      recommendedAction:
+        "Monitor World Bank procurement and implementation updates for education-service delivery opportunities.",
+    },
+  },
+  {
+    id: "25",
+    priority: "relevant",
+    category: "report",
+    title: "BTI 2026 Country Report: Burundi",
+    translatedFrom: "English",
+    date: "2026-03-01",
+    source: "Bertelsmann Transformation Index",
+    summary:
+      "The BTI 2026 country report provides political, economic, and governance context for Burundi. It is useful for risk notes, donor due diligence, governance assumptions, and board-level strategic monitoring.",
+    originalLanguage: "English",
+    sender: "Bertelsmann Stiftung",
+    originalText:
+      "BTI country reports assess political transformation, economic transformation, and governance performance across countries, including Burundi.",
+    location: {
+      name: "Gütersloh, Germany",
+      coords: [8.383, 51.906],
+      countryId: "276",
+    },
+    agentMetadata: {
+      sourceUrl: "https://bti-project.org/en/reports/country-report/BDI",
+      confidence: 0.87,
+      monitoringTheme: "Governance, political risk, and donor due diligence",
+      suggestedUse:
+        "Use as background in high-level risk sections rather than as a direct programme signal.",
+    },
+  },
+  {
+    id: "26",
+    priority: "information",
+    category: "news",
+    title: "IOM Burundi 2026 crisis planning tracks displacement drivers",
+    date: "2026-01-01",
+    source: "IOM Crisis Response",
+    summary:
+      "IOM's Burundi crisis response planning for 2024-2026 remains a 2026 reference for flood displacement, lake-level rise, erratic rainfall, and mobility trends that affect children, schools, and local service access.",
+    imageUrl: imageDisplacementSupport,
+    location: {
+      name: "Lake Tanganyika, Burundi",
+      coords: [29.25, -3.75],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://crisisresponse.iom.int/response/burundi-crisis-response-plan-2024-2026",
+      confidence: 0.89,
+      monitoringTheme: "Displacement, mobility, floods, and school access",
+      suggestedUse:
+        "Use as context for emergency education, WASH, and lakeshore-community risk notes.",
+      keyFacts: [
+        "Crisis plan covers 2024-2026.",
+        "Drivers include floods, erratic rainfall, lake-level rise, and hydric stress.",
+      ],
+    },
+  },
+  {
+    id: "27",
+    priority: "information",
+    category: "funding",
+    title: "AfDB PASEREC water programme: 2026 implementation monitoring",
+    date: "2026-01-01",
+    source: "African Development Bank",
+    summary:
+      "Following the African Development Fund's additional grant for PASEREC, 2026 monitoring should focus on rural water supply, climate resilience, and implementation opportunities that may touch schools or child-focused community infrastructure.",
+    deadline: "2026-12-31",
+    amountRange: "US$8.6 million additional grant within PASEREC",
+    topics: ["WASH", "Rural Water", "Climate Resilience"],
+    funder: "African Development Fund / African Development Bank",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Monitoring item for public-sector programme implementation and related local partner opportunities.",
+    },
+    bkEligible: "check",
+    phases: [
+      {
+        kind: "open",
+        label: "2026 implementation monitoring",
+        date: "2026-01-01",
+      },
+      { kind: "info", label: "Local procurement watch", date: "2026-06-30" },
+      {
+        kind: "deadline",
+        label: "Annual monitoring checkpoint",
+        date: "2026-12-31",
+      },
+    ],
+    location: {
+      name: "Rural Burundi",
+      coords: [29.9189, -3.3731],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.afdb.org/en/news-and-events/press-releases/african-development-fund-approves-additional-86-million-grant-clean-water-supply-and-climate-change-resilience-rural-burundi-88031",
+      deadlineLabel: "2026 implementation watch",
+      confidence: 0.9,
+      fitScore: 68,
+      recommendedAction:
+        "Track procurement notices and local implementation partners connected to rural water and resilience activities.",
+    },
+  },
+  {
+    id: "28",
+    priority: "relevant",
+    category: "funding",
+    title: "ECW Burundi MYRP: 2026 partner and continuation watch",
+    date: "2026-02-01",
+    source: "Education Cannot Wait",
+    summary:
+      "Education Cannot Wait's Burundi Multi-Year Resilience Programme remains relevant in 2026 as a reference for education-in-emergencies partnerships, vulnerable learners, returnee communities, and climate-disaster affected schools.",
+    deadline: "2026-11-30",
+    amountRange:
+      "US$12 million seed grant; US$30 million full programme target",
+    topics: ["Education in Emergencies", "Returnees", "Child Protection"],
+    funder: "Education Cannot Wait",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Continuation-watch item for partner mapping and follow-on funding signals, not a direct open call.",
+    },
+    bkEligible: "check",
+    phases: [
+      { kind: "open", label: "2026 partner watch", date: "2026-02-01" },
+      { kind: "info", label: "Consortium review", date: "2026-06-30" },
+      { kind: "deadline", label: "Follow-on funding scan", date: "2026-11-30" },
+    ],
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.educationcannotwait.org/news-stories/press-releases/education-cannot-wait-announces-us12-million-catalytic-grant-multi-year",
+      deadlineLabel: "2026 continuation watch",
+      confidence: 0.89,
+      fitScore: 76,
+      recommendedAction:
+        "Track ECW, UNICEF, and World Vision updates for follow-on education-in-emergencies partnership windows.",
+    },
+  },
+  {
+    id: "29",
+    priority: "urgent",
+    category: "funding",
+    title: "UNICEF Burundi HAC 2026: education and WASH funding gap watch",
+    date: "2026-06-01",
+    source: "UNICEF Humanitarian Action for Children",
+    summary:
+      "UNICEF's 2026 Burundi humanitarian reporting and appeal pages are useful for monitoring child-focused funding gaps across education, WASH, health, nutrition, and child protection during flood, returnee, and refugee-response operations.",
+    deadline: "2026-07-31",
+    amountRange: "Appeal and sector funding requirements vary by HAC update",
+    topics: ["Education", "WASH", "Child Protection", "Humanitarian Response"],
+    funder: "UNICEF Humanitarian Action for Children",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Funding-gap monitoring item; relevant for co-financing, in-kind support, and response alignment.",
+    },
+    bkEligible: "check",
+    phases: [
+      { kind: "open", label: "Mid-year HAC review", date: "2026-06-01" },
+      { kind: "deadline", label: "Urgent gap scan", date: "2026-07-31" },
+      {
+        kind: "decision",
+        label: "Response reprioritization",
+        date: "2026-09-30",
+      },
+    ],
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://www.unicef.org/appeals/burundi",
+      deadlineLabel: "Urgent 2026 funding-gap scan",
+      confidence: 0.87,
+      fitScore: 74,
+      recommendedAction:
+        "Review HAC sector gaps and identify where school supplies, WASH, or emergency education support can align.",
+    },
+  },
+  {
+    id: "30",
+    priority: "relevant",
+    category: "funding",
+    title:
+      "IOM Burundi Crisis Response Plan 2026: displacement support pipeline",
+    date: "2026-01-15",
+    source: "IOM Crisis Response",
+    summary:
+      "IOM's Burundi Crisis Response Plan for 2024-2026 provides a 2026 funding and response framework for displacement, mobility, flood impacts, returnees, and cross-border crisis response.",
+    deadline: "2026-12-31",
+    amountRange: "Response-plan funding requirements listed by IOM",
+    topics: ["Displacement", "Returnees", "Shelter", "WASH"],
+    funder: "International Organization for Migration",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Response-plan monitoring item for partnerships and complementary support around displaced families and host communities.",
+    },
+    bkEligible: "check",
+    phases: [
+      {
+        kind: "open",
+        label: "2026 response-plan monitoring",
+        date: "2026-01-15",
+      },
+      { kind: "info", label: "Mid-year response review", date: "2026-06-30" },
+      { kind: "deadline", label: "Annual plan checkpoint", date: "2026-12-31" },
+    ],
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://crisisresponse.iom.int/response/burundi-crisis-response-plan-2024-2026",
+      deadlineLabel: "2026 response-plan window",
+      confidence: 0.9,
+      fitScore: 62,
+      recommendedAction:
+        "Track displacement-response funding needs that intersect with education access, WASH, and family support.",
+    },
+  },
+  {
+    id: "31",
+    priority: "information",
+    category: "funding",
+    title: "UNEP Lake Tanganyika water monitoring: 2026 evidence pipeline",
+    date: "2026-01-01",
+    source: "UNEP GRID-Geneva",
+    summary:
+      "UNEP GRID's Burundi water fiche is not a grant call, but it supports 2026 evidence-building for WASH, Lake Tanganyika, fisheries, and climate-resilience proposals that need credible water-resource context.",
+    deadline: "2026-10-31",
+    amountRange: "Evidence source for WASH and climate proposals",
+    topics: ["Water Resources", "Lake Tanganyika", "WASH", "Climate"],
+    funder: "Evidence source / proposal pipeline",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Use as proposal evidence and programme design context rather than direct funding.",
+    },
+    bkEligible: "check",
+    phases: [
+      { kind: "open", label: "Evidence review", date: "2026-01-01" },
+      { kind: "info", label: "Proposal evidence pack", date: "2026-05-31" },
+      {
+        kind: "deadline",
+        label: "Use in 2026 grant pipeline",
+        date: "2026-10-31",
+      },
+    ],
+    location: {
+      name: "Lake Tanganyika, Burundi",
+      coords: [29.25, -3.75],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://dicf.unepgrid.ch/burundi/water",
+      deadlineLabel: "2026 evidence-pipeline checkpoint",
+      confidence: 0.86,
+      fitScore: 58,
+      recommendedAction:
+        "Attach to WASH and climate-resilience concept notes as background evidence.",
+    },
+  },
+  {
+    id: "32",
+    priority: "relevant",
+    category: "funding",
+    title: "GCA-AfDB Burundi resilience investment: 2026 implementation scan",
+    date: "2026-03-15",
+    source: "Global Center on Adaptation",
+    summary:
+      "The Global Center on Adaptation's partnership with AfDB on a US$148 million Burundi-Rwanda agricultural resilience investment remains useful in 2026 for tracking livelihood, food-security, climate adaptation, and school-feeding-adjacent opportunities.",
+    deadline: "2026-09-30",
+    amountRange: "US$148 million regional investment",
+    topics: [
+      "Agriculture",
+      "Climate Adaptation",
+      "Food Security",
+      "Livelihoods",
+    ],
+    funder: "African Development Bank / Global Center on Adaptation",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Implementation-scan item for climate adaptation and livelihood partnership opportunities.",
+    },
+    bkEligible: "check",
+    phases: [
+      { kind: "open", label: "2026 implementation scan", date: "2026-03-15" },
+      { kind: "info", label: "Partner opportunity review", date: "2026-06-30" },
+      { kind: "deadline", label: "Pipeline decision", date: "2026-09-30" },
+    ],
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://gca.org/news/gca-partners-with-afdb-for-148-million-investment-to-boost-agricultural-resilience-in-burundi/",
+      deadlineLabel: "2026 implementation scan",
+      confidence: 0.88,
+      fitScore: 66,
+      recommendedAction:
+        "Monitor adaptation implementation partners and school-feeding or youth-livelihood intersections.",
     },
   },
 ];
