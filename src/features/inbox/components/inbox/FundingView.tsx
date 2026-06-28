@@ -10,7 +10,6 @@ import {
   ListFilter,
   MapPin,
   Megaphone,
-  RefreshCw,
   Rocket,
   Search,
   Target,
@@ -129,15 +128,9 @@ const priorityRank: Record<Priority, number> = {
 export function FundingView({
   entries,
   onSelect,
-  onSync,
-  syncPending = false,
-  syncError,
 }: {
   entries: InboxEntry[];
   onSelect: (e: InboxEntry) => void;
-  onSync?: () => void;
-  syncPending?: boolean;
-  syncError?: string;
 }) {
   const allFundings = useMemo(
     () =>
@@ -270,51 +263,31 @@ export function FundingView({
               steps, deadlines, and eligibility checks.
             </p>
           </div>
-          <div className="flex min-w-[520px] flex-1 flex-wrap items-end justify-end gap-2">
-            <div className="grid flex-1 gap-2 md:grid-cols-4">
-              <FundingStat label="Calls" value={String(allFundings.length)} />
-              <FundingStat
-                label="BK eligible"
-                value={String(
-                  allFundings.filter((funding) => funding.bkEligible === "yes")
-                    .length,
-                )}
-                tone="positive"
-              />
-              <FundingStat
-                label="Urgent"
-                value={String(
-                  allFundings.filter((funding) => funding.priority === "urgent")
-                    .length,
-                )}
-                tone="urgent"
-              />
-              <FundingStat
-                label="Next deadline"
-                value={nextDeadlineDays === null ? "-" : `${nextDeadlineDays}d`}
-                tone={getDeadlineTone(nextDeadlineDays)}
-              />
-            </div>
-            {onSync && (
-              <button
-                type="button"
-                onClick={onSync}
-                disabled={syncPending}
-                className="inline-flex h-10 shrink-0 items-center gap-2 rounded-lg border border-primary/30 bg-primary px-3 text-xs font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary/90 disabled:cursor-wait disabled:opacity-70"
-              >
-                <RefreshCw
-                  className={cn("h-3.5 w-3.5", syncPending && "animate-spin")}
-                />
-                {syncPending ? "Syncing" : "Sync funding"}
-              </button>
-            )}
+          <div className="grid min-w-[520px] flex-1 gap-2 md:grid-cols-4">
+            <FundingStat label="Calls" value={String(allFundings.length)} />
+            <FundingStat
+              label="BK eligible"
+              value={String(
+                allFundings.filter((funding) => funding.bkEligible === "yes")
+                  .length,
+              )}
+              tone="positive"
+            />
+            <FundingStat
+              label="Urgent"
+              value={String(
+                allFundings.filter((funding) => funding.priority === "urgent")
+                  .length,
+              )}
+              tone="urgent"
+            />
+            <FundingStat
+              label="Next deadline"
+              value={nextDeadlineDays === null ? "-" : `${nextDeadlineDays}d`}
+              tone={getDeadlineTone(nextDeadlineDays)}
+            />
           </div>
         </div>
-        {syncError && (
-          <div className="mt-3 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-            {syncError}
-          </div>
-        )}
 
         <div className="mt-4 flex flex-wrap items-center gap-2">
           <div className="relative min-w-64 flex-1">

@@ -1,5 +1,6 @@
 import {
   Banknote,
+  Bot,
   FileText,
   Inbox,
   LogOut,
@@ -22,6 +23,7 @@ import { cn } from "@/lib/utils";
 const primaryItem = { id: "inbox", label: "Inbox", icon: Inbox };
 
 const items = [
+  { id: "agent", label: "Afriki AI Agent", icon: Bot },
   { id: "funding", label: "Funding", icon: Banknote },
   { id: "news", label: "News", icon: Newspaper },
   { id: "reports", label: "Reports", icon: FileText },

@@ -11,6 +11,7 @@ import {
 } from "@/lib/profile";
 import type { AgentMetadata, InboxEntry } from "@/types/inbox";
 import {
+  agentSettingsSchema,
   loginSessionSchema,
   sendSummaryEmailSchema,
   userProfileSchema,
@@ -19,11 +20,13 @@ import { createTRPCRouter, publicProcedure } from "~/server/api/trpc";
 import type {
   FundingPhase,
   Prisma,
+  AgentRun as PrismaAgentRun,
+  AgentSettings as PrismaAgentSettings,
   PrismaClient,
   InboxEntry as PrismaInboxEntry,
   UserProfile as PrismaUserProfile,
 } from "../../../../generated/prisma";
-import { runFundingAgent, runNewsAgent } from "./agent-client";
+import { getAgentHealth, runFundingAgent, runNewsAgent } from "./agent-client";
 import {
   mapAgentFundingResultToInboxEntry,
   mapAgentNewsResultToInboxEntry,
@@ -89,6 +92,148 @@ export const inboxRouter = createTRPCRouter({
         });
 
         return toUserProfile(profile);
+      }),
+  }),
+
+  agent: createTRPCRouter({
+    status: publicProcedure
+      .input(loginSessionSchema)
+      .query(async ({ ctx, input }) => {
+        const session = normalizeSession(input);
+        ensureAgentScheduler(ctx.db);
+        await maybeStartDueAgentRun(ctx.db, session);
+
+        const [settings, latestRun, health] = await Promise.all([
+          getOrCreateAgentSettings(ctx.db, session),
+          getLatestAgentRun(ctx.db, session),
+          getAgentHealth().catch((error: unknown) => ({
+            ok: false,
+            status:
+              error instanceof Error
+                ? error.message
+                : "Agent API is unreachable.",
+          })),
+        ]);
+
+        return {
+          settings: toAgentSettings(settings),
+          run: latestRun ? toAgentRun(latestRun) : null,
+          health,
+        };
+      }),
+
+    updateSettings: publicProcedure
+      .input(agentSettingsSchema)
+      .mutation(async ({ ctx, input }) => {
+        const session = normalizeSession(input.session);
+        const existing = await getOrCreateAgentSettings(ctx.db, session);
+        const nextRunAt =
+          input.scheduleEnabled && !existing.scheduleEnabled
+            ? addDays(new Date(), input.intervalDays)
+            : existing.nextRunAt;
+
+        const settings = await ctx.db.agentSettings.upsert({
+          where: {
+            org_username: {
+              org: session.org,
+              username: session.username,
+            },
+          },
+          create: {
+            id: profileId(session),
+            org: session.org,
+            username: session.username,
+            scheduleEnabled: input.scheduleEnabled,
+            intervalDays: input.intervalDays,
+            nextRunAt,
+            focusAreas: toJson(input.focusAreas),
+            model: input.model,
+            newsMaxCandidates: input.newsMaxCandidates,
+            fundingMaxCandidates: input.fundingMaxCandidates,
+            includeGdelt: input.includeGdelt,
+            gdeltTimespan: input.gdeltTimespan,
+            emailScanEnabled: input.emailScanEnabled,
+          },
+          update: {
+            scheduleEnabled: input.scheduleEnabled,
+            intervalDays: input.intervalDays,
+            nextRunAt,
+            focusAreas: toJson(input.focusAreas),
+            model: input.model,
+            newsMaxCandidates: input.newsMaxCandidates,
+            fundingMaxCandidates: input.fundingMaxCandidates,
+            includeGdelt: input.includeGdelt,
+            gdeltTimespan: input.gdeltTimespan,
+            emailScanEnabled: input.emailScanEnabled,
+          },
+        });
+
+        return toAgentSettings(settings);
+      }),
+
+    startNow: publicProcedure
+      .input(loginSessionSchema)
+      .mutation(async ({ ctx, input }) => {
+        const session = normalizeSession(input);
+        const run = await startAgentRun(ctx.db, session, "manual");
+        return toAgentRun(run);
+      }),
+
+    abort: publicProcedure
+      .input(loginSessionSchema)
+      .mutation(async ({ ctx, input }) => {
+        const session = normalizeSession(input);
+        const run = await getActiveAgentRun(ctx.db, session);
+
+        if (!run) {
+          return { aborted: false, run: null };
+        }
+
+        getAgentControllers().get(run.id)?.abort();
+        const updatedRun = await ctx.db.agentRun.update({
+          where: { id: run.id },
+          data: {
+            status: "aborted",
+            progress: Math.max(run.progress, 100),
+            currentStep: "Stopped by user.",
+            finishedAt: new Date(),
+            events: toJson([
+              ...jsonArray<AgentRunEventPayload>(run.events, []),
+              createAgentEvent("control", "Run stopped by user."),
+            ]),
+          },
+        });
+
+        return { aborted: true, run: toAgentRun(updatedRun) };
+      }),
+
+    pauseSchedule: publicProcedure
+      .input(loginSessionSchema)
+      .mutation(async ({ ctx, input }) => {
+        const session = normalizeSession(input);
+        const settings = await getOrCreateAgentSettings(ctx.db, session);
+        const updated = await ctx.db.agentSettings.update({
+          where: { id: settings.id },
+          data: { scheduleEnabled: false },
+        });
+
+        return toAgentSettings(updated);
+      }),
+
+    resumeSchedule: publicProcedure
+      .input(loginSessionSchema)
+      .mutation(async ({ ctx, input }) => {
+        const session = normalizeSession(input);
+        const settings = await getOrCreateAgentSettings(ctx.db, session);
+        const updated = await ctx.db.agentSettings.update({
+          where: { id: settings.id },
+          data: {
+            scheduleEnabled: true,
+            nextRunAt: addDays(new Date(), settings.intervalDays),
+          },
+        });
+
+        return toAgentSettings(updated);
       }),
   }),
 
@@ -221,6 +366,507 @@ export const inboxRouter = createTRPCRouter({
       }
     }),
 });
+
+type AgentSession = { org: string; username: string };
+type AgentFocusArea = "news" | "funding" | "reports";
+type AgentRunStatus = "queued" | "running" | "succeeded" | "failed" | "aborted";
+type AgentRunTrigger = "manual" | "scheduled";
+
+type AgentRunEventPayload = {
+  type: string;
+  message: string;
+  createdAt: string;
+};
+
+const DEFAULT_AGENT_FOCUS_AREAS: AgentFocusArea[] = [
+  "news",
+  "funding",
+  "reports",
+];
+
+const DEFAULT_AGENT_MODEL = "qwen3:8b";
+const AGENT_SCHEDULER_INTERVAL_MS = 60_000;
+
+async function getOrCreateAgentSettings(
+  db: PrismaClient,
+  session: AgentSession,
+) {
+  const existing = await db.agentSettings.findUnique({
+    where: {
+      org_username: {
+        org: session.org,
+        username: session.username,
+      },
+    },
+  });
+  if (existing) return existing;
+
+  return db.agentSettings.create({
+    data: {
+      id: profileId(session),
+      org: session.org,
+      username: session.username,
+      scheduleEnabled: true,
+      intervalDays: 2,
+      nextRunAt: addDays(new Date(), 2),
+      focusAreas: toJson(DEFAULT_AGENT_FOCUS_AREAS),
+      model: DEFAULT_AGENT_MODEL,
+      newsMaxCandidates: 10,
+      fundingMaxCandidates: 12,
+      includeGdelt: true,
+      gdeltTimespan: "7d",
+      emailScanEnabled: true,
+    },
+  });
+}
+
+async function getLatestAgentRun(db: PrismaClient, session: AgentSession) {
+  return db.agentRun.findFirst({
+    where: {
+      org: session.org,
+      username: session.username,
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+async function getActiveAgentRun(db: PrismaClient, session: AgentSession) {
+  return db.agentRun.findFirst({
+    where: {
+      org: session.org,
+      username: session.username,
+      status: { in: ["queued", "running"] },
+    },
+    orderBy: { createdAt: "desc" },
+  });
+}
+
+async function maybeStartDueAgentRun(db: PrismaClient, session: AgentSession) {
+  const settings = await getOrCreateAgentSettings(db, session);
+  if (!settings.scheduleEnabled || settings.nextRunAt > new Date()) return;
+  await startAgentRun(db, session, "scheduled");
+}
+
+async function startAgentRun(
+  db: PrismaClient,
+  session: AgentSession,
+  trigger: AgentRunTrigger,
+) {
+  const activeRun = await getActiveAgentRun(db, session);
+  if (activeRun) return activeRun;
+
+  const settings = await getOrCreateAgentSettings(db, session);
+  const run = await db.agentRun.create({
+    data: {
+      org: session.org,
+      username: session.username,
+      status: "queued",
+      trigger,
+      progress: 2,
+      currentStep: "Queued for Afriki Agent.",
+      events: toJson([createAgentEvent("queued", "Run queued.")]),
+      configSnapshot: toJson(toAgentSettings(settings)),
+    },
+  });
+
+  void executeAgentRun(db, run.id, session).catch(async (error: unknown) => {
+    await markAgentRunFailed(db, run.id, error);
+  });
+
+  return run;
+}
+
+async function executeAgentRun(
+  db: PrismaClient,
+  runId: string,
+  session: AgentSession,
+) {
+  const controller = new AbortController();
+  getAgentControllers().set(runId, controller);
+
+  try {
+    const profile = await getProfileOrThrow(db, session);
+    const settings = await getOrCreateAgentSettings(db, session);
+    const config = toAgentSettings(settings);
+    const focusAreas = config.focusAreas;
+    const profilePayload = toUserProfile(profile);
+    let insertedNews = 0;
+    let insertedFunding = 0;
+    let insertedReports = 0;
+
+    await updateAgentRunProgress(
+      db,
+      runId,
+      "running",
+      8,
+      "Preparing workspace context and source lists.",
+    );
+
+    if (focusAreas.includes("funding")) {
+      await updateAgentRunProgress(
+        db,
+        runId,
+        "running",
+        24,
+        "Scanning funding sources for new grant calls.",
+      );
+      const response = await runFundingAgent(
+        {
+          query: buildFundingQuery(profilePayload),
+          orgProfile: buildOrgProfile(profilePayload),
+          sources: resolveFundingSources(profilePayload.fundingSources),
+          model: config.model,
+          maxCandidates: config.fundingMaxCandidates,
+        },
+        { signal: controller.signal },
+      );
+      ensureNotAborted(controller);
+      const detectedAt = todayIso();
+      const entries = response.results.map((result) =>
+        mapAgentFundingResultToInboxEntry(result, {
+          runId: response.runId,
+          detectedAt,
+        }),
+      );
+      await upsertInboxEntries(db, entries);
+      insertedFunding = entries.length;
+      await appendAgentRunEvents(
+        db,
+        runId,
+        response.events.map((event) => ({
+          type: event.type,
+          message: event.message,
+          createdAt: event.createdAt,
+        })),
+      );
+    }
+
+    if (focusAreas.includes("news")) {
+      const defaults = getProfileDefaults(profile.org as UserProfile["org"]);
+      const urgency = jsonObject<OnboardingExtras["urgency"]>(
+        profile.urgency,
+        defaults.urgency,
+      );
+      await updateAgentRunProgress(
+        db,
+        runId,
+        "running",
+        58,
+        "Reading news sources and checking wider monitoring signals.",
+      );
+      const response = await runNewsAgent(
+        {
+          query: buildNewsQuery(profilePayload),
+          sources: resolveNewsSources(profilePayload.newsSources),
+          model: config.model,
+          maxCandidates: config.newsMaxCandidates,
+          urgentDefinition: urgency.urgentDefinition,
+          relevantDefinition: urgency.relevantDefinition,
+          includeGdelt: config.includeGdelt,
+          gdeltQuery: buildNewsQuery(profilePayload),
+          gdeltTimespan: config.gdeltTimespan,
+        },
+        { signal: controller.signal },
+      );
+      ensureNotAborted(controller);
+      const detectedAt = todayIso();
+      const entries = response.results.map((result) =>
+        mapAgentNewsResultToInboxEntry(result, {
+          runId: response.runId,
+          detectedAt,
+        }),
+      );
+      await upsertInboxEntries(db, entries);
+      insertedNews = entries.length;
+      await appendAgentRunEvents(
+        db,
+        runId,
+        response.events.map((event) => ({
+          type: event.type,
+          message: event.message,
+          createdAt: event.createdAt,
+        })),
+      );
+    }
+
+    if (focusAreas.includes("reports")) {
+      await updateAgentRunProgress(
+        db,
+        runId,
+        "running",
+        84,
+        "Checking email-report handoff status.",
+      );
+      await sleep(600);
+      insertedReports = 0;
+      await appendAgentRunEvents(db, runId, [
+        createAgentEvent(
+          "reports",
+          "Email report scan is configured; Gmail ingestion is awaiting backend handoff.",
+        ),
+      ]);
+    }
+
+    ensureNotAborted(controller);
+    await finishAgentRun(db, runId, session, {
+      insertedNews,
+      insertedFunding,
+      insertedReports,
+    });
+  } catch (error) {
+    if (isAbortError(error)) {
+      await markAgentRunAborted(db, runId);
+    } else {
+      await markAgentRunFailed(db, runId, error);
+    }
+  } finally {
+    getAgentControllers().delete(runId);
+  }
+}
+
+async function finishAgentRun(
+  db: PrismaClient,
+  runId: string,
+  session: AgentSession,
+  result: {
+    insertedNews: number;
+    insertedFunding: number;
+    insertedReports: number;
+  },
+) {
+  const settings = await getOrCreateAgentSettings(db, session);
+  const existingRun = await db.agentRun.findUnique({ where: { id: runId } });
+  if (existingRun?.status === "aborted") return;
+
+  await db.agentRun.update({
+    where: { id: runId },
+    data: {
+      status: "succeeded",
+      progress: 100,
+      currentStep: "Finished. Workspace data is up to date.",
+      finishedAt: new Date(),
+      insertedNews: result.insertedNews,
+      insertedFunding: result.insertedFunding,
+      insertedReports: result.insertedReports,
+      events: toJson([
+        ...jsonArray<AgentRunEventPayload>(existingRun?.events, []),
+        createAgentEvent("finished", "Run completed."),
+      ]),
+    },
+  });
+  await db.agentSettings.update({
+    where: { id: settings.id },
+    data: { nextRunAt: addDays(new Date(), settings.intervalDays) },
+  });
+}
+
+async function updateAgentRunProgress(
+  db: PrismaClient,
+  runId: string,
+  status: AgentRunStatus,
+  progress: number,
+  currentStep: string,
+) {
+  const run = await db.agentRun.findUnique({ where: { id: runId } });
+  if (run?.status === "aborted")
+    throw new DOMException("Aborted", "AbortError");
+
+  await db.agentRun.update({
+    where: { id: runId },
+    data: {
+      status,
+      progress,
+      currentStep,
+      startedAt:
+        status === "running" ? (run?.startedAt ?? new Date()) : undefined,
+      events: toJson([
+        ...jsonArray<AgentRunEventPayload>(run?.events, []),
+        createAgentEvent(status, currentStep),
+      ]),
+    },
+  });
+}
+
+async function appendAgentRunEvents(
+  db: PrismaClient,
+  runId: string,
+  events: AgentRunEventPayload[],
+) {
+  if (events.length === 0) return;
+  const run = await db.agentRun.findUnique({ where: { id: runId } });
+  if (run?.status === "aborted") return;
+  await db.agentRun.update({
+    where: { id: runId },
+    data: {
+      events: toJson([
+        ...jsonArray<AgentRunEventPayload>(run?.events, []),
+        ...events,
+      ]),
+    },
+  });
+}
+
+async function markAgentRunFailed(
+  db: PrismaClient,
+  runId: string,
+  error: unknown,
+) {
+  const run = await db.agentRun.findUnique({ where: { id: runId } });
+  if (!run || run.status === "aborted") return;
+  const message = error instanceof Error ? error.message : "Agent run failed.";
+
+  await db.agentRun.update({
+    where: { id: runId },
+    data: {
+      status: "failed",
+      progress: Math.max(run.progress, 100),
+      currentStep: "Run failed. Check the Python agent service.",
+      lastError: message,
+      finishedAt: new Date(),
+      events: toJson([
+        ...jsonArray<AgentRunEventPayload>(run.events, []),
+        createAgentEvent("error", message),
+      ]),
+    },
+  });
+}
+
+async function markAgentRunAborted(db: PrismaClient, runId: string) {
+  const run = await db.agentRun.findUnique({ where: { id: runId } });
+  if (!run || run.status === "aborted") return;
+
+  await db.agentRun.update({
+    where: { id: runId },
+    data: {
+      status: "aborted",
+      progress: Math.max(run.progress, 100),
+      currentStep: "Stopped by user.",
+      finishedAt: new Date(),
+      events: toJson([
+        ...jsonArray<AgentRunEventPayload>(run.events, []),
+        createAgentEvent("control", "Run stopped by user."),
+      ]),
+    },
+  });
+}
+
+function ensureAgentScheduler(db: PrismaClient) {
+  const globalForAgent = getAgentGlobal();
+  if (globalForAgent.schedulerStarted) return;
+  globalForAgent.schedulerStarted = true;
+
+  void dispatchDueAgentRuns(db);
+  const timer = setInterval(() => {
+    void dispatchDueAgentRuns(db);
+  }, AGENT_SCHEDULER_INTERVAL_MS);
+  timer.unref?.();
+}
+
+async function dispatchDueAgentRuns(db: PrismaClient) {
+  const dueSettings = await db.agentSettings.findMany({
+    where: {
+      scheduleEnabled: true,
+      nextRunAt: { lte: new Date() },
+    },
+    orderBy: { nextRunAt: "asc" },
+    take: 10,
+  });
+
+  for (const settings of dueSettings) {
+    await startAgentRun(
+      db,
+      { org: settings.org, username: settings.username },
+      "scheduled",
+    );
+  }
+}
+
+function toAgentSettings(settings: PrismaAgentSettings) {
+  return {
+    id: settings.id,
+    org: settings.org,
+    username: settings.username,
+    scheduleEnabled: settings.scheduleEnabled,
+    intervalDays: settings.intervalDays,
+    nextRunAt: settings.nextRunAt.toISOString(),
+    focusAreas: jsonArray<AgentFocusArea>(
+      settings.focusAreas,
+      DEFAULT_AGENT_FOCUS_AREAS,
+    ),
+    model: settings.model,
+    newsMaxCandidates: settings.newsMaxCandidates,
+    fundingMaxCandidates: settings.fundingMaxCandidates,
+    includeGdelt: settings.includeGdelt,
+    gdeltTimespan: settings.gdeltTimespan,
+    emailScanEnabled: settings.emailScanEnabled,
+    updatedAt: settings.updatedAt.toISOString(),
+  };
+}
+
+function toAgentRun(run: PrismaAgentRun) {
+  return {
+    id: run.id,
+    org: run.org,
+    username: run.username,
+    status: run.status as AgentRunStatus,
+    trigger: run.trigger as AgentRunTrigger,
+    progress: run.progress,
+    currentStep: run.currentStep,
+    startedAt: run.startedAt?.toISOString() ?? null,
+    finishedAt: run.finishedAt?.toISOString() ?? null,
+    lastError: run.lastError,
+    insertedNews: run.insertedNews,
+    insertedFunding: run.insertedFunding,
+    insertedReports: run.insertedReports,
+    events: jsonArray<AgentRunEventPayload>(run.events, []),
+    createdAt: run.createdAt.toISOString(),
+    updatedAt: run.updatedAt.toISOString(),
+  };
+}
+
+function createAgentEvent(type: string, message: string): AgentRunEventPayload {
+  return {
+    type,
+    message,
+    createdAt: new Date().toISOString(),
+  };
+}
+
+function getAgentControllers() {
+  const globalForAgent = getAgentGlobal();
+  globalForAgent.controllers ??= new Map<string, AbortController>();
+  return globalForAgent.controllers;
+}
+
+function getAgentGlobal() {
+  return globalThis as unknown as {
+    controllers?: Map<string, AbortController>;
+    schedulerStarted?: boolean;
+  };
+}
+
+function ensureNotAborted(controller: AbortController) {
+  if (controller.signal.aborted) {
+    throw new DOMException("Aborted", "AbortError");
+  }
+}
+
+function isAbortError(error: unknown) {
+  return (
+    error instanceof DOMException ||
+    (error instanceof Error && error.name === "AbortError")
+  );
+}
+
+function addDays(date: Date, days: number) {
+  const next = new Date(date);
+  next.setDate(next.getDate() + days);
+  return next;
+}
+
+function sleep(ms: number) {
+  return new Promise((resolve) => setTimeout(resolve, ms));
+}
 
 async function syncMockInboxEntries(db: PrismaClient) {
   const existing = await db.inboxEntry.findMany({
@@ -611,7 +1257,7 @@ function getProfileDefaults(org: UserProfile["org"]): OnboardingExtras {
   return org === "new_cause" ? EMPTY_ONBOARDING_EXTRAS : DEFAULT_EXTRAS;
 }
 
-function profileId(input: Pick<UserProfile, "org" | "username">) {
+function profileId(input: { org: string; username: string }) {
   return `${input.org}:${normalizeUsername(input.username)}`;
 }
 

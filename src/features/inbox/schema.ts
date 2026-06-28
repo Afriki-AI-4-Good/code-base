@@ -29,10 +29,24 @@ const briefSchema = z.object({
 
 const orgSchema = z.enum(["bk", "wtg", "new_cause"]);
 const usernameSchema = z.string().trim().min(1).max(128);
+const agentFocusAreaSchema = z.enum(["news", "funding", "reports"]);
 
 export const loginSessionSchema = z.object({
   org: orgSchema,
   username: usernameSchema,
+});
+
+export const agentSettingsSchema = z.object({
+  session: loginSessionSchema,
+  scheduleEnabled: z.boolean(),
+  intervalDays: z.number().int().min(1).max(14),
+  focusAreas: z.array(agentFocusAreaSchema).min(1),
+  model: z.string().trim().min(1).max(80),
+  newsMaxCandidates: z.number().int().min(1).max(50),
+  fundingMaxCandidates: z.number().int().min(1).max(50),
+  includeGdelt: z.boolean(),
+  gdeltTimespan: z.enum(["1d", "3d", "7d", "14d", "30d"]),
+  emailScanEnabled: z.boolean(),
 });
 
 export const userProfileSchema = z.object({
@@ -83,3 +97,4 @@ export const sendSummaryEmailSchema = z.object({
 export type LoginSessionInput = z.infer<typeof loginSessionSchema>;
 export type UserProfileInput = z.infer<typeof userProfileSchema>;
 export type SummaryBriefInput = z.infer<typeof briefSchema>;
+export type AgentSettingsInput = z.infer<typeof agentSettingsSchema>;

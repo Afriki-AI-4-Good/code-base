@@ -42,24 +42,40 @@ export interface FundingAgentRequest {
 
 export async function runNewsAgent(
   input: NewsAgentRequest,
+  options?: AgentRunOptions,
 ): Promise<AgentRunResponse<AgentNewsResult>> {
-  return postAgentRun<AgentNewsResult>("/runs/news", input);
+  return postAgentRun<AgentNewsResult>("/runs/news", input, options);
 }
 
 export async function runFundingAgent(
   input: FundingAgentRequest,
+  options?: AgentRunOptions,
 ): Promise<AgentRunResponse<AgentFundingResult>> {
-  return postAgentRun<AgentFundingResult>("/runs/funding", input);
+  return postAgentRun<AgentFundingResult>("/runs/funding", input, options);
+}
+
+export async function getAgentHealth(): Promise<AgentHealth> {
+  const response = await fetch(`${env.AGENT_API_URL}/health`);
+  const payload = (await response
+    .json()
+    .catch(() => null)) as Partial<AgentHealth> | null;
+
+  return {
+    ok: response.ok && payload?.status === "ok",
+    status: payload?.status ?? `http_${response.status}`,
+  };
 }
 
 async function postAgentRun<TResult>(
   path: string,
   body: unknown,
+  options?: AgentRunOptions,
 ): Promise<AgentRunResponse<TResult>> {
   const response = await fetch(`${env.AGENT_API_URL}${path}`, {
     method: "POST",
     headers: { "content-type": "application/json" },
     body: JSON.stringify(body),
+    signal: options?.signal,
   });
   const payload = (await response.json().catch(() => null)) as
     | (Partial<AgentRunResponse<TResult>> & { error?: string })
@@ -82,4 +98,13 @@ async function postAgentRun<TResult>(
     results: payload.results,
     events: Array.isArray(payload.events) ? payload.events : [],
   };
+}
+
+interface AgentRunOptions {
+  signal?: AbortSignal;
+}
+
+interface AgentHealth {
+  ok: boolean;
+  status: string;
 }

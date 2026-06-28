@@ -87,3 +87,47 @@ model UserProfile {
 
     @@unique([org, username])
 }
+
+model AgentSettings {
+    id                   String   @id
+    org                  String
+    username             String
+    scheduleEnabled      Boolean  @default(true)
+    intervalDays         Int      @default(2)
+    nextRunAt            DateTime @default(now())
+    focusAreas           Json
+    model                String   @default("qwen3:8b")
+    newsMaxCandidates    Int      @default(10)
+    fundingMaxCandidates Int      @default(12)
+    includeGdelt         Boolean  @default(true)
+    gdeltTimespan        String   @default("7d")
+    emailScanEnabled     Boolean  @default(true)
+    createdAt            DateTime @default(now())
+    updatedAt            DateTime @updatedAt
+
+    @@unique([org, username])
+    @@index([nextRunAt])
+}
+
+model AgentRun {
+    id              String    @id @default(cuid())
+    org             String
+    username        String
+    status          String
+    trigger         String
+    progress        Int       @default(0)
+    currentStep     String
+    startedAt       DateTime?
+    finishedAt      DateTime?
+    lastError       String?
+    insertedNews    Int       @default(0)
+    insertedFunding Int       @default(0)
+    insertedReports Int       @default(0)
+    events          Json
+    configSnapshot  Json
+    createdAt       DateTime  @default(now())
+    updatedAt       DateTime  @updatedAt
+
+    @@index([org, username, createdAt])
+    @@index([status])
+}

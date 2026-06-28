@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from "react";
 
+import { AgentView } from "@/components/inbox/AgentView";
 import { CardDetailSheet } from "@/components/inbox/CardDetailSheet";
 import { FundingView } from "@/components/inbox/FundingView";
 import type { CategoryFilter, ViewMode } from "@/components/inbox/InboxHeader";
@@ -64,16 +65,6 @@ export function InboxApp() {
         org: nextProfile.org,
         username: nextProfile.username,
       });
-    },
-  });
-  const syncNews = api.inbox.syncNews.useMutation({
-    onSuccess: async () => {
-      await utils.inbox.list.invalidate();
-    },
-  });
-  const syncFunding = api.inbox.syncFunding.useMutation({
-    onSuccess: async () => {
-      await utils.inbox.list.invalidate();
     },
   });
 
@@ -180,15 +171,7 @@ export function InboxApp() {
           ) : section === "funding" ? (
             <>
               <MapBackdrop entries={filtered} dimmed />
-              <FundingView
-                entries={entries}
-                onSelect={handleSelect}
-                onSync={() => {
-                  if (session) syncFunding.mutate(session);
-                }}
-                syncPending={syncFunding.isPending}
-                syncError={syncFunding.error?.message}
-              />
+              <FundingView entries={entries} onSelect={handleSelect} />
             </>
           ) : section === "news" ? (
             <>
@@ -196,15 +179,12 @@ export function InboxApp() {
                 entries={entries.filter((entry) => entry.category === "news")}
                 dimmed
               />
-              <NewsView
-                entries={entries}
-                onSelect={handleSelect}
-                onSync={() => {
-                  if (session) syncNews.mutate(session);
-                }}
-                syncPending={syncNews.isPending}
-                syncError={syncNews.error?.message}
-              />
+              <NewsView entries={entries} onSelect={handleSelect} />
+            </>
+          ) : section === "agent" ? (
+            <>
+              <MapBackdrop entries={entries} dimmed />
+              <AgentView session={session} />
             </>
           ) : section === "reports" ? (
             <>
