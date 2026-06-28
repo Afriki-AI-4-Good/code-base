@@ -4,6 +4,11 @@ import { env } from "~/env";
 import type { OnboardingExtras } from "../lib/profile";
 import type { AgentFundingResult, AgentNewsResult } from "./agent-mappers";
 import type { AgentSource } from "./agent-sources";
+import {
+  getDemoAgentHealth,
+  runDemoFundingAgent,
+  runDemoNewsAgent,
+} from "./demo-agent";
 
 interface AgentRunResponse<TResult> {
   runId: number;
@@ -47,6 +52,13 @@ export async function runNewsAgent(
   input: NewsAgentRequest,
   options?: AgentRunOptions,
 ): Promise<AgentRunResponse<AgentNewsResult>> {
+  if (env.DEMO_AGENT_MODE === "wtg") {
+    return runDemoNewsAgent({
+      maxCandidates: input.maxCandidates,
+      signal: options?.signal,
+    });
+  }
+
   return postAgentRun<AgentNewsResult>("/runs/news", input, options);
 }
 
@@ -54,10 +66,21 @@ export async function runFundingAgent(
   input: FundingAgentRequest,
   options?: AgentRunOptions,
 ): Promise<AgentRunResponse<AgentFundingResult>> {
+  if (env.DEMO_AGENT_MODE === "wtg") {
+    return runDemoFundingAgent({
+      maxCandidates: input.maxCandidates,
+      signal: options?.signal,
+    });
+  }
+
   return postAgentRun<AgentFundingResult>("/runs/funding", input, options);
 }
 
 export async function getAgentHealth(): Promise<AgentHealth> {
+  if (env.DEMO_AGENT_MODE === "wtg") {
+    return getDemoAgentHealth();
+  }
+
   const response = await fetch(`${env.AGENT_API_URL}/health`);
   const payload = (await response
     .json()
