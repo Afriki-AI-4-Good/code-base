@@ -257,6 +257,7 @@ export const inboxRouter = createTRPCRouter({
         includeGdelt: true,
         gdeltQuery: buildNewsQuery(profilePayload),
         gdeltTimespan: "7d",
+        outputFormat: profilePayload.outputFormat,
       }).catch((error: unknown) => {
         throw new TRPCError({
           code: "BAD_GATEWAY",
@@ -292,6 +293,7 @@ export const inboxRouter = createTRPCRouter({
         sources: resolveFundingSources(profilePayload.fundingSources),
         model: "qwen3:8b",
         maxCandidates: 12,
+        outputFormat: profilePayload.outputFormat,
       }).catch((error: unknown) => {
         throw new TRPCError({
           code: "BAD_GATEWAY",

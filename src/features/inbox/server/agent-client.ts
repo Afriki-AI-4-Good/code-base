@@ -1,6 +1,7 @@
 import "server-only";
 
 import { env } from "~/env";
+import type { OnboardingExtras } from "../lib/profile";
 import type { AgentFundingResult, AgentNewsResult } from "./agent-mappers";
 import type { AgentSource } from "./agent-sources";
 
@@ -30,6 +31,7 @@ export interface NewsAgentRequest {
   includeGdelt: boolean;
   gdeltQuery: string;
   gdeltTimespan: string;
+  outputFormat?: OnboardingExtras["outputFormat"];
 }
 
 export interface FundingAgentRequest {
@@ -38,6 +40,7 @@ export interface FundingAgentRequest {
   sources: AgentSource[];
   model: string;
   maxCandidates: number;
+  outputFormat?: OnboardingExtras["outputFormat"];
 }
 
 export async function runNewsAgent(
