@@ -37,3 +37,5 @@ Before any Next.js work, find and read the relevant doc in `node_modules/next/di
 - `src/app/tasks/page.tsx` is DB-backed and must remain dynamic; static prerender causes the tRPC prefetch error to be redacted during `next build`.
 - `supabase/config.toml` references `supabase/seed.sql`, but no seed file is committed; `npm run db:start` warns and continues.
 - Running `npm run build` while `npm run dev -- --turbo` is active can leave stale `.next` dev manifests; restart the dev server before smoke testing.
+- Tailwind v4 scanning is opt-in via `src/features/inbox/styles.css`; add new app/client paths with `@source` or their utility classes will render half-styled.
+- `.github-pages` is generated deploy output; keep it ignored or Biome will lint bundled Next chunks.

@@ -8,6 +8,7 @@
     "build": "next build",
     "start": "next start",
     "preview": "next build && next start",
+    "build:pages": "SKIP_ENV_VALIDATION=1 GITHUB_PAGES_BASE_PATH=/code-base NEXT_PUBLIC_BASE_PATH=/code-base next build && node scripts/export-customer-journey.mjs",
     "db:start": "supabase start",
     "db:stop": "supabase stop",
     "db:migrate": "prisma migrate dev",

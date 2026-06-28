@@ -11,6 +11,7 @@
       "**",
       "!generated",
       "!.next",
+      "!.github-pages",
       "!supabase",
       "!node_modules",
       "!src/features/inbox/styles.css"

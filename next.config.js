@@ -4,7 +4,19 @@
  */
 import "./src/env.js";
 
+const githubPagesBasePath = process.env.GITHUB_PAGES_BASE_PATH ?? "";
+
 /** @type {import("next").NextConfig} */
-const config = {};
+const config = {
+  ...(githubPagesBasePath
+    ? {
+        assetPrefix: githubPagesBasePath,
+        basePath: githubPagesBasePath,
+        images: {
+          unoptimized: true,
+        },
+      }
+    : {}),
+};
 
 export default config;
