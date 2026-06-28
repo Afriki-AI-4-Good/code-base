@@ -1,409 +1,418 @@
 import type { InboxEntry } from "@/types/inbox";
 
-const newsBurundiEducation = "/lovable/news-burundi-education.jpg";
-const newsUnicefHealth = "/lovable/news-unicef-health.jpg";
-const newsVenroTrends = "/lovable/news-venro-trends.jpg";
+const imageUnicefEducation =
+  "https://images.unsplash.com/photo-1509062522246-3755977927d7?auto=format&fit=crop&w=1200&q=80";
+const imageEcwBurundi =
+  "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1200&q=80";
+const imageClimateEducation =
+  "https://images.unsplash.com/photo-1497633762265-9d179a990aa6?auto=format&fit=crop&w=1200&q=80";
+const imagePuppyTrade =
+  "https://www.tierschutzbund.de/fileadmin/_processed_/7/c/csm_Golden_Retriever_Welpen_Transportbox_Tierheim_Welpenhandel_c_Armin_Lerch_dcb050605f.jpg";
+const imageAnimalProtection =
+  "https://images.unsplash.com/photo-1537151625747-768eb6cf92b2?auto=format&fit=crop&w=1200&q=80";
 
 export const mockInbox: InboxEntry[] = [
   {
     id: "1",
-    priority: "urgent",
-    category: "funding",
-    title:
-      "BMZ Call for Proposals: Education Projects in Sub-Saharan Africa 2026",
-    translatedFrom: "German",
-    date: "2026-06-20",
-    source: "BMZ Newsletter",
-    summary:
-      "The German Federal Ministry for Economic Cooperation and Development is launching a new call for proposals for education projects in Sub-Saharan Africa. The focus is on primary and secondary education as well as vocational training. Applications can be submitted by non-profit organizations based in Germany. Co-funding of up to 75% of total project costs is available. Note the short application window.",
-    deadline: "2026-07-15",
-    amountRange: "EUR 200,000 – 1,500,000",
-    topics: ["Education", "Vocational Training", "Child Protection"],
-    funder:
-      "BMZ – German Federal Ministry for Economic Cooperation and Development",
-    criteria: {
-      ownContributionRequired: true,
-      nrwHeadquarters: false,
-      applyFromBurundi: false,
-      notes: "Minimum 25% own contribution; German legal entity required.",
-    },
-    bkEligible: "yes",
-    phases: [
-      { kind: "open", label: "Call published", date: "2026-06-20" },
-      { kind: "info", label: "Info webinar", date: "2026-06-30" },
-      { kind: "deadline", label: "Submission deadline", date: "2026-07-15" },
-      { kind: "decision", label: "Funding decision", date: "2026-09-10" },
-      { kind: "kickoff", label: "Project kickoff", date: "2026-11-01" },
-    ],
-  },
-  {
-    id: "2",
-    priority: "urgent",
-    category: "report",
-    title: "Quarterly Report Q2 2026 – Bujumbura School",
-    translatedFrom: "French",
-    date: "2026-06-25",
-    source: "Bujumbura School",
-    summary:
-      "The school reports 412 enrolled students for the second quarter. Exam results are 8% above the national average. There are acute shortages of school supplies and drinking water. Teachers urgently request additional funds for the upcoming school year. A detailed financial report is attached.",
-    originalLanguage: "French",
-    sender: "Bujumbura School Directorate",
-    originalText:
-      "Rapport trimestriel Q2 2026: 412 élèves inscrits, résultats aux examens 8 % au-dessus de la moyenne nationale. Manque urgent de matériel scolaire et d'eau potable...",
-  },
-  {
-    id: "3",
     priority: "relevant",
     category: "funding",
-    title: "Stiftung Umverteilen: Grants for Women and Girls Projects",
-    translatedFrom: "German",
-    date: "2026-06-18",
-    source: "Stiftung Umverteilen",
+    title: "World Bank: Human Capital Development Project in Burundi",
+    date: "2024-07-30",
+    source: "World Bank",
     summary:
-      "Stiftung Umverteilen funds projects focused on the empowerment of women and girls in the Global South. Applications are accepted year-round with quarterly deadlines. Grant amounts range from EUR 5,000 to 30,000. No own contribution required. The foundation values participatory project approaches.",
-    deadline: "2026-09-30",
-    amountRange: "EUR 5,000 – 30,000",
-    topics: ["Women & Girls", "Empowerment", "Education"],
-    funder: "Stiftung Umverteilen",
+      "The World Bank announced a human-capital project for Burundi focused on nutrition, healthcare, and basic education services. The release says the project is expected to benefit 13.2 million people over five years, including refugees and host communities, and includes a record US$227.6 million package for Burundi.",
+    deadline: "2024-07-30",
+    amountRange: "US$227.6 million",
+    topics: ["Basic Education", "Health", "Nutrition", "Refugees"],
+    funder: "World Bank IDA and Global Partnership for Education trust fund",
     criteria: {
       ownContributionRequired: false,
       nrwHeadquarters: false,
-      applyFromBurundi: false,
+      applyFromBurundi: true,
+      notes:
+        "Public investment programme, not a direct NGO call. Track for partnership and implementation opportunities.",
     },
-    bkEligible: "yes",
+    bkEligible: "check",
     phases: [
-      { kind: "open", label: "Rolling call opens", date: "2026-06-18" },
-      { kind: "deadline", label: "Quarterly deadline", date: "2026-09-30" },
-      { kind: "decision", label: "Board decision", date: "2026-11-15" },
+      { kind: "open", label: "World Bank announcement", date: "2024-07-30" },
+      {
+        kind: "decision",
+        label: "Financing package announced",
+        date: "2024-07-30",
+      },
+      {
+        kind: "kickoff",
+        label: "Five-year implementation window",
+        date: "2024-08-01",
+      },
     ],
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.worldbank.org/en/news/press-release/2024/07/30/a-three-in-one-project-to-foster-human-capital-development-in-burundi-afe",
+      deadlineLabel: "Programme announcement",
+      confidence: 0.95,
+      impactAreas: ["education", "health", "nutrition"],
+      recommendedAction:
+        "Track implementing partners and procurement notices connected to school and health-service delivery.",
+      keyFacts: [
+        "Expected reach: 13.2 million people over five years.",
+        "Financing package: US$200 million IDA grant plus US$27.6 million GPE trust-fund funding.",
+      ],
+    },
+  },
+  {
+    id: "2",
+    priority: "relevant",
+    category: "funding",
+    title: "Education Cannot Wait: Burundi Multi-Year Resilience Programme",
+    date: "2021-12-31",
+    source: "Education Cannot Wait",
+    summary:
+      "Education Cannot Wait announced US$12 million in catalytic seed funding for Burundi's first Multi-Year Resilience Programme. The programme is coordinated with the Government of Burundi and consortia led by World Vision International and UNICEF, with a target of reaching vulnerable children affected by crisis, displacement, climate shocks, and COVID-19.",
+    deadline: "2021-12-31",
+    amountRange:
+      "US$12 million catalytic grant; US$18 million additional target",
+    topics: ["Education in Emergencies", "Displacement", "Climate Resilience"],
+    funder: "Education Cannot Wait",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Programme funding through consortia; useful for partnership mapping and education-in-emergencies alignment.",
+    },
+    bkEligible: "check",
+    phases: [
+      { kind: "open", label: "Grant announced", date: "2021-12-31" },
+      { kind: "kickoff", label: "Three-year MYRP rollout", date: "2022-01-01" },
+      {
+        kind: "decision",
+        label: "Additional financing target",
+        date: "2024-12-31",
+      },
+    ],
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.educationcannotwait.org/news-stories/press-releases/education-cannot-wait-announces-us12-million-catalytic-grant-multi-year",
+      deadlineLabel: "Historical MYRP grant",
+      confidence: 0.96,
+      fitScore: 82,
+      recommendedAction:
+        "Use as a real reference programme for education-in-emergencies proposals and partner landscape analysis.",
+      keyFacts: [
+        "Seed funding: US$12 million.",
+        "Fully funded target reach: more than 300,000 children and adolescents.",
+      ],
+    },
+  },
+  {
+    id: "3",
+    priority: "information",
+    category: "funding",
+    title: "WPHF Call for Proposals in Burundi",
+    date: "2021-06-29",
+    source: "Women's Peace & Humanitarian Fund",
+    summary:
+      "The Women's Peace & Humanitarian Fund opened a Burundi call for local civil society organizations led by and working with women and girls. The call supported women's participation in conflict prevention and institutional capacity for women, peace and security organizations.",
+    deadline: "2021-08-13",
+    amountRange:
+      "US$2,500-30,000 institutional; US$30,000-200,000 programmatic",
+    topics: ["Women & Girls", "Civil Society", "Peacebuilding"],
+    funder: "Women's Peace & Humanitarian Fund",
+    criteria: {
+      ownContributionRequired: false,
+      nrwHeadquarters: false,
+      applyFromBurundi: true,
+      notes:
+        "Past call, retained as a realistic example of local-CSO funding streams in Burundi.",
+    },
+    bkEligible: "check",
+    phases: [
+      { kind: "open", label: "Call published", date: "2021-06-29" },
+      { kind: "deadline", label: "Application deadline", date: "2021-08-13" },
+      {
+        kind: "decision",
+        label: "Selection and contracting",
+        date: "2021-10-01",
+      },
+    ],
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://wphfund.org/call-for-proposals-in-burundi/",
+      deadlineLabel: "Closed call",
+      confidence: 0.94,
+      fitScore: 64,
+      recommendedAction:
+        "Keep as a template for identifying future local-CSO windows and gender-focused partnership opportunities.",
+    },
   },
   {
     id: "4",
     priority: "relevant",
     category: "news",
-    title: "Burundi: Government Unveils New Education Strategy",
-    date: "2026-06-22",
-    source: "Reuters Africa",
+    title: "UNICEF Burundi: Every child has the right to quality education",
+    date: "2019-12-04",
+    source: "UNICEF Burundi",
     summary:
-      "The Burundian government has unveiled a new education strategy for 2026–2030. The goal is to raise the enrollment rate to 95% and expand vocational training. International donors are explicitly invited to support the plan. The strategy calls for closer cooperation with civil society organizations.",
-    imageUrl: newsBurundiEducation,
+      "UNICEF's Burundi education programme page highlights strong gains in primary schooling while pointing to dropout among adolescents, household poverty, early pregnancy, school violence, low learning time, and the need for teacher training, school construction, and back-to-school support.",
+    imageUrl: imageClimateEducation,
+    location: {
+      name: "Nyanza-Lac, Burundi",
+      coords: [29.6, -4.34],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://www.unicef.org/burundi/education",
+      confidence: 0.96,
+      monitoringTheme: "Education access and quality in Burundi",
+      suggestedUse:
+        "Use as the baseline education-context card for proposals and monitoring briefs.",
+      keyFacts: [
+        "Gross enrollment for children aged 6 to 11 was reported at 119.6% in 2018.",
+        "UNICEF identifies teacher training, school construction, and back-to-school campaigns as support areas.",
+      ],
+    },
   },
   {
     id: "5",
-    priority: "relevant",
-    category: "funding",
-    title: "NRW Foundation: International Partnerships Funding Line",
-    translatedFrom: "German",
-    date: "2026-06-15",
-    source: "State of NRW",
+    priority: "urgent",
+    category: "report",
+    title: "UNICEF Burundi Situation Report No. 10: flooded schools supported",
+    translatedFrom: "English",
+    date: "2025-01-31",
+    source: "UNICEF Situation Report",
     summary:
-      "The state of North Rhine-Westphalia funds partnership projects between NRW-based organizations and partners in the Global South. A registered office in NRW is required. The grant covers up to 90% of project costs. 2026 priorities: education, climate, and health. Application is a two-stage process.",
-    deadline: "2026-08-31",
-    amountRange: "EUR 10,000 – 250,000",
-    topics: ["Education", "Climate", "Health"],
-    funder: "State of North Rhine-Westphalia",
-    criteria: {
-      ownContributionRequired: true,
-      nrwHeadquarters: true,
-      applyFromBurundi: false,
-      notes: "Registered office in NRW is mandatory.",
+      "UNICEF reported support to 14 schools in Mutimbuzi Commune, Rural Bujumbura province, that were severely flooded or damaged by strong winds. The support included chalk supplies so 12,768 learners could continue education without disruption.",
+    originalLanguage: "English",
+    sender: "UNICEF Burundi Country Office",
+    originalText:
+      "UNICEF supported 14 schools in Mutimbuzi Commune, Rural Bujumbura province, severely flooded or having suffered roof damage due to strong winds. This support included 3,151 boxes of chalk for 12,768 learners.",
+    location: {
+      name: "Mutimbuzi, Burundi",
+      coords: [29.32, -3.28],
+      countryId: "108",
     },
-    bkEligible: "check",
-    phases: [
-      { kind: "open", label: "Call published", date: "2026-06-15" },
-      { kind: "loi", label: "Letter of intent due", date: "2026-07-20" },
-      { kind: "deadline", label: "Full proposal due", date: "2026-08-31" },
-      { kind: "decision", label: "Decision", date: "2026-10-30" },
-      { kind: "kickoff", label: "Earliest start", date: "2027-01-01" },
-    ],
+    agentMetadata: {
+      sourceUrl:
+        "https://www.unicef.org/media/168361/file/Burundi-Humanitarian-SitRep-31-January-2025.pdf.pdf",
+      confidence: 0.93,
+      monitoringTheme: "Flood-damaged schools and learning continuity",
+      recommendedAction:
+        "Flag for emergency education, WASH, and school-supplies planning in Bujumbura Rural.",
+      keyFacts: [
+        "14 schools supported in Mutimbuzi.",
+        "12,768 learners targeted for uninterrupted education.",
+      ],
+    },
   },
   {
     id: "6",
-    priority: "information",
-    category: "news",
-    title: "UNICEF Report: Progress on Child Health in East Africa",
-    date: "2026-06-10",
-    source: "UNICEF",
+    priority: "urgent",
+    category: "report",
+    title: "UNICEF Burundi Humanitarian Situation Report No. 9",
+    translatedFrom: "English",
+    date: "2024-12-31",
+    source: "ReliefWeb / UNICEF",
     summary:
-      "A new UNICEF report shows significant progress in reducing child mortality in East Africa. Burundi ranks in the middle of the region. Vaccination rates have improved by 15% since 2020. Food security remains a central challenge.",
-    imageUrl: newsUnicefHealth,
+      "UNICEF's 2024 Burundi humanitarian reporting notes the impact of El Nino-related floods and displacement, including affected school children, cholera risks, and emergency support to learners in flooded areas.",
+    originalLanguage: "English",
+    sender: "UNICEF Burundi via ReliefWeb",
+    originalText:
+      "Situation reports provide updates on the humanitarian situation, needs of children, UNICEF response, and funding requirements in Burundi.",
+    location: {
+      name: "Gatumba, Burundi",
+      coords: [29.26, -3.31],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://reliefweb.int/report/burundi/unicef-burundi-humanitarian-situation-report-no-9-december-2024",
+      confidence: 0.9,
+      monitoringTheme:
+        "Floods, displacement, cholera risk, and education disruption",
+      recommendedAction:
+        "Keep in urgent queue for emergency-education and health/WASH coordination.",
+      keyFacts: [
+        "UNICEF reporting links floods and displacement to education disruption.",
+        "Learning-material and temporary-learning-space support appears in the 2024 response.",
+      ],
+    },
   },
   {
     id: "7",
-    priority: "information",
-    category: "report",
-    title: "Monthly Report May – Gitega Health Station",
-    translatedFrom: "French",
-    date: "2026-06-05",
-    source: "Gitega Health Station",
+    priority: "relevant",
+    category: "news",
+    title: "Education Cannot Wait: US$12 million catalytic grant for Burundi",
+    date: "2021-12-31",
+    source: "Education Cannot Wait",
     summary:
-      "In May, 1,245 patients were treated. The focus was on malaria cases and maternal and child care. Medication supply was stable. Additional midwifery support is needed.",
-    originalLanguage: "French",
-    sender: "Head of Gitega Health Station",
-    originalText:
-      "Rapport mensuel mai: 1245 patients traités, focus sur paludisme et soins maternels...",
+      "ECW announced catalytic seed funding for a Multi-Year Resilience Programme in Burundi. The programme was designed for returnee, internally displaced, and other vulnerable children, with pre-primary, primary, and secondary education components.",
+    imageUrl: imageEcwBurundi,
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.educationcannotwait.org/news-stories/press-releases/education-cannot-wait-announces-us12-million-catalytic-grant-multi-year",
+      confidence: 0.96,
+      monitoringTheme: "Education in emergencies and resilience programming",
+      suggestedUse:
+        "Use in fundraising narratives about crisis-affected learners and resilience programming.",
+      keyFacts: [
+        "US$12 million catalytic seed funding.",
+        "Programme seeks to mobilize an additional US$18 million.",
+      ],
+    },
   },
   {
     id: "8",
     priority: "information",
-    category: "news",
-    title: "Sector Update: Trends in Development Cooperation 2026",
-    translatedFrom: "German",
-    date: "2026-06-01",
-    source: "VENRO",
+    category: "report",
+    title: "UNICEF Burundi Situation Reports 2018-2026 index",
+    translatedFrom: "English",
+    date: "2026-05-31",
+    source: "UNICEF Humanitarian Action for Children",
     summary:
-      "The umbrella organization VENRO publishes its annual trends paper. Key topics for 2026 are locally led development, climate adaptation, and digital education. Public funding is stagnating while private foundations are gaining importance.",
-    imageUrl: newsVenroTrends,
+      "UNICEF's Burundi situation-report index lists regular situation reports through 2026, including monthly reports and flash updates on Burundian returnees and DRC refugee impacts.",
+    originalLanguage: "English",
+    sender: "UNICEF Humanitarian Action for Children",
+    originalText:
+      "Situation reports are UNICEF's main reporting tool to monitor humanitarian response and needs of children in Burundi.",
+    location: {
+      name: "Bujumbura, Burundi",
+      coords: [29.3599, -3.3614],
+      countryId: "108",
+    },
+    agentMetadata: {
+      sourceUrl: "https://www.unicef.org/appeals/burundi/situation-reports",
+      confidence: 0.95,
+      monitoringTheme: "Humanitarian situation-report watchlist",
+      recommendedAction:
+        "Use this index as the live source for replacing future static humanitarian mock reports.",
+    },
   },
-
-  // --- Additional entries (extended timeline) ---
   {
     id: "9",
-    priority: "urgent",
-    category: "funding",
-    title: "EU DEVCO Rapid Response: Humanitarian Education in Crisis Regions",
-    translatedFrom: "French",
-    date: "2026-06-26",
-    source: "EU Delegation Brussels",
+    priority: "relevant",
+    category: "report",
+    title: "IOM Burundi Crisis Response Plan 2024-2026",
+    translatedFrom: "English",
+    date: "2026-01-01",
+    source: "IOM Crisis Response",
     summary:
-      "The European Commission announces a rapid response window for education in emergency settings across the Great Lakes region. Grants must be co-implemented with a local partner. Letters of intent due within three weeks.",
-    deadline: "2026-07-20",
-    amountRange: "EUR 100,000 – 600,000",
-    topics: ["Emergency Education", "Refugees", "Child Protection"],
-    funder: "European Commission – DG INTPA",
-    criteria: {
-      ownContributionRequired: true,
-      nrwHeadquarters: false,
-      applyFromBurundi: true,
-      notes: "Local co-implementer required.",
+      "IOM's Burundi Crisis Response Plan frames natural hazards, especially floods, erratic rainfall, Lake Tanganyika water-level rise, and hydric stress as key drivers of crisis and displacement in Burundi.",
+    originalLanguage: "English",
+    sender: "International Organization for Migration",
+    originalText:
+      "Natural hazards, most notably floods, erratic rainfall patterns, lake level rise, and hydric stress exacerbated by climate change, are driving humanitarian needs in Burundi.",
+    location: {
+      name: "Lake Tanganyika, Burundi",
+      coords: [29.25, -3.75],
+      countryId: "108",
     },
-    bkEligible: "yes",
-    phases: [
-      { kind: "open", label: "Rapid call opens", date: "2026-06-26" },
-      { kind: "loi", label: "Letter of intent", date: "2026-07-10" },
-      { kind: "deadline", label: "Full proposal due", date: "2026-07-20" },
-      { kind: "decision", label: "Decision", date: "2026-08-15" },
-    ],
+    agentMetadata: {
+      sourceUrl:
+        "https://crisisresponse.iom.int/response/burundi-crisis-response-plan-2024-2026",
+      confidence: 0.92,
+      monitoringTheme: "Climate hazards, floods, displacement, and mobility",
+      suggestedUse:
+        "Useful for board-level risk monitoring and emergency-preparedness fundraising.",
+    },
   },
   {
     id: "10",
-    priority: "relevant",
+    priority: "urgent",
     category: "news",
-    title: "WHO: Cholera Outbreak Contained in Lake Tanganyika Region",
-    date: "2026-05-28",
-    source: "WHO Africa",
+    title: "German Animal Welfare Federation: illegal puppy trade continues",
+    translatedFrom: "German",
+    date: "2024-03-26",
+    source: "Deutscher Tierschutzbund",
     summary:
-      "After an eight-week response operation, WHO declares the cholera outbreak around Lake Tanganyika contained. More than 12,000 people received oral vaccines. Sanitation infrastructure remains the main vulnerability.",
+      "The Deutscher Tierschutzbund reported that new figures show illegal puppy trade continues, with animal shelters and transport controls still encountering puppies affected by poor breeding and trade conditions.",
+    imageUrl: imagePuppyTrade,
+    location: {
+      name: "Bonn, Germany",
+      coords: [7.0982, 50.7374],
+      countryId: "276",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.tierschutzbund.de/en/about-us/news/press/notification/new-figures-show-illegal-puppy-trade-continues-unabated/",
+      confidence: 0.9,
+      monitoringTheme: "Animal welfare in Germany: puppy trade",
+      suggestedUse:
+        "Same-day press-monitoring item for WTG communications and campaign planning.",
+      keyFacts: [
+        "Real press item from Deutscher Tierschutzbund.",
+        "Topic maps to puppy trade and companion-animal welfare monitoring.",
+      ],
+    },
   },
   {
     id: "11",
     priority: "information",
-    category: "report",
-    title: "Annual Report 2025 – Ngozi Vocational Center",
-    translatedFrom: "Kirundi",
-    date: "2026-05-12",
-    source: "Ngozi Vocational Center",
+    category: "news",
+    title: "World Animal Protection Global Review 2024",
+    date: "2024-12-01",
+    source: "World Animal Protection",
     summary:
-      "187 graduates in 2025, 62% of whom found employment within six months. Tailoring and carpentry remain the most requested tracks. The center plans to add a renewable-energy technician program in 2026.",
-    originalLanguage: "Kirundi",
-    sender: "Ngozi Vocational Center Director",
-    originalText: "Raporo y'umwaka 2025: abanyeshure 187 barangije...",
+      "World Animal Protection's global review presents a 2024 overview of campaign and programme work across wildlife, farming, disasters, and animal-welfare systems. It is a useful comparator for international animal-welfare monitoring.",
+    imageUrl: imageAnimalProtection,
+    location: {
+      name: "London, United Kingdom",
+      coords: [-0.1276, 51.5072],
+      countryId: "826",
+    },
+    agentMetadata: {
+      sourceUrl:
+        "https://www.worldanimalprotection.org/about-us/global-reviews/2024/",
+      confidence: 0.88,
+      monitoringTheme: "International animal welfare campaigns and programmes",
+      suggestedUse:
+        "Background item for international animal-welfare trend monitoring and partner benchmarking.",
+    },
   },
   {
     id: "12",
-    priority: "relevant",
-    category: "funding",
-    title: "Misereor: Open Call for Civil Society Strengthening",
-    translatedFrom: "German",
-    date: "2026-04-30",
-    source: "Misereor",
+    priority: "information",
+    category: "news",
+    title: "AP: extreme weather disrupted schooling for 242 million children",
+    date: "2025-01-24",
+    source: "Associated Press",
     summary:
-      "Misereor opens its annual call for projects strengthening local civil society organizations in East Africa. Multi-year grants up to three years are possible. Strong emphasis on partner-led design and reporting in local languages.",
-    deadline: "2026-10-15",
-    amountRange: "EUR 30,000 – 200,000",
-    topics: ["Civil Society", "Governance", "Capacity Building"],
-    funder: "Misereor",
-    criteria: {
-      ownContributionRequired: false,
-      nrwHeadquarters: false,
-      applyFromBurundi: true,
+      "Associated Press reported UNICEF's finding that at least 242 million children in 85 countries had schooling interrupted in 2024 because of heatwaves, cyclones, flooding, and other climate hazards.",
+    imageUrl: imageUnicefEducation,
+    location: {
+      name: "Cape Town, South Africa",
+      coords: [18.4241, -33.9249],
+      countryId: "710",
     },
-    bkEligible: "yes",
-    phases: [
-      { kind: "open", label: "Annual call opens", date: "2026-04-30" },
-      { kind: "info", label: "Partner consultation", date: "2026-07-15" },
-      { kind: "deadline", label: "Submission deadline", date: "2026-10-15" },
-      { kind: "decision", label: "Decision", date: "2026-12-20" },
-    ],
-  },
-  {
-    id: "13",
-    priority: "information",
-    category: "news",
-    title: "Rwanda Hosts East African Education Ministers Summit",
-    date: "2026-04-18",
-    source: "The East African",
-    summary:
-      "Education ministers from the East African Community met in Kigali to align curricula on digital skills and climate literacy. Burundi confirmed participation in a regional teacher exchange program starting in 2027.",
-  },
-  {
-    id: "14",
-    priority: "urgent",
-    category: "report",
-    title: "Flooding Damage Assessment – Rumonge District",
-    translatedFrom: "French",
-    date: "2026-04-08",
-    source: "Field Coordinator Rumonge",
-    summary:
-      "Heavy rainfall destroyed roofs of two partner schools and displaced 340 families. Emergency budget of EUR 18,500 requested for tarpaulins, water purification tablets, and temporary classrooms.",
-    originalLanguage: "French",
-    sender: "Field Coordinator Rumonge",
-    originalText:
-      "Évaluation des dégâts causés par les inondations dans le district de Rumonge...",
-  },
-  {
-    id: "15",
-    priority: "information",
-    category: "news",
-    title:
-      "African Development Bank Approves USD 45M Education Loan to Burundi",
-    date: "2026-03-22",
-    source: "AfDB",
-    summary:
-      "The African Development Bank board approved a USD 45 million loan to expand secondary school infrastructure in Burundi over five years. Civil society organizations are invited to monitor implementation.",
-  },
-  {
-    id: "16",
-    priority: "relevant",
-    category: "funding",
-    title: "Robert Bosch Stiftung: Youth Leadership in Africa",
-    translatedFrom: "German",
-    date: "2026-03-05",
-    source: "Robert Bosch Stiftung",
-    summary:
-      "New thematic call funding youth-led initiatives across sub-Saharan Africa. Projects must be led by people under 30 and include a learning exchange component. Applications open March through June.",
-    deadline: "2026-06-30",
-    amountRange: "EUR 15,000 – 80,000",
-    topics: ["Youth", "Leadership", "Education"],
-    funder: "Robert Bosch Stiftung",
-    criteria: {
-      ownContributionRequired: false,
-      nrwHeadquarters: false,
-      applyFromBurundi: true,
+    agentMetadata: {
+      sourceUrl: "https://apnews.com/article/eb93150ca5c1f79a663f7c6755be3196",
+      confidence: 0.87,
+      monitoringTheme: "Climate hazards and education disruption",
+      suggestedUse:
+        "Use as global context for Burundi flood-related education interruptions.",
+      keyFacts: [
+        "UNICEF estimate cited by AP: 242 million affected children in 85 countries.",
+        "Climate hazards include heatwaves, cyclones, and flooding.",
+      ],
     },
-    bkEligible: "yes",
-    phases: [
-      { kind: "open", label: "Call opens", date: "2026-03-05" },
-      { kind: "deadline", label: "Submission deadline", date: "2026-06-30" },
-      { kind: "decision", label: "Decision", date: "2026-08-30" },
-      { kind: "kickoff", label: "Project start", date: "2026-10-01" },
-    ],
-  },
-  {
-    id: "17",
-    priority: "information",
-    category: "report",
-    title: "Water & Sanitation Status – Muyinga Schools",
-    translatedFrom: "French",
-    date: "2026-02-14",
-    source: "WASH Coordinator Muyinga",
-    summary:
-      "Survey of 14 partner schools in Muyinga: 9 have functional latrines, 6 have year-round water access. Three sites need urgent borehole rehabilitation before the dry season.",
-    originalLanguage: "French",
-    sender: "WASH Coordinator Muyinga",
-    originalText:
-      "État des lieux eau et assainissement dans les écoles de Muyinga...",
-  },
-  {
-    id: "18",
-    priority: "information",
-    category: "news",
-    title: "DR Congo: New Cross-Border Cooperation Framework Signed",
-    date: "2026-01-28",
-    source: "Reuters Africa",
-    summary:
-      "Burundi and DRC signed a cooperation framework facilitating NGO mobility and goods transport across the western border, easing logistics for organizations operating on both sides of Lake Tanganyika.",
-  },
-  {
-    id: "19",
-    priority: "relevant",
-    category: "funding",
-    title: "GIZ: Local Partner Subgrants 2026",
-    translatedFrom: "German",
-    date: "2025-12-10",
-    source: "GIZ Bonn",
-    summary:
-      "GIZ announces a streamlined subgrant facility for established local partners in the Great Lakes region. Track record of at least three years required. Reporting in French or English accepted.",
-    deadline: "2026-02-28",
-    amountRange: "EUR 20,000 – 120,000",
-    topics: ["Capacity Building", "Local Partnerships"],
-    funder: "GIZ",
-    criteria: {
-      ownContributionRequired: true,
-      nrwHeadquarters: false,
-      applyFromBurundi: true,
-    },
-    bkEligible: "check",
-    phases: [
-      { kind: "open", label: "Subgrant call opens", date: "2025-12-10" },
-      { kind: "loi", label: "Expression of interest", date: "2026-01-20" },
-      { kind: "deadline", label: "Full application due", date: "2026-02-28" },
-      { kind: "decision", label: "Decision", date: "2026-04-15" },
-    ],
-  },
-  {
-    id: "20",
-    priority: "information",
-    category: "news",
-    title: "Year in Review: Education Funding Trends in the Great Lakes Region",
-    date: "2025-11-15",
-    source: "Devex",
-    summary:
-      "Annual review highlights a 12% increase in private foundation spending on education in the Great Lakes region, while bilateral aid declined slightly. Burundi captured 8% of total regional flows.",
-  },
-  {
-    id: "21",
-    priority: "information",
-    category: "report",
-    title: "Pilot Evaluation – Digital Classrooms in Bujumbura",
-    translatedFrom: "French",
-    date: "2025-10-02",
-    source: "M&E Team Bujumbura",
-    summary:
-      "Six-month pilot evaluation of tablet-based learning in three Bujumbura schools shows a 22% improvement in reading scores. Recommendations include teacher coaching and a more robust offline content library.",
-    originalLanguage: "French",
-    sender: "M&E Team Bujumbura",
-    originalText: "Évaluation pilote des classes numériques à Bujumbura...",
-  },
-  {
-    id: "22",
-    priority: "urgent",
-    category: "report",
-    title:
-      "Press mirror: puppy trade investigation gains traction on Instagram",
-    translatedFrom: "German",
-    date: "2026-06-27",
-    source: "Google Alerts: WTG monitoring",
-    summary:
-      "A German investigative outlet and several high-reach Instagram posts report a suspected puppy trafficking network using cross-border online sales. The topic is spreading quickly on social media and may require a same-day communications check. The item connects to puppy trade, animal suffering on social media, and potential public policy follow-up.",
-    originalLanguage: "German",
-    sender: "Google Alerts Daily Digest",
-    originalText:
-      'Google Alert "Welpenhandel": Recherche zu illegalem Welpenhandel erreicht hohe Sichtbarkeit auf Instagram. URL: https://example.org/wtg/puppy-trade-instagram',
-  },
-  {
-    id: "23",
-    priority: "relevant",
-    category: "report",
-    title: "Daily animal welfare digest: donkey-hide trade in East Africa",
-    translatedFrom: "English",
-    date: "2026-06-24",
-    source: "Google Alerts: WTG monitoring",
-    summary:
-      "Several regional outlets report renewed debate about the donkey-hide trade and its impact on working animals and rural livelihoods in East Africa. The coverage is relevant for international animal welfare monitoring and development cooperation, but no immediate response deadline is visible. The item should be kept for the next press mirror and possible project-context review.",
-    originalLanguage: "English",
-    sender: "Google Alerts Daily Digest",
-    originalText:
-      "Daily digest: donkey-hide trade, working animals, East Africa, rural livelihoods. URL: https://example.org/wtg/donkey-hide-east-africa",
   },
 ];
