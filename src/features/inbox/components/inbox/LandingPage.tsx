@@ -32,7 +32,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           <Image
             src="/brand/afriki-logo.svg"
             alt="Afriki logo"
-            width={164}
+            width={128}
             height={49}
             priority
             className="h-10 w-auto"
@@ -49,12 +49,8 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
       </header>
 
       <main>
-        <section className="relative mx-auto flex min-h-[calc(100svh-72px)] w-full max-w-7xl items-center overflow-hidden px-5 pb-16 pt-6 sm:px-8">
-          <div className="pointer-events-none absolute right-[-7rem] top-10 hidden w-[690px] opacity-95 lg:block xl:right-0">
-            <ProductMockup />
-          </div>
-
-          <div className="relative z-10 max-w-3xl">
+        <section className="relative mx-auto grid min-h-[calc(100svh-72px)] w-full max-w-7xl items-center gap-10 overflow-hidden px-5 pb-16 pt-6 sm:px-8 lg:grid-cols-[minmax(0,0.95fr)_minmax(430px,0.85fr)]">
+          <div className="relative z-10 max-w-[680px]">
             <div className="mb-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[oklch(0.44_0.045_150)]">
               An intelligent inbox for small NGOs
             </div>
@@ -92,6 +88,10 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
                 Built around real BK and WTG workflows
               </div>
             </div>
+          </div>
+
+          <div className="relative z-0 hidden min-w-0 lg:block">
+            <ProductMockup />
           </div>
 
           <div className="absolute bottom-0 left-5 right-5 h-px bg-[oklch(0.84_0.018_120)] sm:left-8 sm:right-8" />
@@ -517,9 +517,12 @@ function PartnerLogo({ org }: { org: PartnerOrg }) {
       <Image
         src={org.logoSrc}
         alt={org.logoAlt}
-        width={org.id === "bk" ? 170 : 74}
-        height={org.id === "bk" ? 56 : 74}
-        className="max-h-16 w-auto object-contain"
+        width={org.id === "bk" ? 220 : 74}
+        height={org.id === "bk" ? 74 : 74}
+        className={cn(
+          "w-auto object-contain",
+          org.id === "bk" ? "max-h-20" : "max-h-16",
+        )}
       />
       <div className="mt-3 text-[11px] font-semibold text-muted-foreground">
         {org.description}

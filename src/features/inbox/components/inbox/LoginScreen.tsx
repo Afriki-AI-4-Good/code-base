@@ -77,13 +77,16 @@ export function LoginScreen({
                     : "border-border hover:border-primary/40",
                 )}
               >
-                <div className="flex h-16 w-full items-center justify-center rounded-lg bg-white">
+                <div className="flex h-20 w-full items-center justify-center rounded-lg bg-white">
                   <Image
                     src={item.logoSrc}
                     alt={item.logoAlt}
-                    width={item.id === "bk" ? 150 : 72}
-                    height={item.id === "bk" ? 50 : 72}
-                    className="max-h-14 w-auto object-contain"
+                    width={item.id === "bk" ? 220 : 72}
+                    height={item.id === "bk" ? 74 : 72}
+                    className={cn(
+                      "w-auto object-contain",
+                      item.id === "bk" ? "max-h-16" : "max-h-14",
+                    )}
                     priority
                   />
                 </div>
