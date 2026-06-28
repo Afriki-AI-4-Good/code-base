@@ -4,6 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 
 import { AgentView } from "@/components/inbox/AgentView";
 import { CardDetailSheet } from "@/components/inbox/CardDetailSheet";
+import { ExperimentalLabView } from "@/components/inbox/ExperimentalLabView";
 import { FundingView } from "@/components/inbox/FundingView";
 import type { CategoryFilter, ViewMode } from "@/components/inbox/InboxHeader";
 import { LandingPage } from "@/components/inbox/LandingPage";
@@ -19,7 +20,6 @@ import { NewsView } from "@/components/inbox/NewsView";
 import { OnboardingDialog } from "@/components/inbox/OnboardingDialog";
 import { ReportsView } from "@/components/inbox/ReportsView";
 import { Sidebar } from "@/components/inbox/Sidebar";
-import { SwipeReviewView } from "@/components/inbox/SwipeReviewView";
 import {
   filterByTime,
   TimePills,
@@ -178,7 +178,7 @@ export function InboxApp() {
           {section === "triage" ? (
             <>
               <MapBackdrop entries={filtered} dimmed />
-              <SwipeReviewView entries={filtered} onSelect={handleSelect} />
+              <ExperimentalLabView entries={filtered} onSelect={handleSelect} />
             </>
           ) : section === "funding" ? (
             <>

@@ -31,7 +31,7 @@ const items = [
 
 const experimentalItem = {
   id: "triage",
-  label: "Triage Lab",
+  label: "Experiments",
   icon: PanelsTopLeft,
 };
 

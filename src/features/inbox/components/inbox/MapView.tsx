@@ -12,6 +12,7 @@ import { sourceLocations } from "@/data/source-locations";
 import { cn } from "@/lib/utils";
 import type { InboxEntry } from "@/types/inbox";
 import { categoryLabel, formatDate, priorityMeta } from "./priority";
+import { countryMeta, globalCountry } from "./source-meta";
 
 export type MapViewMode = "list" | "map";
 
@@ -66,6 +67,7 @@ export function MapView({
           key: k,
           coords: first._loc.coords,
           locName: first._loc.name,
+          countryId: first._loc.countryId,
           items,
         },
       ];
@@ -89,9 +91,11 @@ export function MapView({
   const [activeId, setActiveId] = useState<string | null>(null);
   const [mapCenter, setMapCenter] = useState<[number, number]>(DEFAULT_CENTER);
   const [mapZoom, setMapZoom] = useState(1);
+  const activeGroup = grouped.find((g) => g.key === activeKey) ?? null;
 
   const listRef = useRef<HTMLUListElement>(null);
   const groupRefs = useRef<Map<string, HTMLLIElement>>(new Map());
+  const itemRefs = useRef<Map<string, HTMLLIElement>>(new Map());
 
   // When activeKey changes via map click, scroll the right panel.
   useEffect(() => {
@@ -102,11 +106,26 @@ export function MapView({
     }
   }, [activeKey]);
 
+  useEffect(() => {
+    if (!activeId) return;
+    const el = itemRefs.current.get(activeId);
+    if (el && listRef.current) {
+      el.scrollIntoView({ behavior: "smooth", block: "nearest" });
+    }
+  }, [activeId]);
+
   const focusGroup = (key: string, coords: [number, number], id?: string) => {
     setActiveKey(key);
     setActiveId(id ?? null);
     setMapCenter(coords);
     setMapZoom(2.2);
+  };
+
+  const focusCountry = (countryId: string) => {
+    const target = grouped.find((g) => g.countryId === countryId);
+    const first = target?.items[0];
+    if (!target) return;
+    focusGroup(target.key, target.coords, first?.id);
   };
 
   const viewTabs: {
@@ -142,6 +161,7 @@ export function MapView({
                 geographies.map((geo) => {
                   const id = String(geo.id);
                   const pri = countryPriority.get(id);
+                  const isActiveCountry = activeGroup?.countryId === id;
                   const baseFill = pri
                     ? priorityHex(pri)
                     : "oklch(0.96 0.004 264)";
@@ -149,21 +169,30 @@ export function MapView({
                     <Geography
                       key={geo.rsmKey}
                       geography={geo}
+                      onClick={() => {
+                        if (pri) focusCountry(id);
+                      }}
                       style={{
                         default: {
                           fill: baseFill,
-                          fillOpacity: pri ? 0.32 : 1,
+                          fillOpacity: isActiveCountry ? 0.58 : pri ? 0.32 : 1,
                           stroke: pri
                             ? priorityHex(pri)
                             : "oklch(0.9 0.005 264)",
-                          strokeWidth: pri ? 0.9 / mapZoom : 0.4 / mapZoom,
+                          strokeWidth: isActiveCountry
+                            ? 1.6 / mapZoom
+                            : pri
+                              ? 0.9 / mapZoom
+                              : 0.4 / mapZoom,
                           outline: "none",
+                          cursor: pri ? "pointer" : "default",
                           transition: "fill-opacity 200ms",
                         },
                         hover: {
                           fill: baseFill,
-                          fillOpacity: pri ? 0.5 : 1,
+                          fillOpacity: pri ? 0.62 : 1,
                           outline: "none",
+                          cursor: pri ? "pointer" : "default",
                         },
                         pressed: { outline: "none" },
                       }}
@@ -336,6 +365,7 @@ export function MapView({
         <ul ref={listRef} className="flex-1 overflow-y-auto p-3 space-y-4">
           {grouped.map((g) => {
             const isActiveGroup = activeKey === g.key;
+            const country = countryMeta[g.countryId] ?? globalCountry;
             return (
               <li
                 key={g.key}
@@ -362,7 +392,12 @@ export function MapView({
                       ),
                     }}
                   />
-                  <span className="text-xs font-semibold">{g.locName}</span>
+                  <span className="text-base leading-none" aria-hidden="true">
+                    {country.flag}
+                  </span>
+                  <span className="min-w-0 truncate text-xs font-semibold">
+                    {g.locName}
+                  </span>
                   <span className="text-[10px] ml-auto">{g.items.length}</span>
                 </button>
                 <ul className="mt-1.5 space-y-1.5 pl-1">
@@ -372,6 +407,10 @@ export function MapView({
                     return (
                       <li
                         key={e.id}
+                        ref={(el) => {
+                          if (el) itemRefs.current.set(e.id, el);
+                          else itemRefs.current.delete(e.id);
+                        }}
                         className={cn(
                           "group cursor-pointer rounded-lg border bg-white/70 p-2.5 transition-all",
                           isActive
