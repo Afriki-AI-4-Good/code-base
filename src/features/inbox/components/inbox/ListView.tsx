@@ -23,7 +23,10 @@ export function ListView({
             <div className="flex items-center gap-2 mb-3">
               <span className={cn("h-2 w-2 rounded-full", meta.dot)} />
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
-                {meta.label} ({items.length})
+                {meta.label}{" "}
+                <span className={cn("tabular-nums", meta.chipText)}>
+                  ({items.length})
+                </span>
               </h2>
             </div>
             <div className="grid gap-3 md:grid-cols-2">

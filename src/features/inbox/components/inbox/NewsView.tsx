@@ -9,7 +9,7 @@ import {
   Sparkles,
   X,
 } from "lucide-react";
-import { useMemo, useState } from "react";
+import { useMemo, useRef, useState } from "react";
 import { sourceLocations } from "@/data/source-locations";
 import { cn } from "@/lib/utils";
 import type { InboxEntry, NewsEntry, Priority } from "@/types/inbox";
@@ -75,6 +75,8 @@ export function NewsView({
   const [time, setTime] = useState<TimeRange>("all");
   const [priority, setPriority] = useState<PriorityFilter>("all");
   const [query, setQuery] = useState("");
+  const [filtersHidden, setFiltersHidden] = useState(false);
+  const lastScrollTop = useRef(0);
 
   const filtered = useMemo(() => {
     let list = news;
@@ -107,6 +109,20 @@ export function NewsView({
     setPriority("all");
     setQuery("");
   };
+  const handleFeedScroll = (event: React.UIEvent<HTMLDivElement>) => {
+    const nextTop = event.currentTarget.scrollTop;
+    const delta = nextTop - lastScrollTop.current;
+
+    if (nextTop < 12) {
+      setFiltersHidden(false);
+    } else if (delta > 10) {
+      setFiltersHidden(true);
+    } else if (delta < -10) {
+      setFiltersHidden(false);
+    }
+
+    lastScrollTop.current = nextTop;
+  };
 
   return (
     <div className="absolute inset-x-4 top-4 bottom-4 z-10 flex flex-col overflow-hidden rounded-2xl border border-white/40 bg-white/75 shadow-xl backdrop-blur-xl">
@@ -127,17 +143,25 @@ export function NewsView({
             </p>
           </div>
           <div className="flex min-w-[420px] flex-wrap items-end justify-end gap-2">
-            <div className="grid flex-1 gap-2 sm:grid-cols-3">
+            <div className="grid flex-1 gap-2 sm:grid-cols-4">
               <NewsStat label="Articles" value={String(news.length)} />
               <NewsStat
                 label="Sources"
                 value={String(new Set(news.map((item) => item.source)).size)}
               />
               <NewsStat
+                label="Urgent"
+                value={String(
+                  news.filter((item) => item.priority === "urgent").length,
+                )}
+                tone="urgent"
+              />
+              <NewsStat
                 label="Relevant"
                 value={String(
                   news.filter((item) => item.priority === "relevant").length,
                 )}
+                tone="relevant"
               />
             </div>
             {onSync && (
@@ -163,7 +187,14 @@ export function NewsView({
       </div>
 
       {/* Unified filter bar — three rows, identical pill grammar */}
-      <div className="space-y-2 border-b border-border/60 bg-white/50 px-6 py-3">
+      <div
+        className={cn(
+          "space-y-2 overflow-hidden border-b border-border/60 bg-white/50 px-6 transition-all duration-300 ease-out",
+          filtersHidden
+            ? "max-h-0 translate-y-[-8px] border-transparent py-0 opacity-0"
+            : "max-h-72 translate-y-0 py-3 opacity-100",
+        )}
+      >
         <div className="flex flex-wrap items-center gap-2">
           <div className="relative min-w-72 flex-1">
             <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
@@ -257,7 +288,7 @@ export function NewsView({
       </div>
 
       {/* Masonry waterfall */}
-      <div className="flex-1 overflow-y-auto p-6">
+      <div className="flex-1 overflow-y-auto p-6" onScroll={handleFeedScroll}>
         {filtered.length === 0 ? (
           <div className="grid h-full place-items-center text-sm text-muted-foreground">
             No articles match the selected filters.
@@ -286,23 +317,25 @@ function NewsMasonryCard({
 }) {
   const c = countryDisplay(countryKeyOf(entry));
   const metadata = entry.agentMetadata;
+  const hasImage = Boolean(entry.imageUrl);
   return (
     <div className="group">
-      {/* Floating meta badges over the image */}
       <div className="relative">
         <InboxCard entry={entry} onClick={onClick} />
-        <div className="pointer-events-none absolute left-3 top-3 z-20 flex items-center gap-1.5">
-          <span className="inline-flex items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-md">
-            <span className="text-sm leading-none">{c.flag}</span>
-            {c.name}
-          </span>
-        </div>
-        <div className="pointer-events-none absolute right-3 top-3 z-20">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-white/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-sm backdrop-blur-md">
-            <SourceDot name={entry.source} size="sm" />
-            <span className="max-w-[120px] truncate">{entry.source}</span>
-          </span>
-        </div>
+        {hasImage && (
+          <div className="pointer-events-none absolute inset-x-3 top-3 z-20 flex min-w-0 items-start justify-between gap-2">
+            <span className="inline-flex shrink-0 items-center gap-1 rounded-full bg-black/55 px-2 py-0.5 text-[10px] font-medium text-white backdrop-blur-md">
+              <span className="text-sm leading-none">{c.flag}</span>
+              {c.name}
+            </span>
+            <span className="inline-flex min-w-0 items-center gap-1.5 rounded-full bg-white/85 px-2 py-0.5 text-[10px] font-medium text-foreground shadow-sm backdrop-blur-md">
+              <SourceDot name={entry.source} size="sm" />
+              <span className="min-w-0 max-w-[120px] truncate">
+                {entry.source}
+              </span>
+            </span>
+          </div>
+        )}
         <div className="mt-2 rounded-lg border border-border bg-white p-3 shadow-sm">
           <div className="mb-2 flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">
             <Sparkles className="h-3.5 w-3.5" />
@@ -311,13 +344,13 @@ function NewsMasonryCard({
           <div className="grid gap-2 text-[11px]">
             <div>
               <span className="font-semibold text-foreground">Theme: </span>
-              <span className="text-muted-foreground">
+              <span className="break-words text-muted-foreground">
                 {metadata?.monitoringTheme ?? "Pending classification"}
               </span>
             </div>
             <div>
               <span className="font-semibold text-foreground">Use: </span>
-              <span className="text-muted-foreground">
+              <span className="break-words text-muted-foreground">
                 {metadata?.suggestedUse ?? "Keep for review"}
               </span>
             </div>
@@ -337,7 +370,7 @@ function NewsMasonryCard({
               {metadata.keyFacts.slice(0, 2).map((fact) => (
                 <li key={fact} className="flex gap-2">
                   <span className="mt-2 h-1 w-1 shrink-0 rounded-full bg-primary" />
-                  <span>{fact}</span>
+                  <span className="break-words">{fact}</span>
                 </li>
               ))}
             </ul>
@@ -348,16 +381,35 @@ function NewsMasonryCard({
   );
 }
 
-function NewsStat({ label, value }: { label: string; value: string }) {
+function NewsStat({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "urgent" | "relevant" | "information";
+}) {
   return (
     <div className="rounded-lg border border-border bg-white px-3 py-2 shadow-sm">
       <div className="text-[10px] font-semibold uppercase text-muted-foreground">
         {label}
       </div>
-      <div className="text-lg font-black tabular-nums">{value}</div>
+      <div
+        className={cn("text-lg font-black tabular-nums", statToneClass[tone])}
+      >
+        {value}
+      </div>
     </div>
   );
 }
+
+const statToneClass = {
+  neutral: "text-foreground",
+  urgent: "text-[oklch(0.45_0.12_22)]",
+  relevant: "text-[oklch(0.4_0.07_80)]",
+  information: "text-[oklch(0.35_0.05_145)]",
+};
 
 // ---------- Filter row scaffolding ----------
 function FilterRow({

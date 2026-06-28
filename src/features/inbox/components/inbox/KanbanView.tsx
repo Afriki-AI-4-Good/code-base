@@ -24,8 +24,14 @@ export function KanbanView({
               <h2 className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 {meta.label}
               </h2>
-              <span className="text-xs text-muted-foreground">
-                ({items.length})
+              <span
+                className={cn(
+                  "rounded-full px-1.5 text-[10px] font-bold tabular-nums",
+                  meta.chipBg,
+                  meta.chipText,
+                )}
+              >
+                {items.length}
               </span>
             </div>
             <div className="flex flex-col gap-3">

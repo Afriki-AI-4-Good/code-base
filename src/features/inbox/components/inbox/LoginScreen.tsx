@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Lock, Mail } from "lucide-react";
 import Image from "next/image";
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,9 @@ import {
 } from "@/lib/profile";
 import { cn } from "@/lib/utils";
 
+const DEMO_EMAIL = "demo@afriki.org";
+const DEMO_PASSWORD = "demo2026";
+
 export function LoginScreen({
   initialOrg = "bk",
   onLogin,
@@ -23,12 +26,16 @@ export function LoginScreen({
   onBack: () => void;
 }) {
   const [org, setOrg] = useState<OrgId>(initialOrg);
-  const [username, setUsername] = useState("");
-  const canContinue = normalizeUsername(username).length > 0;
+  const [email, setEmail] = useState(DEMO_EMAIL);
+  const [password, setPassword] = useState(DEMO_PASSWORD);
+  const normalizedEmail = email.trim().toLowerCase();
+  const canContinue =
+    /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(normalizedEmail) &&
+    password.trim().length > 0;
 
   const handleSubmit = () => {
     if (!canContinue) return;
-    onLogin({ org, username: normalizeUsername(username) });
+    onLogin({ org, username: normalizeUsername(normalizedEmail) });
   };
 
   return (
@@ -91,24 +98,51 @@ export function LoginScreen({
           })}
         </div>
 
-        <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-          <Input
-            value={username}
-            onChange={(event) => setUsername(event.target.value)}
-            onKeyDown={(event) => {
-              if (event.key === "Enter") handleSubmit();
-            }}
-            placeholder="Username"
-            className="h-11 bg-white"
-          />
-          <Button
-            type="button"
-            onClick={handleSubmit}
-            disabled={!canContinue}
-            className="h-11 shrink-0 px-6"
-          >
-            Continue
-          </Button>
+        <div className="mt-5 rounded-xl border border-border bg-[oklch(0.99_0.004_110)] p-4">
+          <div className="mb-3 flex items-center justify-between gap-3">
+            <div>
+              <div className="text-sm font-semibold">Demo access</div>
+              <div className="text-xs text-muted-foreground">
+                Organization, email, and password are prefilled for the demo.
+              </div>
+            </div>
+          </div>
+          <div className="grid gap-3 md:grid-cols-[1fr_1fr_auto]">
+            <div className="relative">
+              <Mail className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="email"
+                value={email}
+                onChange={(event) => setEmail(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") handleSubmit();
+                }}
+                placeholder="Email"
+                className="h-11 bg-white pl-9"
+              />
+            </div>
+            <div className="relative">
+              <Lock className="pointer-events-none absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-muted-foreground" />
+              <Input
+                type="password"
+                value={password}
+                onChange={(event) => setPassword(event.target.value)}
+                onKeyDown={(event) => {
+                  if (event.key === "Enter") handleSubmit();
+                }}
+                placeholder="Password"
+                className="h-11 bg-white pl-9"
+              />
+            </div>
+            <Button
+              type="button"
+              onClick={handleSubmit}
+              disabled={!canContinue}
+              className="h-11 shrink-0 px-6"
+            >
+              Continue
+            </Button>
+          </div>
         </div>
       </div>
     </div>

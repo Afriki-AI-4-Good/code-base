@@ -93,6 +93,7 @@ export function ReportsView({
             icon={AlertTriangle}
             label="Needs action"
             value={String(counts.urgent)}
+            tone="urgent"
           />
           <StatTile
             icon={Languages}
@@ -100,6 +101,7 @@ export function ReportsView({
             value={String(
               reports.filter((report) => report.translatedFrom).length,
             )}
+            tone="positive"
           />
           <StatTile
             icon={UserRound}
@@ -192,10 +194,12 @@ function StatTile({
   icon: Icon,
   label,
   value,
+  tone = "neutral",
 }: {
   icon: typeof Mail;
   label: string;
   value: string;
+  tone?: "neutral" | "urgent" | "relevant" | "positive";
 }) {
   return (
     <div className="flex items-center gap-3 rounded-lg border border-border bg-white px-3 py-3 shadow-sm">
@@ -206,7 +210,11 @@ function StatTile({
         <div className="text-[10px] font-semibold uppercase text-muted-foreground">
           {label}
         </div>
-        <div className="text-lg font-black tabular-nums">{value}</div>
+        <div
+          className={cn("text-lg font-black tabular-nums", statToneClass[tone])}
+        >
+          {value}
+        </div>
       </div>
     </div>
   );
@@ -239,6 +247,7 @@ function FilterButton({
         className={cn(
           "rounded px-1.5 text-[10px] tabular-nums",
           active ? "bg-background/20" : "bg-muted",
+          !active && reportFilterCountClass[item.id],
         )}
       >
         {count}
@@ -246,6 +255,20 @@ function FilterButton({
     </button>
   );
 }
+
+const statToneClass = {
+  neutral: "text-foreground",
+  urgent: "text-[oklch(0.45_0.12_22)]",
+  relevant: "text-[oklch(0.4_0.07_80)]",
+  positive: "text-[oklch(0.35_0.05_145)]",
+};
+
+const reportFilterCountClass: Record<ReportFilter, string> = {
+  all: "text-muted-foreground",
+  urgent: "text-[oklch(0.45_0.12_22)]",
+  relevant: "text-[oklch(0.4_0.07_80)]",
+  information: "text-[oklch(0.35_0.05_145)]",
+};
 
 function EmptyReports() {
   return (
@@ -273,15 +296,15 @@ function ReportMailCard({
       type="button"
       onClick={onPreview}
       className={cn(
-        "group relative min-h-64 rounded-lg border bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
+        "group relative flex min-h-64 flex-col rounded-lg border bg-white p-4 text-left shadow-sm transition-all hover:-translate-y-0.5 hover:shadow-md",
         active ? "border-primary ring-2 ring-primary/15" : "border-border",
       )}
     >
       <div
         className={cn("absolute inset-y-0 left-0 w-1 rounded-l-lg", meta.bar)}
       />
-      <div className="flex items-start justify-between gap-3 pl-1">
-        <div className="flex flex-wrap items-center gap-2">
+      <div className="flex min-w-0 items-start justify-between gap-3 pl-1">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <Badge className={cn("border-0", meta.chipBg, meta.chipText)}>
             {meta.label}
           </Badge>
@@ -293,24 +316,24 @@ function ReportMailCard({
             </span>
           )}
         </div>
-        <div className="text-[11px] text-muted-foreground">
+        <div className="shrink-0 text-[11px] text-muted-foreground">
           {formatDate(report.date)}
         </div>
       </div>
 
-      <h2 className="mt-3 line-clamp-2 pl-1 text-base font-bold leading-snug tracking-tight">
+      <h2 className="mt-3 line-clamp-2 break-words pl-1 text-base font-bold leading-snug tracking-tight">
         {report.title}
       </h2>
-      <div className="mt-2 flex items-center gap-2 pl-1 text-xs text-muted-foreground">
-        <UserRound className="h-3.5 w-3.5" />
-        <span className="truncate">{report.sender}</span>
+      <div className="mt-2 flex min-w-0 items-center gap-2 pl-1 text-xs text-muted-foreground">
+        <UserRound className="h-3.5 w-3.5 shrink-0" />
+        <span className="min-w-0 truncate">{report.sender}</span>
       </div>
-      <p className="mt-3 line-clamp-4 pl-1 text-sm leading-6 text-muted-foreground">
+      <p className="mt-3 line-clamp-4 break-words pl-1 text-sm leading-6 text-muted-foreground">
         {report.summary}
       </p>
 
-      <div className="absolute inset-x-4 bottom-4 flex items-center justify-between gap-3 pl-1">
-        <div className="text-[11px] text-muted-foreground">
+      <div className="mt-auto flex min-w-0 items-center justify-between gap-3 pl-1 pt-4">
+        <div className="min-w-0 truncate text-[11px] text-muted-foreground">
           Source: {report.source}
         </div>
         <Button
