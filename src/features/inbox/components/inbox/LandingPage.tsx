@@ -2,9 +2,12 @@
 
 import {
   ArrowRight,
-  Compass,
+  CheckCircle2,
+  Clock3,
   Globe2,
+  Inbox,
   Landmark,
+  Languages,
   MailCheck,
   Newspaper,
   ShieldCheck,
@@ -12,24 +15,25 @@ import {
 import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { ORGS } from "@/lib/profile";
+import { cn } from "@/lib/utils";
 
 const PARTNER_ORGS = ORGS.filter((org) => org.id !== "new_cause");
 
 export function LandingPage({ onLogin }: { onLogin: () => void }) {
   return (
-    <div className="min-h-screen bg-[oklch(0.985_0.008_100)] text-foreground">
+    <div className="min-h-screen bg-[oklch(0.982_0.006_140)] text-foreground">
       <header className="mx-auto flex w-full max-w-7xl items-center justify-between px-5 py-4 sm:px-8">
         <button
           type="button"
           onClick={onLogin}
-          className="flex items-center gap-3 text-left"
+          className="flex items-center text-left"
           aria-label="Open organization login"
         >
           <Image
             src="/brand/afriki-logo.svg"
             alt="Afriki logo"
-            width={140}
-            height={40}
+            width={164}
+            height={49}
             priority
             className="h-10 w-auto"
           />
@@ -37,7 +41,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
         <Button
           type="button"
           onClick={onLogin}
-          className="h-10 gap-2 bg-[oklch(0.26_0.04_170)] px-4 text-white hover:bg-[oklch(0.32_0.05_170)]"
+          className="h-10 gap-2 rounded-lg bg-[oklch(0.28_0.035_150)] px-4 text-white hover:bg-[oklch(0.34_0.045_150)]"
         >
           Log in
           <ArrowRight className="h-4 w-4" />
@@ -45,149 +49,73 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
       </header>
 
       <main>
-        <section className="mx-auto grid min-h-[calc(100vh-72px)] w-full max-w-7xl items-center gap-8 px-5 pb-12 pt-4 sm:px-8 lg:grid-cols-[0.95fr_1.05fr]">
-          <div className="max-w-xl">
-            <div className="mb-5 inline-flex items-center gap-2 rounded-md border border-[oklch(0.77_0.07_90)] bg-[oklch(0.96_0.025_90)] px-3 py-1 text-xs font-semibold text-[oklch(0.34_0.06_90)]">
-              <Compass className="h-3.5 w-3.5" />
-              Afrika + KI, shaped for NGO operations
+        <section className="relative mx-auto flex min-h-[calc(100svh-72px)] w-full max-w-7xl items-center overflow-hidden px-5 pb-16 pt-6 sm:px-8">
+          <div className="pointer-events-none absolute right-[-7rem] top-10 hidden w-[690px] opacity-95 lg:block xl:right-0">
+            <ProductMockup />
+          </div>
+
+          <div className="relative z-10 max-w-3xl">
+            <div className="mb-7 text-[11px] font-semibold uppercase tracking-[0.42em] text-[oklch(0.44_0.045_150)]">
+              An intelligent inbox for small NGOs
             </div>
-            <h1 className="text-balance text-4xl font-black tracking-tight sm:text-5xl lg:text-6xl">
-              Intelligence for teams working across borders.
+            <h1 className="max-w-4xl text-balance text-[clamp(3.3rem,10vw,8.5rem)] font-black leading-[0.86] tracking-tight text-[oklch(0.22_0.012_260)]">
+              afriki
+              <span className="ml-2 inline-block h-[0.14em] w-[0.14em] rounded-full bg-[oklch(0.68_0.045_145)] align-baseline" />
             </h1>
-            <p className="mt-5 max-w-lg text-base leading-7 text-muted-foreground">
-              Afriki turns funding calls, field updates, media monitoring, and
-              received project reports into a calm workspace for teams that need
-              to understand context before they act.
+            <p className="mt-7 max-w-3xl text-balance text-2xl font-medium leading-snug text-[oklch(0.34_0.012_260)] sm:text-3xl">
+              Turning the daily flood of African news and funding calls into a{" "}
+              <span className="font-black text-[oklch(0.25_0.05_145)]">
+                triaged inbox
+              </span>{" "}
+              for small NGOs.
             </p>
-            <div className="mt-7 flex flex-col gap-3 sm:flex-row">
+            <div className="mt-7 flex flex-wrap items-center gap-x-5 gap-y-3 text-sm font-medium text-muted-foreground">
+              <PriorityDot color="bg-[oklch(0.72_0.085_28)]" label="Urgent" />
+              <PriorityDot color="bg-[oklch(0.79_0.085_78)]" label="Relevant" />
+              <PriorityDot
+                color="bg-[oklch(0.68_0.045_145)]"
+                label="Information"
+              />
+            </div>
+
+            <div className="mt-9 flex flex-col gap-3 sm:flex-row sm:items-center">
               <Button
                 type="button"
                 onClick={onLogin}
-                className="h-11 gap-2 bg-[oklch(0.26_0.04_170)] px-5 text-white hover:bg-[oklch(0.32_0.05_170)]"
+                className="h-11 gap-2 rounded-lg bg-[oklch(0.28_0.035_150)] px-5 text-white hover:bg-[oklch(0.34_0.045_150)]"
               >
                 Enter workspace
                 <ArrowRight className="h-4 w-4" />
               </Button>
               <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                <ShieldCheck className="h-4 w-4 text-[oklch(0.47_0.11_145)]" />
-                Organization workspaces, simple team access
+                <ShieldCheck className="h-4 w-4 text-[oklch(0.48_0.065_145)]" />
+                Built around real BK and WTG workflows
               </div>
             </div>
           </div>
 
-          <div className="relative">
-            <div className="absolute -left-4 top-8 hidden h-24 w-24 rotate-[-7deg] rounded-lg border border-[oklch(0.82_0.05_65)] bg-[oklch(0.98_0.02_65)] p-3 text-xs font-semibold shadow-lg md:block">
-              <div className="text-[10px] uppercase text-muted-foreground">
-                Today
-              </div>
-              <div className="mt-2">3 deadlines moved into action</div>
-            </div>
-            <div className="rounded-xl border border-[oklch(0.84_0.025_130)] bg-white p-3 shadow-2xl">
-              <div className="flex items-center justify-between border-b border-border px-3 pb-3">
-                <div>
-                  <div className="text-xs font-semibold uppercase text-muted-foreground">
-                    Afriki workspace
-                  </div>
-                  <div className="text-lg font-bold">
-                    Sources, urgency, outputs
-                  </div>
-                </div>
-                <div className="flex -space-x-2">
-                  {ORGS.map((org) => (
-                    <div
-                      key={org.id}
-                      className="grid h-10 w-10 place-items-center rounded-full border border-border bg-white p-1"
-                    >
-                      <Image
-                        src={org.logoSrc}
-                        alt={org.logoAlt}
-                        width={org.id === "bk" ? 34 : 25}
-                        height={org.id === "bk" ? 12 : 25}
-                        className="max-h-7 w-auto object-contain"
-                        priority
-                      />
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              <div className="grid gap-3 p-3 md:grid-cols-[0.9fr_1.1fr]">
-                <div className="min-h-72 rounded-lg border border-[oklch(0.83_0.04_145)] bg-[oklch(0.93_0.035_145)] p-4">
-                  <div className="mb-4 flex items-center justify-between">
-                    <Globe2 className="h-5 w-5 text-[oklch(0.34_0.07_170)]" />
-                    <span className="rounded bg-white px-2 py-1 text-[10px] font-semibold uppercase text-muted-foreground">
-                      Source map
-                    </span>
-                  </div>
-                  <div className="relative h-48 rounded-lg bg-[oklch(0.78_0.055_155)]">
-                    <span className="absolute left-[18%] top-[36%] h-3 w-3 rounded-full bg-[oklch(0.7_0.17_35)] ring-4 ring-white/70" />
-                    <span className="absolute left-[51%] top-[55%] h-3 w-3 rounded-full bg-[oklch(0.42_0.12_215)] ring-4 ring-white/70" />
-                    <span className="absolute left-[70%] top-[28%] h-3 w-3 rounded-full bg-[oklch(0.54_0.12_145)] ring-4 ring-white/70" />
-                    <div className="absolute bottom-3 left-3 right-3 rounded-md bg-white/90 p-3 shadow-sm">
-                      <div className="text-xs font-semibold">
-                        Burundi project email
-                      </div>
-                      <div className="mt-1 text-[11px] text-muted-foreground">
-                        Translated, tagged, and ready for review.
-                      </div>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="space-y-3">
-                  {SIGNALS.map((signal) => {
-                    const Icon = signal.icon;
-                    return (
-                      <article
-                        key={signal.title}
-                        className="rounded-lg border border-border bg-[oklch(0.99_0.004_110)] p-4"
-                      >
-                        <div className="flex items-start gap-3">
-                          <div className={signal.iconClass}>
-                            <Icon className="h-4 w-4" />
-                          </div>
-                          <div className="min-w-0 flex-1">
-                            <div className="flex items-center justify-between gap-2">
-                              <h2 className="truncate text-sm font-bold">
-                                {signal.title}
-                              </h2>
-                              <span className="shrink-0 text-[10px] font-semibold uppercase text-muted-foreground">
-                                {signal.owner}
-                              </span>
-                            </div>
-                            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                              {signal.body}
-                            </p>
-                          </div>
-                        </div>
-                      </article>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
+          <div className="absolute bottom-0 left-5 right-5 h-px bg-[oklch(0.84_0.018_120)] sm:left-8 sm:right-8" />
         </section>
 
-        <section className="border-y border-[oklch(0.86_0.025_110)] bg-white">
-          <div className="mx-auto grid max-w-7xl gap-5 px-5 py-8 sm:px-8 lg:grid-cols-[0.7fr_1.3fr]">
+        <section className="border-b border-[oklch(0.84_0.018_120)] bg-white/72">
+          <div className="mx-auto grid max-w-7xl gap-5 px-5 py-8 sm:px-8 lg:grid-cols-[0.75fr_1.25fr]">
             <div>
-              <div className="text-xs font-semibold uppercase text-muted-foreground">
-                Partners
+              <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                Designed with
               </div>
               <h2 className="mt-2 text-2xl font-black tracking-tight">
-                A focused partner network.
+                Real partners, real operating pressure.
               </h2>
-              <p className="mt-2 text-sm leading-6 text-muted-foreground">
-                Afriki brings product, social-impact, and NGO expertise into one
-                operational workspace.
+              <p className="mt-2 max-w-md text-sm leading-6 text-muted-foreground">
+                Afriki brings social AI, field experience, and two NGO use cases
+                into one calm workspace.
               </p>
             </div>
             <div className="grid gap-3 sm:grid-cols-3">
               <PartnerImage
                 src="/partners/tum-social-ai-club-logo.svg"
                 alt="TUM Social AI Club logo"
-                label="Research and social AI community"
+                label="Social AI community"
                 width={210}
                 height={64}
               />
@@ -198,25 +126,82 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
           </div>
         </section>
 
-        <section className="mx-auto max-w-7xl px-5 py-10 sm:px-8">
-          <div className="mb-5 flex flex-wrap items-end justify-between gap-4">
+        <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+          <div className="mb-6 flex flex-wrap items-end justify-between gap-4">
             <div>
-              <div className="text-xs font-semibold uppercase text-muted-foreground">
-                Project references
+              <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+                What Afriki does
               </div>
-              <h2 className="mt-2 text-2xl font-black tracking-tight">
-                Workflows grounded in real NGO needs.
+              <h2 className="mt-2 max-w-2xl text-3xl font-black tracking-tight">
+                From scattered raw sources to a clean, role-aware inbox.
               </h2>
             </div>
             <Button
               type="button"
               variant="outline"
               onClick={onLogin}
-              className="h-10"
+              className="h-10 rounded-lg bg-white"
             >
               View workspace
               <ArrowRight className="h-4 w-4" />
             </Button>
+          </div>
+
+          <div className="grid gap-4 md:grid-cols-4">
+            {PIPELINE.map((item, index) => {
+              const Icon = item.icon;
+              return (
+                <article
+                  key={item.title}
+                  className="min-h-48 rounded-lg border border-[oklch(0.86_0.018_120)] bg-white p-5 shadow-sm"
+                >
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="grid h-10 w-10 place-items-center rounded-lg bg-[oklch(0.94_0.024_145)] text-[oklch(0.34_0.055_145)]">
+                      <Icon className="h-5 w-5" />
+                    </div>
+                    <span className="font-mono text-xs text-muted-foreground">
+                      0{index + 1}
+                    </span>
+                  </div>
+                  <h3 className="mt-5 text-lg font-black tracking-tight">
+                    {item.title}
+                  </h3>
+                  <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                    {item.body}
+                  </p>
+                </article>
+              );
+            })}
+          </div>
+        </section>
+
+        <section className="bg-[oklch(0.24_0.02_260)] text-white">
+          <div className="mx-auto grid max-w-7xl gap-8 px-5 py-12 sm:px-8 lg:grid-cols-[0.9fr_1.1fr]">
+            <div>
+              <div className="text-[11px] font-semibold uppercase tracking-[0.26em] text-white/55">
+                The moat
+              </div>
+              <h2 className="mt-3 max-w-xl text-4xl font-black tracking-tight">
+                Funding intelligence: never miss a grant again.
+              </h2>
+              <p className="mt-4 max-w-lg text-sm leading-7 text-white/70">
+                Every funding call is separated from reports, translated,
+                checked against the NGO profile, and shown with deadline,
+                amount, funder, and eligibility before the first review.
+              </p>
+            </div>
+            <FundingCard />
+          </div>
+        </section>
+
+        <section className="mx-auto max-w-7xl px-5 py-12 sm:px-8">
+          <div className="mb-6">
+            <div className="text-[11px] font-semibold uppercase tracking-[0.24em] text-muted-foreground">
+              Project references
+            </div>
+            <h2 className="mt-2 max-w-2xl text-3xl font-black tracking-tight">
+              Workflows grounded in BK and WTG specifications.
+            </h2>
           </div>
           <div className="grid gap-4 md:grid-cols-3">
             {REFERENCES.map((reference) => {
@@ -224,13 +209,13 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
               return (
                 <article
                   key={reference.title}
-                  className="overflow-hidden rounded-lg border border-[oklch(0.84_0.025_110)] bg-white shadow-sm"
+                  className="overflow-hidden rounded-lg border border-[oklch(0.86_0.018_120)] bg-white shadow-sm"
                 >
                   <div className={reference.bandClass}>
-                    <div className="grid h-10 w-10 place-items-center rounded-md bg-white/90 text-[oklch(0.26_0.04_170)]">
+                    <div className="grid h-10 w-10 place-items-center rounded-lg bg-white/92 text-[oklch(0.25_0.04_145)]">
                       <Icon className="h-5 w-5" />
                     </div>
-                    <div className="text-right text-[10px] font-bold uppercase tracking-wide text-white/90">
+                    <div className="text-right text-[10px] font-bold uppercase tracking-[0.18em] text-white/90">
                       {reference.org}
                     </div>
                   </div>
@@ -245,7 +230,7 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
                       {reference.tags.map((tag) => (
                         <span
                           key={tag}
-                          className="rounded-md bg-[oklch(0.96_0.015_120)] px-2 py-1 text-[11px] font-semibold text-[oklch(0.33_0.05_145)]"
+                          className="rounded-md bg-[oklch(0.95_0.02_145)] px-2 py-1 text-[11px] font-semibold text-[oklch(0.34_0.055_145)]"
                         >
                           {tag}
                         </span>
@@ -262,30 +247,26 @@ export function LandingPage({ onLogin }: { onLogin: () => void }) {
   );
 }
 
-const SIGNALS = [
+const PIPELINE = [
   {
-    title: "Grant deadline detected",
-    owner: "BK",
-    body: "Eligibility, amount range, co-funding notes, and timeline are grouped before the first review meeting.",
+    title: "Aggregate",
+    body: "RSS, newsletters, funding databases, Google Alerts, and mailbox reports pulled into one place.",
+    icon: Globe2,
+  },
+  {
+    title: "Classify",
+    body: "Priority and organization-specific categories tagged on every item.",
+    icon: CheckCircle2,
+  },
+  {
+    title: "Translate",
+    body: "Summary in the team's language, with the original preserved for review.",
+    icon: Languages,
+  },
+  {
+    title: "Flag funding",
+    body: "Deadlines, amounts, funders, and eligibility surfaced up front.",
     icon: Landmark,
-    iconClass:
-      "grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[oklch(0.94_0.035_90)] text-[oklch(0.39_0.08_80)]",
-  },
-  {
-    title: "Animal welfare issue clustered",
-    owner: "WTG",
-    body: "Articles are sorted into German, international, social media, agriculture, and NGO-reporting categories.",
-    icon: Newspaper,
-    iconClass:
-      "grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[oklch(0.94_0.035_35)] text-[oklch(0.48_0.13_35)]",
-  },
-  {
-    title: "Partner report translated",
-    owner: "Inbox",
-    body: "Original text, summary, source, tags, and image fields follow each workspace's onboarding setup.",
-    icon: MailCheck,
-    iconClass:
-      "grid h-8 w-8 shrink-0 place-items-center rounded-md bg-[oklch(0.94_0.035_210)] text-[oklch(0.38_0.1_220)]",
   },
 ];
 
@@ -297,29 +278,209 @@ const REFERENCES = [
     tags: ["Funding", "Eligibility", "Deadlines"],
     icon: Landmark,
     bandClass:
-      "flex h-24 items-start justify-between bg-[oklch(0.38_0.08_155)] p-4",
+      "flex h-24 items-start justify-between bg-[oklch(0.32_0.045_150)] p-4",
   },
   {
     org: "Welttierschutzgesellschaft e.V.",
     title: "Animal welfare press mirror",
-    body: "WTG monitoring combines keywords, categories, and urgency so daily Google Alert items can become clear press-mirror entries.",
+    body: "WTG monitoring combines keywords, categories, and urgency so daily Google Alert items become clear press-mirror entries.",
     tags: ["Keywords", "Categories", "Urgency"],
     icon: Newspaper,
     bandClass:
-      "flex h-24 items-start justify-between bg-[oklch(0.48_0.12_45)] p-4",
+      "flex h-24 items-start justify-between bg-[oklch(0.49_0.09_42)] p-4",
   },
   {
     org: "Afriki",
-    title: "Email reports turned into working notes",
-    body: "Incoming project emails are translated, summarized, sorted by urgency, and prepared as a clean output before deeper review.",
+    title: "Emails turned into working notes",
+    body: "Incoming project emails are translated, summarized, sorted by urgency, and prepared for deeper review.",
     tags: ["Email intake", "Translation", "Reports"],
     icon: MailCheck,
     bandClass:
-      "flex h-24 items-start justify-between bg-[oklch(0.32_0.08_220)] p-4",
+      "flex h-24 items-start justify-between bg-[oklch(0.29_0.028_260)] p-4",
   },
 ];
 
 type PartnerOrg = (typeof ORGS)[number];
+
+function ProductMockup() {
+  return (
+    <div className="rounded-2xl border border-[oklch(0.86_0.018_120)] bg-white p-4 shadow-2xl">
+      <div className="grid min-h-[460px] gap-4 lg:grid-cols-[0.78fr_1.2fr_0.86fr]">
+        <div className="rounded-lg border border-[oklch(0.88_0.014_120)] bg-[oklch(0.98_0.006_140)] p-4">
+          <div className="mb-5 flex items-center gap-2 text-sm font-black">
+            <Inbox className="h-4 w-4 text-[oklch(0.42_0.055_145)]" />
+            Inbox
+          </div>
+          {["All", "Today", "Funding"].map((item, index) => (
+            <div
+              key={item}
+              className={cn(
+                "mb-2 rounded-lg px-3 py-2 text-xs font-semibold",
+                index === 0
+                  ? "bg-[oklch(0.28_0.035_150)] text-white"
+                  : "bg-white text-muted-foreground",
+              )}
+            >
+              {item}
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-3">
+          <MockItem
+            priority="Urgent"
+            category="Funding"
+            title="BMZ Call: Education Projects in Sub-Saharan Africa 2026"
+            meta="Jul 15 · 17d · EUR 200k-1.5M"
+            tone="urgent"
+          />
+          <MockItem
+            priority="Urgent"
+            category="Report"
+            title="Quarterly Report Q2 2026 - Bujumbura School"
+            meta="French · translated summary ready"
+            tone="urgent"
+          />
+          <MockItem
+            priority="Relevant"
+            category="News"
+            title="Burundi unveils new education strategy"
+            meta="Source clustered with policy updates"
+            tone="relevant"
+          />
+        </div>
+
+        <div className="rounded-lg border border-[oklch(0.88_0.014_120)] bg-[oklch(0.985_0.006_140)] p-4">
+          <div className="text-xs font-semibold uppercase tracking-[0.18em] text-muted-foreground">
+            Your brief
+          </div>
+          <div className="mt-2 text-lg font-black leading-tight">
+            5 items for you, 2 urgent.
+          </div>
+          <div className="mt-5 space-y-3 text-xs leading-5 text-muted-foreground">
+            <BriefLine text="BMZ education call - deadline 15 Jul" />
+            <BriefLine text="Bujumbura School Q2 report" />
+            <BriefLine text="New national education strategy" />
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FundingCard() {
+  return (
+    <article className="rounded-xl border border-white/10 bg-white p-5 text-foreground shadow-2xl">
+      <div className="flex flex-wrap items-center gap-2 text-[10px] font-black uppercase tracking-[0.18em]">
+        <span className="rounded bg-[oklch(0.95_0.035_28)] px-2 py-1 text-[oklch(0.45_0.1_28)]">
+          Urgent
+        </span>
+        <span className="rounded bg-[oklch(0.96_0.02_145)] px-2 py-1 text-[oklch(0.35_0.055_145)]">
+          Funding
+        </span>
+        <span className="text-muted-foreground">Translated from German</span>
+      </div>
+      <h3 className="mt-4 text-2xl font-black tracking-tight">
+        BMZ Call for Proposals: Education Projects in Sub-Saharan Africa 2026
+      </h3>
+      <div className="mt-5 grid gap-3 sm:grid-cols-3">
+        <FundingFact label="Amount" value="EUR 200k - 1.5M" />
+        <FundingFact label="Funder" value="BMZ" />
+        <FundingFact label="BK eligibility" value="Yes" />
+      </div>
+      <div className="mt-5 rounded-lg border border-[oklch(0.86_0.018_120)] bg-[oklch(0.982_0.006_140)] p-4">
+        <div className="flex items-center justify-between gap-4">
+          {["Open", "Info", "Deadline", "Decision"].map((step, index) => (
+            <div key={step} className="flex flex-1 items-center gap-2">
+              <span
+                className={cn(
+                  "h-2.5 w-2.5 shrink-0 rounded-full",
+                  index < 3
+                    ? "bg-[oklch(0.68_0.045_145)]"
+                    : "bg-[oklch(0.86_0.018_120)]",
+                )}
+              />
+              <span className="truncate text-xs font-semibold text-muted-foreground">
+                {step}
+              </span>
+            </div>
+          ))}
+        </div>
+        <div className="mt-4 flex items-center gap-3">
+          <Clock3 className="h-5 w-5 text-[oklch(0.72_0.085_28)]" />
+          <div>
+            <div className="text-xl font-black">17 days</div>
+            <div className="text-xs text-muted-foreground">
+              to the submission deadline · 15 Jul 2026
+            </div>
+          </div>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function PriorityDot({ color, label }: { color: string; label: string }) {
+  return (
+    <span className="inline-flex items-center gap-2">
+      <span className={cn("h-2.5 w-2.5 rounded-full", color)} />
+      {label}
+    </span>
+  );
+}
+
+function MockItem({
+  priority,
+  category,
+  title,
+  meta,
+  tone,
+}: {
+  priority: string;
+  category: string;
+  title: string;
+  meta: string;
+  tone: "urgent" | "relevant";
+}) {
+  return (
+    <article className="rounded-lg border border-[oklch(0.88_0.014_120)] bg-white p-4 shadow-sm">
+      <div className="flex items-center gap-2 text-[10px] font-black uppercase tracking-[0.16em]">
+        <span
+          className={cn(
+            "h-2 w-2 rounded-full",
+            tone === "urgent"
+              ? "bg-[oklch(0.72_0.085_28)]"
+              : "bg-[oklch(0.79_0.085_78)]",
+          )}
+        />
+        <span>{priority}</span>
+        <span className="text-muted-foreground">{category}</span>
+      </div>
+      <h3 className="mt-3 text-sm font-black leading-snug">{title}</h3>
+      <div className="mt-2 text-xs text-muted-foreground">{meta}</div>
+    </article>
+  );
+}
+
+function BriefLine({ text }: { text: string }) {
+  return (
+    <div className="flex items-start gap-2">
+      <CheckCircle2 className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[oklch(0.5_0.07_145)]" />
+      <span>{text}</span>
+    </div>
+  );
+}
+
+function FundingFact({ label, value }: { label: string; value: string }) {
+  return (
+    <div className="rounded-lg border border-[oklch(0.88_0.014_120)] bg-[oklch(0.99_0.003_140)] p-3">
+      <div className="text-[10px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">
+        {label}
+      </div>
+      <div className="mt-1 text-sm font-black">{value}</div>
+    </div>
+  );
+}
 
 function PartnerImage({
   src,
@@ -335,7 +496,7 @@ function PartnerImage({
   height: number;
 }) {
   return (
-    <div className="flex min-h-28 flex-col items-center justify-center rounded-lg border border-border bg-[oklch(0.99_0.003_110)] p-4 text-center shadow-sm">
+    <div className="flex min-h-28 flex-col items-center justify-center rounded-lg border border-[oklch(0.86_0.018_120)] bg-white p-4 text-center shadow-sm">
       <Image
         src={src}
         alt={alt}
@@ -352,7 +513,7 @@ function PartnerImage({
 
 function PartnerLogo({ org }: { org: PartnerOrg }) {
   return (
-    <div className="flex min-h-28 flex-col items-center justify-center rounded-lg border border-border bg-[oklch(0.99_0.003_110)] p-4 text-center shadow-sm">
+    <div className="flex min-h-28 flex-col items-center justify-center rounded-lg border border-[oklch(0.86_0.018_120)] bg-white p-4 text-center shadow-sm">
       <Image
         src={org.logoSrc}
         alt={org.logoAlt}

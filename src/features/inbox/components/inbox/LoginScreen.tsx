@@ -39,7 +39,7 @@ export function LoginScreen({
   };
 
   return (
-    <div className="grid min-h-screen place-items-center bg-[oklch(0.985_0.005_145)] px-4 text-foreground">
+    <div className="grid min-h-screen place-items-center bg-[oklch(0.982_0.006_140)] px-4 text-foreground">
       <div className="w-full max-w-4xl rounded-2xl border border-white/60 bg-white/80 p-6 shadow-2xl backdrop-blur-xl">
         <div className="mb-6 flex items-start justify-between gap-4">
           <div>

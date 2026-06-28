@@ -175,7 +175,7 @@ export function InboxApp() {
         onActiveChange={setSection}
       />
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
-        <div className="relative flex-1 overflow-hidden bg-[oklch(0.985_0.005_145)]">
+        <div className="relative flex-1 overflow-hidden bg-[oklch(0.982_0.006_140)]">
           {section === "triage" ? (
             <>
               <MapBackdrop entries={filtered} dimmed />
@@ -285,7 +285,7 @@ const FALLBACK_SESSION: LoginSession = { org: "bk", username: "pending" };
 
 function InboxLoading() {
   return (
-    <div className="grid h-screen place-items-center bg-[oklch(0.985_0.005_145)] text-foreground">
+    <div className="grid h-screen place-items-center bg-[oklch(0.982_0.006_140)] text-foreground">
       <div className="rounded-2xl border border-white/50 bg-white/70 px-5 py-4 text-sm shadow-xl backdrop-blur-xl">
         Loading intelligent inbox...
       </div>

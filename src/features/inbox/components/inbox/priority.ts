@@ -12,16 +12,16 @@ export const priorityMeta: Record<
 > = {
   urgent: {
     label: "Urgent",
-    dot: "bg-[oklch(0.7_0.09_22)]",
-    bar: "bg-[oklch(0.7_0.09_22)]",
-    chipBg: "bg-[oklch(0.96_0.025_22)]",
-    chipText: "text-[oklch(0.45_0.12_22)]",
+    dot: "bg-[oklch(0.72_0.085_28)]",
+    bar: "bg-[oklch(0.72_0.085_28)]",
+    chipBg: "bg-[oklch(0.95_0.035_28)]",
+    chipText: "text-[oklch(0.45_0.1_28)]",
   },
   relevant: {
     label: "Relevant",
-    dot: "bg-[oklch(0.75_0.09_80)]",
-    bar: "bg-[oklch(0.75_0.09_80)]",
-    chipBg: "bg-[oklch(0.96_0.03_80)]",
+    dot: "bg-[oklch(0.79_0.085_78)]",
+    bar: "bg-[oklch(0.79_0.085_78)]",
+    chipBg: "bg-[oklch(0.96_0.032_78)]",
     chipText: "text-[oklch(0.4_0.07_80)]",
   },
   information: {
@@ -46,11 +46,11 @@ export const bkLabel: Record<BkEligibility, { label: string; cls: string }> = {
   },
   check: {
     label: "BK: To review",
-    cls: "bg-[oklch(0.96_0.03_80)] text-[oklch(0.4_0.07_80)]",
+    cls: "bg-[oklch(0.96_0.032_78)] text-[oklch(0.4_0.07_80)]",
   },
   no: {
     label: "BK: Not eligible",
-    cls: "bg-[oklch(0.96_0.025_22)] text-[oklch(0.45_0.12_22)]",
+    cls: "bg-[oklch(0.95_0.035_28)] text-[oklch(0.45_0.1_28)]",
   },
 };
 

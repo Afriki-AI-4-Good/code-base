@@ -96,11 +96,11 @@ const PRIORITY_RANK = { urgent: 3, relevant: 2, information: 1 } as const;
 function priorityHex(p: "urgent" | "relevant" | "information") {
   switch (p) {
     case "urgent":
-      return "oklch(0.7 0.09 22)";
+      return "oklch(0.72 0.085 28)";
     case "relevant":
-      return "oklch(0.75 0.09 80)";
+      return "oklch(0.79 0.085 78)";
     case "information":
-      return "oklch(0.68 0.055 145)";
+      return "oklch(0.68 0.045 145)";
   }
 }
 

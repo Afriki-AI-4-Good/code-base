@@ -14,9 +14,9 @@ import { theme } from "~/shared/theme";
 import { TRPCReactProvider } from "~/trpc/react";
 
 export const metadata: Metadata = {
-  title: "Intelligent Inbox",
+  title: "Afriki",
   description:
-    "Curated inbox for funding calls, news, reports, and AI-assisted nonprofit workflows.",
+    "An intelligent inbox for African news, funding calls, reports, and small NGO workflows.",
   icons: [{ rel: "icon", url: "/favicon.ico" }],
 };
 
