@@ -19,6 +19,7 @@ import { NewsView } from "@/components/inbox/NewsView";
 import { OnboardingDialog } from "@/components/inbox/OnboardingDialog";
 import { ReportsView } from "@/components/inbox/ReportsView";
 import { Sidebar } from "@/components/inbox/Sidebar";
+import { SwipeReviewView } from "@/components/inbox/SwipeReviewView";
 import {
   filterByTime,
   TimePills,
@@ -171,7 +172,12 @@ export function InboxApp() {
       />
       <main className="flex min-w-0 flex-1 flex-col overflow-hidden">
         <div className="relative flex-1 overflow-hidden bg-[oklch(0.985_0.005_145)]">
-          {section === "funding" ? (
+          {section === "triage" ? (
+            <>
+              <MapBackdrop entries={filtered} dimmed />
+              <SwipeReviewView entries={filtered} onSelect={handleSelect} />
+            </>
+          ) : section === "funding" ? (
             <>
               <MapBackdrop entries={filtered} dimmed />
               <FundingView
