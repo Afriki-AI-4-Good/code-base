@@ -133,12 +133,16 @@ export function OnboardingDialog({
   open,
   session,
   initial,
+  saving = false,
+  saveError = null,
   onCancel,
   onComplete,
 }: {
   open: boolean;
   session: LoginSession;
   initial?: UserProfile | null;
+  saving?: boolean;
+  saveError?: string | null;
   onCancel: () => void;
   onComplete: (p: UserProfile) => void;
 }) {
@@ -156,8 +160,11 @@ export function OnboardingDialog({
   const isLast = stepIdx === steps.length - 1;
 
   useEffect(() => {
-    if (open) setStepIdx(0);
-  }, [open]);
+    if (!open) return;
+    setStepIdx(0);
+    setDept(initial?.department ?? getDefaultDepartment(session.org));
+    setExtras(createInitialExtras(session.org, initial));
+  }, [open, session.org, initial]);
 
   const update = <K extends keyof OnboardingExtras>(
     key: K,
@@ -165,6 +172,8 @@ export function OnboardingDialog({
   ) => setExtras((e) => ({ ...e, [key]: val }));
 
   const handleNext = () => {
+    if (saving) return;
+
     if (isLast) {
       onComplete({
         username: session.username,
@@ -277,6 +286,11 @@ export function OnboardingDialog({
               onChange={(v) => update("urgency", v)}
             />
           )}
+          {saveError && (
+            <div className="mt-4 rounded-lg border border-destructive/30 bg-destructive/10 px-3 py-2 text-xs leading-5 text-destructive">
+              {saveError}
+            </div>
+          )}
         </div>
 
         {/* Footer */}
@@ -285,7 +299,7 @@ export function OnboardingDialog({
             variant="ghost"
             size="sm"
             onClick={() => setStepIdx((i) => Math.max(0, i - 1))}
-            disabled={stepIdx === 0}
+            disabled={stepIdx === 0 || saving}
             className="gap-1.5"
           >
             <ArrowLeft className="h-4 w-4" />
@@ -294,11 +308,16 @@ export function OnboardingDialog({
           <div className="text-[11px] text-muted-foreground">
             You can edit these later in settings
           </div>
-          <Button onClick={handleNext} size="sm" className="gap-1.5">
+          <Button
+            onClick={handleNext}
+            size="sm"
+            className="gap-1.5"
+            disabled={saving}
+          >
             {isLast ? (
               <>
                 <Check className="h-4 w-4" />
-                Finish
+                {saving ? "Saving" : "Finish"}
               </>
             ) : (
               <>

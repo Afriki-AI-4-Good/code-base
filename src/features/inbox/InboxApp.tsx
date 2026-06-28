@@ -56,8 +56,12 @@ export function InboxApp() {
   const [open, setOpen] = useState(false);
   const [profile, setProfile] = useState<UserProfile | null>(null);
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [onboardingError, setOnboardingError] = useState<string | null>(null);
 
   const upsertProfile = api.inbox.profile.upsert.useMutation({
+    onMutate: () => {
+      setOnboardingError(null);
+    },
     onSuccess: async (nextProfile) => {
       setProfile(nextProfile);
       setOnboardingOpen(false);
@@ -65,6 +69,9 @@ export function InboxApp() {
         org: nextProfile.org,
         username: nextProfile.username,
       });
+    },
+    onError: (error) => {
+      setOnboardingError(error.message);
     },
   });
 
@@ -77,6 +84,7 @@ export function InboxApp() {
     if (!session) {
       setProfile(null);
       setOnboardingOpen(false);
+      setOnboardingError(null);
       return;
     }
 
@@ -98,10 +106,13 @@ export function InboxApp() {
   };
 
   const handleCompleteOnboarding = (nextProfile: UserProfile) => {
+    if (upsertProfile.isPending) return;
     upsertProfile.mutate(nextProfile);
   };
 
   const handleCancelOnboarding = () => {
+    setOnboardingError(null);
+
     if (profile) {
       setOnboardingOpen(false);
       return;
@@ -118,6 +129,7 @@ export function InboxApp() {
     saveSession(nextSession);
     setSession(nextSession);
     setProfile(null);
+    setOnboardingError(null);
     setSection("inbox");
     setAuthMode("landing");
   };
@@ -128,6 +140,7 @@ export function InboxApp() {
     setSession(null);
     setProfile(null);
     setOnboardingOpen(false);
+    setOnboardingError(null);
   };
 
   if (!sessionLoaded) {
@@ -257,6 +270,8 @@ export function InboxApp() {
         open={onboardingOpen}
         session={session}
         initial={profile}
+        saving={upsertProfile.isPending}
+        saveError={onboardingError}
         onCancel={handleCancelOnboarding}
         onComplete={handleCompleteOnboarding}
       />
