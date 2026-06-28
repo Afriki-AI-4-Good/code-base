@@ -819,36 +819,37 @@ function sleep(ms: number) {
 }
 
 async function syncMockInboxEntries(db: PrismaClient) {
-  const existing = await db.inboxEntry.findMany({
-    select: { id: true, agentMetadata: true },
-  });
-  const existingById = new Map(existing.map((entry) => [entry.id, entry]));
-  const operations = mockInbox.flatMap((entry) => {
-    const existingEntry = existingById.get(entry.id);
-    if (!existingEntry) {
-      return [
-        db.inboxEntry.create({
-          data: toInboxCreate(entry),
-        }),
-      ];
-    }
-    if (!existingEntry.agentMetadata) {
-      return [
-        db.inboxEntry.update({
-          where: { id: entry.id },
-          data: {
-            agentMetadata: toJson(
-              entry.agentMetadata ?? mockAgentMetadata(entry),
-            ),
-          },
-        }),
-      ];
-    }
-    return [];
-  });
-  if (operations.length === 0) return;
+  const mockIds = new Set(mockInbox.map((entry) => entry.id));
+  const staleSeedIds = Array.from({ length: 40 }, (_, index) =>
+    String(index + 1),
+  ).filter((id) => !mockIds.has(id));
 
-  await db.$transaction(operations);
+  await db.$transaction([
+    db.inboxEntry.deleteMany({
+      where: { id: { in: staleSeedIds } },
+    }),
+    ...mockInbox.map((entry) =>
+      db.inboxEntry.upsert({
+        where: { id: entry.id },
+        create: toInboxCreate(entry),
+        update: {
+          ...toInboxUpdateFields(entry, locationForEntry(entry)),
+          phases:
+            entry.category === "funding"
+              ? {
+                  deleteMany: {},
+                  create: (entry.phases ?? []).map((phase, order) => ({
+                    kind: phase.kind,
+                    label: phase.label,
+                    date: toDate(phase.date),
+                    order,
+                  })),
+                }
+              : { deleteMany: {} },
+        },
+      }),
+    ),
+  ]);
 }
 
 async function getProfileOrThrow(

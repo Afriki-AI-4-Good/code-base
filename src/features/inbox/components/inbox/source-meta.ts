@@ -11,6 +11,8 @@ export const countryMeta: Record<string, { name: string; flag: string }> = {
   "276": { name: "Germany", flag: "🇩🇪" },
   "056": { name: "Belgium", flag: "🇧🇪" },
   "840": { name: "United States", flag: "🇺🇸" },
+  "826": { name: "United Kingdom", flag: "🇬🇧" },
+  "710": { name: "South Africa", flag: "🇿🇦" },
 };
 
 export const globalCountry = { name: "Global", flag: "🌍" };
