@@ -28,7 +28,7 @@ const briefSchema = z.object({
 });
 
 const orgSchema = z.enum(["bk", "wtg", "new_cause"]);
-const usernameSchema = z.string().trim().min(1).max(48);
+const usernameSchema = z.string().trim().min(1).max(128);
 
 export const loginSessionSchema = z.object({
   org: orgSchema,

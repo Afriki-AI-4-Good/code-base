@@ -41,8 +41,8 @@ export function InboxCard({
           />
         </div>
       )}
-      <div className="space-y-3 p-4 pl-5">
-        <div className="flex items-center gap-2 flex-wrap">
+      <div className="min-w-0 space-y-3 p-4 pl-5">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <Badge
             variant="secondary"
             className={cn(
@@ -68,35 +68,35 @@ export function InboxCard({
           )}
         </div>
 
-        <h3 className="font-semibold leading-snug text-foreground line-clamp-2">
+        <h3 className="line-clamp-2 break-words font-semibold leading-snug text-foreground">
           {entry.title}
         </h3>
 
-        <div className="flex items-center gap-3 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <Calendar className="h-3 w-3" />
+        <div className="flex min-w-0 items-center gap-3 text-xs text-muted-foreground">
+          <span className="inline-flex shrink-0 items-center gap-1">
+            <Calendar className="h-3 w-3 shrink-0" />
             {formatDate(entry.date)}
           </span>
-          <span className="truncate">{entry.source}</span>
+          <span className="min-w-0 truncate">{entry.source}</span>
         </div>
 
-        <p className="text-sm text-muted-foreground line-clamp-3 leading-relaxed">
+        <p className="line-clamp-3 break-words text-sm leading-relaxed text-muted-foreground">
           {entry.summary}
         </p>
 
         {entry.category === "funding" && (
-          <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 pt-1 border-t border-border/60">
-            <span className="inline-flex items-center gap-1 text-xs font-medium text-foreground">
-              <Clock className="h-3 w-3" />
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5 border-t border-border/60 pt-1">
+            <span className="inline-flex min-w-0 items-center gap-1 text-xs font-medium text-foreground">
+              <Clock className="h-3 w-3 shrink-0" />
               Deadline: {fundingDeadlineLabel(entry)}
               {fundingDaysUntilLabel(entry) && (
-                <span className="text-muted-foreground">
+                <span className="shrink-0 text-muted-foreground">
                   {fundingDaysUntilLabel(entry)}
                 </span>
               )}
             </span>
-            <span className="inline-flex items-center gap-1 text-xs text-muted-foreground">
-              <Banknote className="h-3 w-3" />
+            <span className="inline-flex min-w-0 items-center gap-1 text-xs text-muted-foreground">
+              <Banknote className="h-3 w-3 shrink-0" />
               {entry.amountRange}
             </span>
             <Badge

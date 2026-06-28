@@ -25,7 +25,6 @@ import {
   Newspaper,
   Plus,
   Search,
-  SlidersHorizontal,
   Tag,
   X,
 } from "lucide-react";
@@ -37,6 +36,7 @@ import { Input } from "@/components/ui/input";
 import { Slider } from "@/components/ui/slider";
 import {
   DEFAULT_EXTRAS,
+  DEPARTMENTS,
   type DepartmentId,
   EMPTY_ONBOARDING_EXTRAS,
   getDefaultDepartment,
@@ -87,13 +87,12 @@ const TOPIC_PRESETS = [
 ];
 
 type StepId =
-  | "news"
-  | "keywords"
-  | "format"
-  | "funding"
-  | "criteria"
-  | "urgency"
-  | "categories";
+  | "focus"
+  | "sources"
+  | "taxonomy"
+  | "fundingFit"
+  | "triage"
+  | "output";
 
 const STEP_META: Record<
   StepId,
@@ -103,45 +102,52 @@ const STEP_META: Record<
     icon: React.ReactNode;
   }
 > = {
-  news: {
-    label: "News & Email",
-    sub: "Your information inputs",
-    icon: <Newspaper className="h-4 w-4" />,
+  focus: {
+    label: "Workspace focus",
+    sub: "Team role and monitoring goal",
+    icon: <Briefcase className="h-4 w-4" />,
   },
-  keywords: {
-    label: "Keywords",
-    sub: "What this workspace monitors",
-    icon: <Search className="h-4 w-4" />,
+  sources: {
+    label: "Inputs",
+    sub: "News sources and email intake",
+    icon: <Globe2 className="h-4 w-4" />,
   },
-  format: {
-    label: "Layout",
-    sub: "How items are displayed",
-    icon: <FileText className="h-4 w-4" />,
+  taxonomy: {
+    label: "Monitoring taxonomy",
+    sub: "Topics and buckets used for grouping",
+    icon: <Tag className="h-4 w-4" />,
   },
-  funding: {
-    label: "Funding sources",
-    sub: "Where you scout grants",
+  fundingFit: {
+    label: "Funding fit",
+    sub: "Scouting sources and eligibility rules",
     icon: <HandHeart className="h-4 w-4" />,
   },
-  criteria: {
-    label: "Criteria",
-    sub: "What makes a grant a fit",
-    icon: <SlidersHorizontal className="h-4 w-4" />,
-  },
-  urgency: {
-    label: "Urgency",
-    sub: "Color-code thresholds",
+  triage: {
+    label: "Triage rules",
+    sub: "Urgency labels and escalation keywords",
     icon: <AlertTriangle className="h-4 w-4" />,
   },
-  categories: {
-    label: "Categories",
-    sub: "How news is grouped",
-    icon: <Tag className="h-4 w-4" />,
+  output: {
+    label: "Output layout",
+    sub: "Fields, language, and summary style",
+    icon: <FileText className="h-4 w-4" />,
   },
 };
 
-const BK_STEPS: StepId[] = ["news", "format", "funding", "criteria", "urgency"];
-const WTG_STEPS: StepId[] = ["keywords", "format", "categories", "urgency"];
+const BK_STEPS: StepId[] = [
+  "focus",
+  "sources",
+  "fundingFit",
+  "triage",
+  "output",
+];
+const WTG_STEPS: StepId[] = [
+  "focus",
+  "taxonomy",
+  "sources",
+  "triage",
+  "output",
+];
 
 const WTG_KEYWORD_PRESETS = DEFAULT_EXTRAS.wtgKeywords;
 const WTG_CATEGORY_PRESETS = DEFAULT_EXTRAS.wtgNewsCategories;
@@ -171,7 +177,7 @@ export function OnboardingDialog({
 }) {
   const steps = useMemo(() => getSteps(session.org), [session.org]);
   const [stepIdx, setStepIdx] = useState(0);
-  const [dept] = useState<DepartmentId>(
+  const [dept, setDept] = useState<DepartmentId>(
     initial?.department ?? getDefaultDepartment(session.org),
   );
   const [extras, setExtras] = useState<OnboardingExtras>(() =>
@@ -262,7 +268,14 @@ export function OnboardingDialog({
 
         {/* Body */}
         <div className="px-7 py-6 min-h-[360px] max-h-[62vh] overflow-y-auto">
-          {step.id === "news" && (
+          {step.id === "focus" && (
+            <FocusStep
+              orgName={org.name}
+              department={dept}
+              onChange={setDept}
+            />
+          )}
+          {step.id === "sources" && (
             <NewsStep
               sources={extras.newsSources}
               onSourcesChange={(v) => update("newsSources", v)}
@@ -274,45 +287,33 @@ export function OnboardingDialog({
               }}
             />
           )}
-          {step.id === "keywords" && (
-            <KeywordsStep
+          {step.id === "taxonomy" && (
+            <TaxonomyStep
+              org={session.org}
               keywords={extras.wtgKeywords}
-              presets={getKeywordPresets(session.org)}
-              hint={getKeywordHint(session.org)}
-              onChange={(v) => update("wtgKeywords", v)}
+              categories={extras.wtgNewsCategories}
+              onKeywordsChange={(v) => update("wtgKeywords", v)}
+              onCategoriesChange={(v) => update("wtgNewsCategories", v)}
             />
           )}
-          {step.id === "format" && (
-            <FormatStep
-              value={extras.outputFormat}
-              onChange={(v) => update("outputFormat", v)}
-            />
-          )}
-          {step.id === "funding" && (
-            <FundingSourcesStep
+          {step.id === "fundingFit" && (
+            <FundingFitStep
               sources={extras.fundingSources}
-              onChange={(v) => update("fundingSources", v)}
+              onSourcesChange={(v) => update("fundingSources", v)}
+              criteria={extras.fundingCriteria}
+              onCriteriaChange={(v) => update("fundingCriteria", v)}
             />
           )}
-          {step.id === "criteria" && (
-            <CriteriaStep
-              value={extras.fundingCriteria}
-              onChange={(v) => update("fundingCriteria", v)}
-            />
-          )}
-          {step.id === "urgency" && (
+          {step.id === "triage" && (
             <UrgencyStep
               value={extras.urgency}
               onChange={(v) => update("urgency", v)}
             />
           )}
-          {step.id === "categories" && (
-            <WtgCategoriesStep
-              categories={extras.wtgNewsCategories}
-              presets={getCategoryPresets(session.org)}
-              title={getCategoryTitle(session.org)}
-              hint={getCategoryHint(session.org)}
-              onChange={(v) => update("wtgNewsCategories", v)}
+          {step.id === "output" && (
+            <FormatStep
+              value={extras.outputFormat}
+              onChange={(v) => update("outputFormat", v)}
             />
           )}
         </div>
@@ -424,6 +425,142 @@ function getCategoryHint(org: OrgId) {
 }
 
 // ---------- Steps ----------
+
+function FocusStep({
+  orgName,
+  department,
+  onChange,
+}: {
+  orgName: string;
+  department: DepartmentId;
+  onChange: (department: DepartmentId) => void;
+}) {
+  const selected = getDepartment(department);
+
+  return (
+    <div className="space-y-5">
+      <div className="rounded-xl border border-primary/20 bg-primary/5 p-4">
+        <div className="flex items-start gap-3">
+          <div className="mt-0.5 flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-white text-primary shadow-sm ring-1 ring-primary/15">
+            <Briefcase className="h-4 w-4" />
+          </div>
+          <div className="min-w-0">
+            <div className="text-sm font-semibold">
+              What should {orgName} optimize this inbox for?
+            </div>
+            <p className="mt-1 text-xs leading-relaxed text-muted-foreground">
+              This choice sets the default AI briefing style. It also makes the
+              later categories easier to interpret: funding teams need fit and
+              deadlines, communications teams need story angles, and management
+              needs decision-ready signals.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <div className="grid gap-3 sm:grid-cols-2">
+        {DEPARTMENTS.map((item) => {
+          const isSelected = item.id === department;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => onChange(item.id)}
+              className={cn(
+                "flex min-h-[132px] flex-col rounded-xl border bg-white p-4 text-left transition-all",
+                isSelected
+                  ? "border-primary shadow-sm ring-2 ring-primary/15"
+                  : "border-border hover:border-primary/40 hover:shadow-sm",
+              )}
+            >
+              <div className="flex items-start justify-between gap-3">
+                <div>
+                  <div className="text-sm font-semibold leading-snug">
+                    {item.shortName}
+                  </div>
+                  <div className="mt-1 text-[11px] leading-relaxed text-muted-foreground">
+                    {item.description}
+                  </div>
+                </div>
+                <span
+                  className={cn(
+                    "flex h-5 w-5 shrink-0 items-center justify-center rounded-full border",
+                    isSelected
+                      ? "border-primary bg-primary text-primary-foreground"
+                      : "border-border bg-muted/40",
+                  )}
+                >
+                  {isSelected && <Check className="h-3 w-3" />}
+                </span>
+              </div>
+              <div className="mt-auto pt-4 text-[11px] font-medium leading-relaxed text-foreground">
+                {item.focus}
+              </div>
+            </button>
+          );
+        })}
+      </div>
+
+      <div className="rounded-xl border border-border bg-muted/30 p-4">
+        <div className="text-xs font-semibold">Current briefing lens</div>
+        <div className="mt-1 text-sm text-muted-foreground">
+          {selected.name}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function TaxonomyStep({
+  org,
+  keywords,
+  categories,
+  onKeywordsChange,
+  onCategoriesChange,
+}: {
+  org: OrgId;
+  keywords: string[];
+  categories: string[];
+  onKeywordsChange: (keywords: string[]) => void;
+  onCategoriesChange: (categories: string[]) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <KeywordsStep
+        keywords={keywords}
+        presets={getKeywordPresets(org)}
+        hint={getKeywordHint(org)}
+        onChange={onKeywordsChange}
+      />
+      <WtgCategoriesStep
+        categories={categories}
+        presets={getCategoryPresets(org)}
+        title={getCategoryTitle(org)}
+        hint={getCategoryHint(org)}
+        onChange={onCategoriesChange}
+      />
+    </div>
+  );
+}
+
+function FundingFitStep({
+  sources,
+  onSourcesChange,
+  criteria,
+  onCriteriaChange,
+}: {
+  sources: string[];
+  onSourcesChange: (sources: string[]) => void;
+  criteria: OnboardingExtras["fundingCriteria"];
+  onCriteriaChange: (criteria: OnboardingExtras["fundingCriteria"]) => void;
+}) {
+  return (
+    <div className="space-y-6">
+      <FundingSourcesStep sources={sources} onChange={onSourcesChange} />
+      <CriteriaStep value={criteria} onChange={onCriteriaChange} />
+    </div>
+  );
+}
 
 function ChipList({
   items,

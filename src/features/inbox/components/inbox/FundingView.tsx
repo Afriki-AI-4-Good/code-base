@@ -153,6 +153,9 @@ export function FundingView({
   );
   const nextFundingWithDeadline =
     allFundings.find(hasConcreteFundingDeadline) ?? null;
+  const nextDeadlineDays = nextFundingWithDeadline
+    ? daysUntil(nextFundingWithDeadline.deadline)
+    : null;
   const [eligibility, setEligibility] = useState<EligibilityFilter>("all");
   const [priority, setPriority] = useState<PriorityFilter>("all");
   const [query, setQuery] = useState("");
@@ -276,6 +279,7 @@ export function FundingView({
                   allFundings.filter((funding) => funding.bkEligible === "yes")
                     .length,
                 )}
+                tone="positive"
               />
               <FundingStat
                 label="Urgent"
@@ -283,14 +287,12 @@ export function FundingView({
                   allFundings.filter((funding) => funding.priority === "urgent")
                     .length,
                 )}
+                tone="urgent"
               />
               <FundingStat
                 label="Next deadline"
-                value={
-                  nextFundingWithDeadline
-                    ? `${daysUntil(nextFundingWithDeadline.deadline)}d`
-                    : "-"
-                }
+                value={nextDeadlineDays === null ? "-" : `${nextDeadlineDays}d`}
+                tone={getDeadlineTone(nextDeadlineDays)}
               />
             </div>
             {onSync && (
@@ -536,10 +538,10 @@ export function FundingView({
                         onClick={() => handleTimelineClick(f)}
                         className="w-full text-left"
                       >
-                        <div className="flex flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
+                        <div className="flex min-w-0 flex-wrap items-center gap-2 text-[11px] text-muted-foreground">
                           <span
                             className={cn(
-                              "rounded-full px-2 py-0.5 font-medium",
+                              "shrink-0 rounded-full px-2 py-0.5 font-medium",
                               meta.chipBg,
                               meta.chipText,
                             )}
@@ -560,30 +562,36 @@ export function FundingView({
                           )}
                           <span
                             className={cn(
-                              "ml-auto rounded-full px-2 py-0.5 text-[10px] font-medium",
+                              "rounded-full px-2 py-0.5 text-[10px] font-medium md:ml-auto",
                               bkLabel[f.bkEligible].cls,
                             )}
                           >
                             {bkLabel[f.bkEligible].label}
                           </span>
                         </div>
-                        <h3 className="mt-2 text-sm font-semibold leading-snug">
+                        <h3 className="mt-2 break-words text-sm font-semibold leading-snug">
                           {f.title}
                         </h3>
-                        <div className="mt-1 flex flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
-                          <span className="flex items-center gap-1">
-                            <Banknote className="h-3 w-3" /> {f.amountRange}
+                        <div className="mt-1 flex min-w-0 flex-wrap items-center gap-x-4 gap-y-1 text-[11px] text-muted-foreground">
+                          <span className="flex min-w-0 items-center gap-1">
+                            <Banknote className="h-3 w-3 shrink-0" />{" "}
+                            <span className="break-words">{f.amountRange}</span>
                           </span>
-                          <span>{f.funder}</span>
+                          <span className="min-w-0 break-words">
+                            {f.funder}
+                          </span>
                           {typeof f.agentMetadata?.fitScore === "number" && (
-                            <span className="flex items-center gap-1 font-medium text-[oklch(0.35_0.07_145)]">
-                              <Target className="h-3 w-3" /> Fit{" "}
+                            <span className="flex shrink-0 items-center gap-1 font-medium text-[oklch(0.35_0.07_145)]">
+                              <Target className="h-3 w-3 shrink-0" /> Fit{" "}
                               {f.agentMetadata.fitScore}%
                             </span>
                           )}
                           {f.location && (
-                            <span className="flex items-center gap-1">
-                              <MapPin className="h-3 w-3" /> {f.location.name}
+                            <span className="flex min-w-0 items-center gap-1">
+                              <MapPin className="h-3 w-3 shrink-0" />{" "}
+                              <span className="break-words">
+                                {f.location.name}
+                              </span>
                             </span>
                           )}
                         </div>
@@ -660,7 +668,7 @@ export function FundingView({
                           </span>
                         ))}
                       </div>
-                      <p className="mt-2 line-clamp-2 text-[12px] text-muted-foreground">
+                      <p className="mt-2 line-clamp-2 break-words text-[12px] text-muted-foreground">
                         {f.summary}
                       </p>
                       {f.agentMetadata?.recommendedAction && (
@@ -699,16 +707,47 @@ export function FundingView({
   );
 }
 
-function FundingStat({ label, value }: { label: string; value: string }) {
+function FundingStat({
+  label,
+  value,
+  tone = "neutral",
+}: {
+  label: string;
+  value: string;
+  tone?: "neutral" | "urgent" | "warning" | "positive";
+}) {
   return (
     <div className="rounded-lg border border-border bg-white px-3 py-2 shadow-sm">
       <div className="text-[10px] font-semibold uppercase text-muted-foreground">
         {label}
       </div>
-      <div className="text-lg font-black tabular-nums">{value}</div>
+      <div
+        className={cn(
+          "text-lg font-black tabular-nums",
+          fundingStatToneClass[tone],
+        )}
+      >
+        {value}
+      </div>
     </div>
   );
 }
+
+function getDeadlineTone(
+  days: number | null,
+): "neutral" | "urgent" | "warning" {
+  if (days === null) return "neutral";
+  if (days <= 30) return "urgent";
+  if (days <= 60) return "warning";
+  return "neutral";
+}
+
+const fundingStatToneClass = {
+  neutral: "text-foreground",
+  urgent: "text-[oklch(0.45_0.12_22)]",
+  warning: "text-[oklch(0.4_0.07_80)]",
+  positive: "text-[oklch(0.35_0.05_145)]",
+};
 
 function FilterChip({
   active,
